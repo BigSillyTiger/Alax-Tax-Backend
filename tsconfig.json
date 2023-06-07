@@ -1,23 +1,29 @@
 {
-  "compilerOptions": {
-    "target": "ES2020",
-    "useDefineForClassFields": true,
-    "module": "ESNext",
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
-    "skipLibCheck": true,
+    "compilerOptions": {
+        //"target": "ES2020",
+        "target": "es6",
+        "rootDir": "./",
+        "outDir": "./build",
+        "useDefineForClassFields": true,
+        //"module": "ESNext",
+        "module": "commonjs",
+        //"lib": ["ES2020", "DOM", "DOM.Iterable"],
+        "lib": ["ES6", "DOM", "DOM.Iterable"],
+        "skipLibCheck": true,
+        "esModuleInterop": true,
 
-    /* Bundler mode */
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "noEmit": true,
+        /* Bundler mode */
+        //"moduleResolution": "bundler",
+        "allowImportingTsExtensions": true,
+        "resolveJsonModule": true,
+        "isolatedModules": true,
+        "noEmit": true,
 
-    /* Linting */
-    "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true
-  },
-  "include": ["src"]
+        /* Linting */
+        "strict": true,
+        "noUnusedLocals": false,
+        "noUnusedParameters": false,
+        "noFallthroughCasesInSwitch": true
+    },
+    "include": ["src"]
 }
