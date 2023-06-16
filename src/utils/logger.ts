@@ -20,4 +20,8 @@ const warnLog = (msg: any) => {
     pinoLogger.warn("[" + SERVER_NAME + "'s Warn]: " + msg);
 };
 
-export default { infoLog, warnLog };
+const errLog = (msg: any) => {
+    pinoLogger.error("[" + SERVER_NAME + "'s Err]: " + msg);
+};
+
+export default { infoLog, warnLog, errLog };

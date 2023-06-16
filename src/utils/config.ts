@@ -5,4 +5,12 @@ const URL_LIST = {
     test: "/test",
 };
 
-export { SERVER_NAME, PORT, URL_LIST };
+const ALAX_DB_CONFIG = {
+    connectionLimit: 5,
+    host: "localhost",
+    user: "root",
+    password: "",
+    database: "alax_tax_database",
+};
+
+export { SERVER_NAME, ALAX_DB_CONFIG, PORT, URL_LIST };

@@ -11,6 +11,7 @@
         "lib": ["ES6", "DOM", "DOM.Iterable"],
         "skipLibCheck": true,
         "esModuleInterop": true,
+        "types": ["node", "jsonwebtoken"],
 
         /* Bundler mode */
         //"moduleResolution": "bundler",
@@ -25,5 +26,5 @@
         "noUnusedParameters": false,
         "noFallthroughCasesInSwitch": true
     },
-    "include": ["src"]
+    "include": ["src", "testoperations"]
 }
