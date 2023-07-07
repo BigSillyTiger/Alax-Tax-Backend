@@ -7,6 +7,7 @@ import logger from "../utils/logger";
 const sqlFilePath = path.join(__dirname, "", "Alax_Tax_Database.sql");
 const sql = fs.readFileSync(sqlFilePath, "utf8");
 
+// temporary not in use
 const createConnection = async () => {
     try {
         const connection = await mysql.createConnection(ALAX_DB_CONFIG);

@@ -12,9 +12,9 @@ import cors from "cors";
 
 import logger from "./utils/logger";
 import { PORT } from "./utils/config";
-import authRouter from "./routes/authRoute";
+import dbRouter from "./modules/db_creation/dbRoute";
+import authRouter from "./modules/auth/authRoute";
 import testRouter from "./routes/testRoute";
-import { createConnection, connectDB } from "./database";
 //require("dotenv").config();
 
 const app = express();
@@ -26,6 +26,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
 
+app.use(dbRouter);
 app.use(authRouter);
 app.use(testRouter);
 

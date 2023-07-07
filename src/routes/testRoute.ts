@@ -3,7 +3,7 @@ import mysql, { Pool, PoolConnection } from "mysql2/promise";
 
 import logger from "../utils/logger";
 import { URL_LIST, ALAX_DB_CONFIG } from "../utils/config";
-import * as authCtl from "../controllers/authCtl";
+import * as authCtl from "../modules/auth/authCon";
 
 const router = express.Router();
 

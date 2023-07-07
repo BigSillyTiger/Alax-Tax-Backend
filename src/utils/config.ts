@@ -6,11 +6,17 @@ const URL_LIST = {
 };
 
 const ALAX_DB_CONFIG = {
-    connectionLimit: 5,
     host: "localhost",
     user: "root",
     password: "",
-    database: "alax_tax_database",
+    database: "alax_tax_db",
 };
 
-export { SERVER_NAME, ALAX_DB_CONFIG, PORT, URL_LIST };
+const DB_TABLE_LIST = {
+    MANAGER: "managers",
+    CLIENT: "clients",
+    OD_DETAIL: "order_details",
+    OD_STATUS: "order_status",
+};
+
+export { SERVER_NAME, ALAX_DB_CONFIG, PORT, URL_LIST, DB_TABLE_LIST };
