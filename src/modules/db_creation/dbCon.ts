@@ -1,32 +1,19 @@
 import { Request, Response } from "express";
 import mysql, { Pool, PoolConnection } from "mysql2/promise";
-import { URL_LIST, ALAX_DB_CONFIG, DB_TABLE_LIST } from "../../utils/config";
+import { URL_LIST, DB_TABLE_LIST } from "../../utils/config";
+import dotenv from "dotenv";
 
 import logger from "../../utils/logger";
 
-/* const createDB = async (req: Request, res: Response) => {
-    logger.infoLog(`db - create database: ${ALAX_DB_CONFIG.database}`);
-    const pool: Pool = mysql.createPool(ALAX_DB_CONFIG);
-    try {
-        const connection = await pool.getConnection();
-        const createDB = `CREATE DATABASE IF NOT EXISTS ${ALAX_DB_CONFIG.database}`;
-        await connection.query(createDB);
-        connection.release();
-        res.status(200).json({
-            success: `success: create database ${ALAX_DB_CONFIG.database}`,
-        });
-    } catch (err) {
-        logger.errLog(err);
-        res.status(500).json({
-            error: `Failed: create database ${ALAX_DB_CONFIG.database}`,
-        });
-    }
-}; */
+dotenv.config();
 
 const createTableManager = async (req: Request, res: Response) => {
     logger.infoLog(`db - create tabel: ${DB_TABLE_LIST.MANAGER}`);
     const pool: Pool = mysql.createPool({
-        ...ALAX_DB_CONFIG,
+        host: process.env.DB_HOST,
+        user: process.env.DB_USER,
+        password: process.env.DB_PW,
+        database: process.env.DATABASE,
         connectionLimit: 5,
     });
     try {

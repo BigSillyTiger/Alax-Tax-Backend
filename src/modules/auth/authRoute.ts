@@ -6,6 +6,6 @@ import * as authCtl from "./authCon";
 
 const router = express.Router();
 
-router.post("/register_new", authCtl.register);
+router.post("/register_new", authCtl.registerNewUser);
 
 export default router;

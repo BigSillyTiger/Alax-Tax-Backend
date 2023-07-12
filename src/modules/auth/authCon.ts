@@ -2,8 +2,11 @@ import uuid from "uuid";
 import bcrypt from "bcrypt";
 import mysql, { Connection, createConnection } from "mysql2/promise";
 import logger from "../../utils/logger";
-import { ALAX_DB_CONFIG, DB_TABLE_LIST } from "../../utils/config";
+import { DB_TABLE_LIST } from "../../utils/config";
 import { Request, Response } from "express";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 interface userType {
     first_name: string;
@@ -14,7 +17,13 @@ interface userType {
     email: string;
 }
 
-const pool = mysql.createPool({ ...ALAX_DB_CONFIG, connectionLimit: 5 });
+const pool = mysql.createPool({
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PW,
+    database: process.env.DATABASE,
+    connectionLimit: 5,
+});
 
 const formDate = () => {
     const date = new Date();
@@ -38,37 +47,35 @@ const formatNewUser = async ({
 }: userType) => {
     const hashedPW = await bcrypt.hash(password, 10);
     const date = formDate();
-    console.log("test: ", [
-        first_name,
-        surname,
-        account,
-        hashedPW,
-        phone,
-        email,
-        date,
-    ]);
     return [first_name, surname, account, hashedPW, phone, email, date];
 };
 
-const register = async (req: Request, res: Response) => {
+const registerNewUser = async (req: Request, res: Response) => {
     logger.infoLog("server - register");
-    console.log(11111);
-    console.log(req.body);
     try {
-        const newUser = await formatNewUser(req.body);
-
         const connection = await pool.getConnection();
-        await connection.query(
-            `INSERT INTO ${DB_TABLE_LIST.MANAGER} (first_name, surname, account, password, phone, email, created_date) VALUES (?, ?, ?, ?, ?, ?, ?)
-        `,
-            newUser
+        const results: any = await connection.query(
+            `SELECT account, phone, email FROM ${DB_TABLE_LIST.MANAGER} WHERE account = ? OR phone = ? OR email = ?`,
+            [req.body.account, req.body.phone, req.body.email]
         );
+        if (!results.length) {
+            const newUser = await formatNewUser(req.body);
+            await connection.query(
+                `INSERT INTO ${DB_TABLE_LIST.MANAGER} (first_name, surname, account, password, phone, email, created_date) VALUES (?, ?, ?, ?, ?, ?, ?)
+            `,
+                newUser
+            );
+            res.status(201).json({ msg: "new user register successfully" });
+        } else {
+            res.status(406).json({
+                msg: "conflict: accouont or phone or email",
+            });
+        }
         connection.release();
-        res.status(201).json({ msg: "new user register successfully" });
     } catch (err) {
         logger.errLog(err);
         res.status(500).json({ msg: "Internet Server Error" });
     }
 };
 
-export { register };
+export { registerNewUser };

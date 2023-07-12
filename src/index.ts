@@ -11,11 +11,12 @@ import expressPinoLogger from "express-pino-logger";
 import cors from "cors";
 
 import logger from "./utils/logger";
-import { PORT } from "./utils/config";
 import dbRouter from "./modules/db_creation/dbRoute";
 import authRouter from "./modules/auth/authRoute";
-import testRouter from "./routes/testRoute";
-//require("dotenv").config();
+import dotenv from "dotenv";
+
+//dotenv.config({ path: "../../.env" });
+dotenv.config();
 
 const app = express();
 
@@ -28,10 +29,9 @@ app.use(express.static("public"));
 
 app.use(dbRouter);
 app.use(authRouter);
-app.use(testRouter);
 
-app.listen(PORT, () => {
-    logger.infoLog(`server runs on ${PORT}`);
+app.listen(process.env.PORT || 5005, () => {
+    logger.infoLog(`server runs on ${process.env.PORT || 5005}`);
 });
 /* 
 createConnection()
