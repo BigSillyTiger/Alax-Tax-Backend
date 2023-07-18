@@ -22,11 +22,10 @@ const createTableManager = async (req: Request, res: Response) => {
             uid INT PRIMARY KEY AUTO_INCREMENT,
             first_name VARCHAR(255) NOT NULL,
             surname VARCHAR(255) NOT NULL,
-            account VARCHAR(255) NOT NULL,
-            password VARCHAR(255) NOT NULL,
-            phone VARCHAR(20) NOT NULL,
-            address VARCHAR(255),
             email VARCHAR(255) NOT NULL,
+            phone VARCHAR(20) NOT NULL,
+            password VARCHAR(255) NOT NULL,
+            address VARCHAR(255),
             created_date DATETIME
         )`;
         await connection.query(createTable);

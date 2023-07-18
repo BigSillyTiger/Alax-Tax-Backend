@@ -48,14 +48,13 @@ const formDate = () => {
 const formatNewUser = async ({
     first_name,
     surname,
-    account,
-    password,
-    phone,
     email,
+    phone,
+    password,
 }: userType) => {
     const hashedPW = await bcrypt.hash(password, 10);
     const date = formDate();
-    return [first_name, surname, account, hashedPW, phone, email, date];
+    return [first_name, surname, email, phone, hashedPW, date];
 };
 
 const registerNewUser = async (req: Request, res: Response) => {
@@ -63,13 +62,14 @@ const registerNewUser = async (req: Request, res: Response) => {
     try {
         const connection = await pool.getConnection();
         const results: any = await connection.query(
-            `SELECT account, phone, email FROM ${DB_TABLE_LIST.MANAGER} WHERE account = ? OR phone = ? OR email = ?`,
-            [req.body.account, req.body.phone, req.body.email]
+            `SELECT phone, email FROM ${DB_TABLE_LIST.MANAGER} WHERE phone = ? OR email = ?`,
+            [req.body.phone, req.body.email]
         );
-        if (!results.length) {
+        //console.log("-> search result: ", results[0]);
+        if (!results[0].length) {
             const newUser = await formatNewUser(req.body);
             await connection.query(
-                `INSERT INTO ${DB_TABLE_LIST.MANAGER} (first_name, surname, account, password, phone, email, created_date) VALUES (?, ?, ?, ?, ?, ?, ?)
+                `INSERT INTO ${DB_TABLE_LIST.MANAGER} (first_name, surname, email, phone, password, created_date) VALUES (?, ?, ?, ?, ?, ?)
             `,
                 newUser
             );
@@ -86,13 +86,13 @@ const registerNewUser = async (req: Request, res: Response) => {
     }
 };
 
-const loginUser = async (req: Request, res: Response) => {
-    logger.infoLog("server - login");
+const adminLogin = async (req: Request, res: Response) => {
+    logger.infoLog("server - login: ");
     try {
         const connection = await pool.getConnection();
         const [user]: any = await connection.query(
-            `SELECT * FROM managers WHERE account = ?`,
-            [req.body.account]
+            `SELECT * FROM managers WHERE email = ?`,
+            [req.body.email]
         );
         if (!user.length) {
             connection.release();
@@ -104,14 +104,18 @@ const loginUser = async (req: Request, res: Response) => {
             );
             if (!pwMatch) {
                 connection.release();
+                logger.warnLog(`error: loggin pw wrong`);
                 return res
                     .status(404)
                     .json({ msg: "ERROR: wrong credentials" });
             }
             const token = generateToken(user[0].uid);
-            console.log("-> new token: ", token);
+            logger.infoLog(`-> new login token: ${token}`);
 
-            res.cookie("token", token, { httpOnly: true }).json({
+            res.cookie("token", token, {
+                maxAge: 1000 * 30,
+                httpOnly: true,
+            }).json({
                 msg: "login success~~",
             });
         }
@@ -125,4 +129,13 @@ const authCheck = async (req: Request, res: Response) => {
     res.status(200).json({ msg: "welcome to the protected page" });
 };
 
-export { registerNewUser, loginUser, authCheck };
+const adminLogout = async (req: Request, res: Response) => {
+    try {
+        res.clearCookie("token");
+        res.status(200).json({ msg: "successfully logout" });
+    } catch (error) {
+        res.status(400).json({ error: "logout error" });
+    }
+};
+
+export { registerNewUser, adminLogin, authCheck, adminLogout };
