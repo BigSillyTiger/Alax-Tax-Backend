@@ -7,7 +7,7 @@ import logger from "../../utils/logger";
 
 dotenv.config();
 
-const createTableManager = async (req: Request, res: Response) => {
+const dbInit = async (req: Request, res: Response) => {
     logger.infoLog(`db - create tabel: ${DB_TABLE_LIST.MANAGER}`);
     const pool: Pool = mysql.createPool({
         host: process.env.DB_HOST,
@@ -18,25 +18,36 @@ const createTableManager = async (req: Request, res: Response) => {
     });
     try {
         const connection = await pool.getConnection();
-        const createTable = `CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.MANAGER} (
-            uid INT PRIMARY KEY AUTO_INCREMENT,
+        const createTableManager = `CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.MANAGER} (
+            uid INT AUTO_INCREMENT PRIMARY KEY,
             first_name VARCHAR(255) NOT NULL,
             surname VARCHAR(255) NOT NULL,
             email VARCHAR(255) NOT NULL,
             phone VARCHAR(20) NOT NULL,
             password VARCHAR(255) NOT NULL,
             address VARCHAR(255),
-            created_date DATETIME
+            created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )`;
-        await connection.query(createTable);
+
+        const createTableAdminLv = `CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.ADMIN_LEVEL} (
+            admin_id INT AUTO_INCREMENT,
+            fk_uid INT,
+            dashboard TINYINT NOT NULL DEFAULT 2,
+            clients TINYINT NOT NULL DEFAULT 2,
+            orders TINYINT NOT NULL DEFAULT 2,
+            employees TINYINT NOT NULL DEFAULT 2,		
+            management TINYINT NOT NULL DEFAULT 0,
+            PRIMARY KEY (admin_id, fk_uid),
+            FOREIGN KEY (fk_uid) REFERENCES ${DB_TABLE_LIST.MANAGER}(uid) ON UPDATE NO ACTION ON DELETE CASCADE
+        )`;
+        await connection.query(createTableManager);
+        await connection.query(createTableAdminLv);
         connection.release();
         res.status(200).json({ msg: "success: create table manager" });
     } catch (err) {
         logger.errLog(err);
         res.status(500).json({ msg: "Failed: create table manager" });
     }
-
-    res.status(200).json({ msg: "created db table: manager" });
 };
 
 /* template
@@ -60,4 +71,4 @@ const __ = async (req: Request, res: Response) => {
 };
 */
 
-export { createTableManager };
+export { dbInit };

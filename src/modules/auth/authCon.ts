@@ -53,8 +53,8 @@ const formatNewUser = async ({
     password,
 }: userType) => {
     const hashedPW = await bcrypt.hash(password, 10);
-    const date = formDate();
-    return [first_name, surname, email, phone, hashedPW, date];
+    //const date = formDate();
+    return [first_name, surname, email, phone, hashedPW];
 };
 
 const registerNewUser = async (req: Request, res: Response) => {
@@ -68,11 +68,24 @@ const registerNewUser = async (req: Request, res: Response) => {
         //console.log("-> search result: ", results[0]);
         if (!results[0].length) {
             const newUser = await formatNewUser(req.body);
-            await connection.query(
-                `INSERT INTO ${DB_TABLE_LIST.MANAGER} (first_name, surname, email, phone, password, created_date) VALUES (?, ?, ?, ?, ?, ?)
+            const insertRes: any = await connection.query(
+                `INSERT INTO ${DB_TABLE_LIST.MANAGER} (first_name, surname, email, phone, password) VALUES(?, ?, ?, ?, ?)
             `,
                 newUser
             );
+            await connection.query(
+                `INSERT INTO ${DB_TABLE_LIST.ADMIN_LEVEL} (fk_uid, dashboard, clients, orders, employees, management) VALUES(?,?,?,?,?,?)`,
+                [
+                    insertRes[0].insertId,
+                    req.body.dashboard,
+                    req.body.clients,
+                    req.body.orders,
+                    req.body.employees,
+                    req.body.management,
+                ]
+            );
+            console.log("-> the new instered user: ", insertRes[0].insertId);
+            const userID = "";
             res.status(201).json({ msg: "new user register successfully" });
         } else {
             res.status(406).json({
@@ -126,7 +139,15 @@ const adminLogin = async (req: Request, res: Response) => {
 };
 
 const authCheck = async (req: Request, res: Response) => {
-    res.status(200).json({ msg: "welcome to the protected page" });
+    logger.infoLog("Server - permission check");
+    try {
+        const connection = await pool.getConnection();
+        const [user]: any = await connection.query(``);
+    } catch (err) {}
+    res.status(200).json({
+        status: true,
+        msg: "welcome to the protected page",
+    });
 };
 
 const adminLogout = async (req: Request, res: Response) => {
@@ -138,4 +159,17 @@ const adminLogout = async (req: Request, res: Response) => {
     }
 };
 
-export { registerNewUser, adminLogin, authCheck, adminLogout };
+const permission = async (req: Request, res: Response) => {
+    try {
+        const connection = await pool.getConnection();
+        const [user]: any = await connection.query(
+            `SELECT * FROM managers WHERE email = ?`,
+            [req.body.email]
+        );
+        res.status(200).json({ msg: "successfully logout" });
+    } catch (error) {
+        res.status(400).json({ error: "logout error" });
+    }
+};
+
+export { registerNewUser, adminLogin, authCheck, adminLogout, permission };

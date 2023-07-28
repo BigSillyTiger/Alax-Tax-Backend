@@ -6,6 +6,7 @@ const URL_LIST = {
 
 const DB_TABLE_LIST = {
     MANAGER: "managers",
+    ADMIN_LEVEL: "admin_level",
     CLIENT: "clients",
     OD_DETAIL: "order_details",
     OD_STATUS: "order_status",
