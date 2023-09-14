@@ -35,6 +35,7 @@ const dbInit = async (req: Request, res: Response) => {
             dashboard TINYINT NOT NULL DEFAULT 2,
             clients TINYINT NOT NULL DEFAULT 2,
             orders TINYINT NOT NULL DEFAULT 2,
+            calendar TINYINT NOT NULL DEFAULT 2,
             employees TINYINT NOT NULL DEFAULT 2,		
             management TINYINT NOT NULL DEFAULT 0,
             PRIMARY KEY (admin_id, fk_uid),
@@ -43,10 +44,10 @@ const dbInit = async (req: Request, res: Response) => {
         await connection.query(createTableManager);
         await connection.query(createTableAdminLv);
         connection.release();
-        res.status(200).json({ msg: "success: create table manager" });
+        res.status(200).json({ msg: "success: create tables" });
     } catch (err) {
         logger.errLog(err);
-        res.status(500).json({ msg: "Failed: create table manager" });
+        res.status(500).json({ msg: "Failed: create tables" });
     }
 };
 

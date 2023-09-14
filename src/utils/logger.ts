@@ -1,4 +1,3 @@
-import { config } from "dotenv";
 import { SERVER_NAME } from "./config";
 
 const pinoLogger = require("pino")({

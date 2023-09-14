@@ -4,6 +4,7 @@ import { authenticateJWT } from "../../middleware/authMW";
 
 const router = express.Router();
 
+router.get("/test", authCtl.test);
 router.post("/register_new", authCtl.registerNewUser);
 router.post("/adminLogin", authCtl.adminLogin);
 router.get("/adminLogout", authCtl.adminLogout);

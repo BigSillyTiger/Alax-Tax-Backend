@@ -23,7 +23,7 @@ const pool = mysql.createPool({
     user: process.env.DB_USER,
     password: process.env.DB_PW,
     database: process.env.DATABASE,
-    connectionLimit: 5,
+    connectionLimit: 15,
 });
 
 const generateToken = (userID: number): string => {
@@ -33,7 +33,7 @@ const generateToken = (userID: number): string => {
     });
 };
 
-const formDate = () => {
+/* const formDate = () => {
     const date = new Date();
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, "0"); // Adding leading zero if needed
@@ -43,7 +43,7 @@ const formDate = () => {
     const seconds = String(date.getSeconds()).padStart(2, "0");
 
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-};
+}; */
 
 const formatNewUser = async ({
     first_name,
@@ -53,7 +53,6 @@ const formatNewUser = async ({
     password,
 }: userType) => {
     const hashedPW = await bcrypt.hash(password, 10);
-    //const date = formDate();
     return [first_name, surname, email, phone, hashedPW];
 };
 
@@ -100,21 +99,26 @@ const registerNewUser = async (req: Request, res: Response) => {
 };
 
 const adminLogin = async (req: Request, res: Response) => {
-    logger.infoLog("server - login: ");
+    console.log("server - login  req: ", req.body);
+
+    const connection = await pool.getConnection();
     try {
-        const connection = await pool.getConnection();
+        console.log("-> test start");
         const [user]: any = await connection.query(
             `SELECT * FROM managers WHERE email = ?`,
             [req.body.email]
         );
+        console.log("-> test 0: user = ", user);
         if (!user.length) {
             connection.release();
             return res.status(404).json({ msg: "ERROR: wrong credentials" });
         } else {
+            console.log("-> test 1");
             const pwMatch = await bcrypt.compare(
                 req.body.password,
                 user[0].password
             );
+            console.log("-> test 2");
             if (!pwMatch) {
                 connection.release();
                 logger.warnLog(`error: loggin pw wrong`);
@@ -125,29 +129,62 @@ const adminLogin = async (req: Request, res: Response) => {
             const token = generateToken(user[0].uid);
             logger.infoLog(`-> new login token: ${token}`);
 
-            res.cookie("token", token, {
-                maxAge: 1000 * 30,
-                httpOnly: true,
-            }).json({
-                msg: "login success~~",
-            });
+            const result: any = await connection.query(
+                `SELECT dashboard, clients, orders, employees, management FROM ${DB_TABLE_LIST.ADMIN_LEVEL}
+                WHERE fk_uid = (SELECT uid FROM managers WHERE email = ?)`,
+                [req.body.email]
+            );
+            console.log("-> login select user permission: ", result[0]);
+            connection.release();
+            return res
+                .cookie("token", token, {
+                    expires: new Date(Date.now() + 600000), // 10 min
+                    httpOnly: true,
+                })
+                .json({
+                    status: true,
+                    msg: "login success~~",
+                    permission: result[0],
+                });
         }
     } catch (err) {
+        connection.release();
         logger.errLog(err);
-        res.status(500).json({ msg: "Internet Server Error" });
+        return res.status(500).json({ msg: "Internet Server Error" });
     }
 };
 
-const authCheck = async (req: Request, res: Response) => {
-    logger.infoLog("Server - permission check");
+interface User {
+    userId: number;
+    username: string;
+}
+
+interface RequestWithUser extends Request {
+    user?: User;
+}
+
+const authCheck = async (req: RequestWithUser, res: Response) => {
+    const uid = req.user!.userId;
+    logger.infoLog(`Server - authCheck, userID = ${uid}`);
+    const connection = await pool.getConnection();
     try {
-        const connection = await pool.getConnection();
-        const [user]: any = await connection.query(``);
-    } catch (err) {}
-    res.status(200).json({
-        status: true,
-        msg: "welcome to the protected page",
-    });
+        const result: any = await connection.query(
+            `SELECT dashboard, clients, orders, calendar, employees, management FROM ${DB_TABLE_LIST.ADMIN_LEVEL} WHERE fk_uid = ${uid}`
+        );
+        console.log("-> permission result: ", result[0]);
+        connection.release();
+        return res.status(200).json({
+            status: true,
+            msg: "welcome to the protected page",
+            permission: result[0][0],
+        });
+    } catch (err) {
+        connection.release();
+        return res.status(403).json({
+            status: false,
+            msg: "authcheck error",
+        });
+    }
 };
 
 const adminLogout = async (req: Request, res: Response) => {
@@ -172,4 +209,15 @@ const permission = async (req: Request, res: Response) => {
     }
 };
 
-export { registerNewUser, adminLogin, authCheck, adminLogout, permission };
+const test = async (req: Request, res: Response) => {
+    res.status(200).json({ msg: "test ok" });
+};
+
+export {
+    registerNewUser,
+    adminLogin,
+    authCheck,
+    adminLogout,
+    permission,
+    test,
+};

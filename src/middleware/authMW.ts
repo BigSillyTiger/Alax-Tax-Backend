@@ -1,27 +1,31 @@
 import { Request, Response, NextFunction } from "express";
 import { verify } from "jsonwebtoken";
 import dotenv from "dotenv";
+import logger from "../utils/logger";
 
 dotenv.config();
 
 interface User {
-    userId: number;
+    userId: number | null;
     username: string;
 }
 
-declare global {
-    namespace Express {
-        interface Request {
-            user?: User;
-        }
-    }
+interface RequestWithUser extends Request {
+    user?: User;
 }
 
-const authenticateJWT = (req: Request, res: Response, next: NextFunction) => {
+const authenticateJWT = (
+    req: RequestWithUser,
+    res: Response,
+    next: NextFunction
+) => {
+    logger.infoLog("-> authenticate JWT");
     const token = req.cookies.token;
-    console.log("-> jwt cookies: ", req.cookies.token);
     if (!token) {
-        return res.status(200).json({ msg: "no token in header", auth: false });
+        logger.infoLog("-> jwt cookies empty ");
+        return res
+            .status(403)
+            .json({ status: false, msg: "no token in header" });
     }
     try {
         const decoded = verify(token, process.env.JWT_SECRET as string) as {
@@ -30,12 +34,15 @@ const authenticateJWT = (req: Request, res: Response, next: NextFunction) => {
             exp: number;
         };
         //console.log("-> the decoded: ", decoded);
+        req.user = { userId: null, username: "" };
         req.user!.userId = decoded.userID;
+        console.log("-> verifed jwt");
         next();
     } catch (err) {
+        console.log("-> unverifed jwt: ", err);
         return res
             .status(403)
-            .json({ msg: "not authorized token", auth: false });
+            .json({ msg: "not authorized token", status: false });
     }
 };
 
