@@ -2,7 +2,7 @@ import uuid from "uuid";
 import { Request, Response } from "express";
 import mysql, { Connection, createConnection } from "mysql2/promise";
 import { DB_TABLE_LIST } from "../../utils/config";
-import logger from "@/utils/logger";
+import logger from "../../utils/logger";
 import dotenv from "dotenv";
 
 const pool = mysql.createPool({
@@ -21,19 +21,47 @@ const phaseClientsData = (items: any /* placeholder */) => {
 };
 
 const clientMulInstert = async (req: Request, res: Response) => {
-    console.log("server - client: multiple insert clients");
+    console.log("server - client: multiple insert clients: ", req.body);
     try {
         const connection = await pool.getConnection();
         const insertData = phaseClientsData(req.body);
+        console.log("-> parsed data: ", insertData);
 
         const sql = `INSERT INTO ${DB_TABLE_LIST.CLIENT} (first_name, surname, phone, email, address) VALUES ?`;
         await connection.query(sql, [insertData]);
         connection.release();
         res.status(200).json({ msg: "success: insert multiple clients" });
-    } catch (err) {
-        logger.errLog(err);
-        res.status(500).json({ msg: "Failed: create tables" });
+    } catch (error: any) {
+        logger.errLog(error);
+        if (error?.code === "ER_DUP_ENTRY") {
+            return res.status(400).json({
+                message: "Duplicate phone number. Data not inserted.",
+            });
+        }
+        return res.status(400).json({ msg: "Failed: insert multiple clients" });
     }
 };
 
-export { clientMulInstert };
+const clientGetAll = async (req: Request, res: Response) => {
+    console.log("-> server - client: all");
+    try {
+        const connection = await pool.getConnection();
+        const result: any = await connection.query(
+            `SELECT * FROM ${DB_TABLE_LIST.CLIENT}`
+        );
+        //console.log("-> ALL client from server: ", result);
+        connection.release();
+        return res.status(200).json({
+            status: true,
+            msg: "successed retrieve all client",
+            data: result[0],
+        });
+    } catch (error) {
+        return res.status(403).json({
+            status: false,
+            msg: "acquire all client failed",
+        });
+    }
+};
+
+export { clientMulInstert, clientGetAll };

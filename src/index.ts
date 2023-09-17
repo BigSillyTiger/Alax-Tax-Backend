@@ -13,6 +13,7 @@ import cors from "cors";
 import logger from "./utils/logger";
 import dbRouter from "./modules/db_creation/dbRoute";
 import authRouter from "./modules/auth/authRoute";
+import clientRouter from "./modules/clients/clientRoute";
 import dotenv from "dotenv";
 
 //dotenv.config({ path: "../../.env" });
@@ -27,8 +28,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
 
+/*
+ * adding router
+ */
 app.use(dbRouter);
 app.use(authRouter);
+app.use(clientRouter);
 
 app.listen(process.env.PORT || 5005, () => {
     logger.infoLog(`server runs on ${process.env.PORT || 5005}`);

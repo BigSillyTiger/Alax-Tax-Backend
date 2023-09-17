@@ -101,9 +101,8 @@ const registerNewUser = async (req: Request, res: Response) => {
 const adminLogin = async (req: Request, res: Response) => {
     console.log("server - login  req: ", req.body);
 
-    const connection = await pool.getConnection();
     try {
-        console.log("-> test start");
+        const connection = await pool.getConnection();
         const [user]: any = await connection.query(
             `SELECT * FROM managers WHERE email = ?`,
             [req.body.email]
@@ -148,7 +147,6 @@ const adminLogin = async (req: Request, res: Response) => {
                 });
         }
     } catch (err) {
-        connection.release();
         logger.errLog(err);
         return res.status(500).json({ msg: "Internet Server Error" });
     }
@@ -166,12 +164,12 @@ interface RequestWithUser extends Request {
 const authCheck = async (req: RequestWithUser, res: Response) => {
     const uid = req.user!.userId;
     logger.infoLog(`Server - authCheck, userID = ${uid}`);
-    const connection = await pool.getConnection();
     try {
+        const connection = await pool.getConnection();
         const result: any = await connection.query(
             `SELECT dashboard, clients, orders, calendar, employees, management FROM ${DB_TABLE_LIST.ADMIN_LEVEL} WHERE fk_uid = ${uid}`
         );
-        console.log("-> permission result: ", result[0]);
+        //console.log("-> permission result: ", result[0]);
         connection.release();
         return res.status(200).json({
             status: true,
@@ -179,7 +177,6 @@ const authCheck = async (req: RequestWithUser, res: Response) => {
             permission: result[0][0],
         });
     } catch (err) {
-        connection.release();
         return res.status(403).json({
             status: false,
             msg: "authcheck error",
