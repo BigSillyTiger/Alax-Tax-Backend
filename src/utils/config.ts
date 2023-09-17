@@ -12,4 +12,6 @@ const DB_TABLE_LIST = {
     OD_STATUS: "order_status",
 };
 
-export { SERVER_NAME, URL_LIST, DB_TABLE_LIST };
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+export { SERVER_NAME, URL_LIST, DB_TABLE_LIST, sleep };

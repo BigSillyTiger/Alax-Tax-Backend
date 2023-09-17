@@ -41,8 +41,18 @@ const dbInit = async (req: Request, res: Response) => {
             PRIMARY KEY (admin_id, fk_uid),
             FOREIGN KEY (fk_uid) REFERENCES ${DB_TABLE_LIST.MANAGER}(uid) ON UPDATE NO ACTION ON DELETE CASCADE
         )`;
+        const createTableClient = `CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.CLIENT} (
+            client_id INT AUTO_INCREMENT,
+            first_name VARCHAR(255) NOT NULL,
+            surname VARCHAR(255) NOT NULL,
+            phone VARCHAR(15) NOT NULL,
+            email VARCHAR(15),
+            address VARCHAR(255),
+            created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        )`;
         await connection.query(createTableManager);
         await connection.query(createTableAdminLv);
+        await connection.query(createTableClient);
         connection.release();
         res.status(200).json({ msg: "success: create tables" });
     } catch (err) {
@@ -50,6 +60,7 @@ const dbInit = async (req: Request, res: Response) => {
         res.status(500).json({ msg: "Failed: create tables" });
     }
 };
+
 
 /* template
 const __ = async (req: Request, res: Response) => {

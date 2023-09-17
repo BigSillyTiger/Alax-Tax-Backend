@@ -3,7 +3,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import mysql, { Connection, createConnection } from "mysql2/promise";
 import logger from "../../utils/logger";
-import { DB_TABLE_LIST } from "../../utils/config";
+import { DB_TABLE_LIST, sleep } from "../../utils/config";
 import { Request, Response } from "express";
 import dotenv from "dotenv";
 
@@ -210,6 +210,7 @@ const permission = async (req: Request, res: Response) => {
 };
 
 const test = async (req: Request, res: Response) => {
+    await sleep(1000);
     res.status(200).json({ msg: "test ok" });
 };
 
