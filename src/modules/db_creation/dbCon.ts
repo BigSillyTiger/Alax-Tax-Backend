@@ -44,16 +44,26 @@ const dbInit = async (req: Request, res: Response) => {
         const createTableClient = `CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.CLIENT} (
             client_id INT AUTO_INCREMENT PRIMARY KEY,
             first_name VARCHAR(255) NOT NULL,
-            surname VARCHAR(255) NOT NULL,
+            last_name VARCHAR(255) NOT NULL,
             phone VARCHAR(15) NOT NULL,
             email VARCHAR(255),
             address VARCHAR(255),
             created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             UNIQUE(phone, email)
         )`;
+        const createViewAllClient = `CREATE OR REPLACE VIEW ${DB_TABLE_LIST.V_ALL_CLIENTS} AS 
+            SELECT
+                client_id AS id,
+                CONCAT(first_name, ' ', last_name) AS full_name,
+                phone,
+                email,
+                address
+            FROM
+                ${DB_TABLE_LIST.CLIENT};`;
         await connection.query(createTableManager);
         await connection.query(createTableAdminLv);
         await connection.query(createTableClient);
+        await connection.query(createViewAllClient);
         connection.release();
         res.status(200).json({ msg: "success: create tables" });
     } catch (err) {

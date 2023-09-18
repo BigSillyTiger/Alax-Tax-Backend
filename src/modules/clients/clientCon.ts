@@ -15,19 +15,19 @@ const pool = mysql.createPool({
 
 const phaseClientsData = (items: any /* placeholder */) => {
     return items.map((item: any) => {
-        const { first_name, surname, phone, email, address } = item;
-        return [first_name, surname, phone, email, address];
+        const { first_name, last_name, phone, email, address } = item;
+        return [first_name, last_name, phone, email, address];
     });
 };
 
 const clientMulInstert = async (req: Request, res: Response) => {
-    console.log("server - client: multiple insert clients: ", req.body);
+    console.log("server - client: multiple insert clients ");
     try {
         const connection = await pool.getConnection();
         const insertData = phaseClientsData(req.body);
         console.log("-> parsed data: ", insertData);
 
-        const sql = `INSERT INTO ${DB_TABLE_LIST.CLIENT} (first_name, surname, phone, email, address) VALUES ?`;
+        const sql = `INSERT INTO ${DB_TABLE_LIST.CLIENT} (first_name, last_name, phone, email, address) VALUES ?`;
         await connection.query(sql, [insertData]);
         connection.release();
         res.status(200).json({ msg: "success: insert multiple clients" });
@@ -47,7 +47,7 @@ const clientGetAll = async (req: Request, res: Response) => {
     try {
         const connection = await pool.getConnection();
         const result: any = await connection.query(
-            `SELECT * FROM ${DB_TABLE_LIST.CLIENT}`
+            `SELECT * FROM ${DB_TABLE_LIST.V_ALL_CLIENTS}`
         );
         //console.log("-> ALL client from server: ", result);
         connection.release();

@@ -10,6 +10,7 @@ const DB_TABLE_LIST = {
     CLIENT: "clients",
     OD_DETAIL: "order_details",
     OD_STATUS: "order_status",
+    V_ALL_CLIENTS: "v_all_clients",
 };
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
