@@ -13,6 +13,42 @@ const pool = mysql.createPool({
     connectionLimit: 15,
 });
 
+type clientType = {
+    first_name: string;
+    last_name: string;
+    phone: string;
+    email: string;
+    address: string;
+    city: string;
+    state: string;
+    country: string;
+    postcode: number;
+};
+
+const formatNewClient = async ({
+    first_name,
+    last_name,
+    phone,
+    email,
+    address,
+    city,
+    state,
+    country,
+    postcode,
+}: clientType) => {
+    return [
+        first_name,
+        last_name,
+        phone,
+        email,
+        address,
+        city,
+        state,
+        country,
+        postcode,
+    ];
+};
+
 const phaseClientsData = (items: any /* placeholder */) => {
     return items.map((item: any) => {
         const { first_name, last_name, phone, email, address } = item;
@@ -25,7 +61,7 @@ const clientMulInstert = async (req: Request, res: Response) => {
     try {
         const connection = await pool.getConnection();
         const insertData = phaseClientsData(req.body);
-        console.log("-> parsed data: ", insertData);
+        //console.log("-> parsed data: ", insertData);
 
         const sql = `INSERT INTO ${DB_TABLE_LIST.CLIENT} (first_name, last_name, phone, email, address) VALUES ?`;
         await connection.query(sql, [insertData]);
@@ -47,7 +83,7 @@ const clientGetAll = async (req: Request, res: Response) => {
     try {
         const connection = await pool.getConnection();
         const result: any = await connection.query(
-            `SELECT * FROM ${DB_TABLE_LIST.V_ALL_CLIENTS}`
+            `SELECT * FROM ${DB_TABLE_LIST.VIEW_CLIENTS}`
         );
         //console.log("-> ALL client from server: ", result);
         connection.release();
@@ -64,4 +100,38 @@ const clientGetAll = async (req: Request, res: Response) => {
     }
 };
 
-export { clientMulInstert, clientGetAll };
+const clientSingleInstert = async (req: Request, res: Response) => {
+    console.log("-> server - client: add new");
+    try {
+        const connection = await pool.getConnection();
+        const results: any = await connection.query(
+            `SELECT phone, email FROM ${DB_TABLE_LIST.CLIENT} WHERE phone = ? OR email = ?`,
+            [req.body.phone, req.body.email]
+        );
+        if (!results[0].length) {
+            const newClient = await formatNewClient(req.body);
+            const insertRes: any = await connection.query(
+                `INSERT INTO ${DB_TABLE_LIST.CLIENT} (first_name, last_name, phone, email, address, city, state, country, postcode,) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                newClient
+            );
+            console.log("-> insert new client: ", insertRes[0]);
+            res.status(201).json({
+                status: true,
+                msg: "new client created successfully",
+            });
+        } else {
+            console.log("-> fould existed phone or email: ", results[0]);
+            res.status(406).json({
+                status: false,
+                msg: "conflict: accouont or phone or email",
+            });
+        }
+    } catch (error) {
+        return res.status(403).json({
+            status: false,
+            msg: "add new client failed",
+        });
+    }
+};
+
+export { clientMulInstert, clientGetAll, clientSingleInstert };

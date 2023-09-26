@@ -11,7 +11,7 @@ dotenv.config();
 
 interface userType {
     first_name: string;
-    surname: string;
+    last_name: string;
     account: string;
     password: string;
     phone: string;
@@ -47,13 +47,13 @@ const generateToken = (userID: number): string => {
 
 const formatNewUser = async ({
     first_name,
-    surname,
+    last_name,
     email,
     phone,
     password,
 }: userType) => {
     const hashedPW = await bcrypt.hash(password, 10);
-    return [first_name, surname, email, phone, hashedPW];
+    return [first_name, last_name, email, phone, hashedPW];
 };
 
 const registerNewUser = async (req: Request, res: Response) => {
@@ -68,7 +68,7 @@ const registerNewUser = async (req: Request, res: Response) => {
         if (!results[0].length) {
             const newUser = await formatNewUser(req.body);
             const insertRes: any = await connection.query(
-                `INSERT INTO ${DB_TABLE_LIST.MANAGER} (first_name, surname, email, phone, password) VALUES(?, ?, ?, ?, ?)
+                `INSERT INTO ${DB_TABLE_LIST.MANAGER} (first_name, last_name, email, phone, password) VALUES(?, ?, ?, ?, ?)
             `,
                 newUser
             );
@@ -84,7 +84,7 @@ const registerNewUser = async (req: Request, res: Response) => {
                 ]
             );
             console.log("-> the new instered user: ", insertRes[0].insertId);
-            const userID = "";
+            //const userID = "";
             res.status(201).json({ msg: "new user register successfully" });
         } else {
             res.status(406).json({
@@ -99,7 +99,7 @@ const registerNewUser = async (req: Request, res: Response) => {
 };
 
 const adminLogin = async (req: Request, res: Response) => {
-    console.log("server - login  req: ", req.body);
+    console.log("server - login");
 
     try {
         const connection = await pool.getConnection();
@@ -112,12 +112,10 @@ const adminLogin = async (req: Request, res: Response) => {
             connection.release();
             return res.status(404).json({ msg: "ERROR: wrong credentials" });
         } else {
-            console.log("-> test 1");
             const pwMatch = await bcrypt.compare(
                 req.body.password,
                 user[0].password
             );
-            console.log("-> test 2");
             if (!pwMatch) {
                 connection.release();
                 logger.warnLog(`error: loggin pw wrong`);

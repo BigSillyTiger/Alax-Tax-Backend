@@ -21,7 +21,7 @@ const dbInit = async (req: Request, res: Response) => {
         const createTableManager = `CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.MANAGER} (
             uid INT AUTO_INCREMENT PRIMARY KEY,
             first_name VARCHAR(255) NOT NULL,
-            surname VARCHAR(255) NOT NULL,
+            last_name VARCHAR(255) NOT NULL,
             email VARCHAR(255) NOT NULL,
             phone VARCHAR(20) NOT NULL,
             password VARCHAR(255) NOT NULL,
@@ -45,19 +45,27 @@ const dbInit = async (req: Request, res: Response) => {
             client_id INT AUTO_INCREMENT PRIMARY KEY,
             first_name VARCHAR(255) NOT NULL,
             last_name VARCHAR(255) NOT NULL,
-            phone VARCHAR(15) NOT NULL,
-            email VARCHAR(255),
+            phone VARCHAR(25) NOT NULL,
+            email VARCHAR(255) NOT NULL,
             address VARCHAR(255),
+            city VARCHAR(20) DEFAULT 'Adelaide',
+            state VARCHAR(20) DEFAULT 'SA',
+            country VARCHAR(20) DEFAULT "Australia",
+            postcode VARCHAR(10) DEFAULT '5000',
             created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             UNIQUE(phone, email)
         )`;
-        const createViewAllClient = `CREATE OR REPLACE VIEW ${DB_TABLE_LIST.V_ALL_CLIENTS} AS 
+        const createViewAllClient = `CREATE OR REPLACE VIEW ${DB_TABLE_LIST.VIEW_CLIENTS} AS 
             SELECT
                 client_id AS id,
                 CONCAT(first_name, ' ', last_name) AS full_name,
                 phone,
                 email,
-                address
+                address,
+                city,
+                state,
+                country,
+                postcode
             FROM
                 ${DB_TABLE_LIST.CLIENT};`;
         await connection.query(createTableManager);
