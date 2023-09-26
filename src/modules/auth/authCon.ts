@@ -29,7 +29,7 @@ const pool = mysql.createPool({
 const generateToken = (userID: number): string => {
     const payload = { userID };
     return jwt.sign(payload, process.env.JWT_SECRET as string, {
-        expiresIn: "30s",
+        expiresIn: process.env.JWT_EXPIRE,
     });
 };
 
@@ -107,7 +107,6 @@ const adminLogin = async (req: Request, res: Response) => {
             `SELECT * FROM managers WHERE email = ?`,
             [req.body.email]
         );
-        console.log("-> test 0: user = ", user);
         if (!user.length) {
             connection.release();
             return res.status(404).json({ msg: "ERROR: wrong credentials" });
@@ -131,11 +130,12 @@ const adminLogin = async (req: Request, res: Response) => {
                 WHERE fk_uid = (SELECT uid FROM managers WHERE email = ?)`,
                 [req.body.email]
             );
-            console.log("-> login select user permission: ", result[0]);
             connection.release();
             return res
                 .cookie("token", token, {
-                    expires: new Date(Date.now() + 600000), // 10 min
+                    expires: new Date(
+                        Date.now() + parseInt(process.env.JWT_EXPIRE as string)
+                    ),
                     httpOnly: true,
                 })
                 .json({
@@ -146,6 +146,7 @@ const adminLogin = async (req: Request, res: Response) => {
         }
     } catch (err) {
         logger.errLog(err);
+        console.log("-> login error: ", err);
         return res.status(500).json({ msg: "Internet Server Error" });
     }
 };

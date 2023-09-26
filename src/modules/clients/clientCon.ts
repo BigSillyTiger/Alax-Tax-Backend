@@ -111,25 +111,30 @@ const clientSingleInstert = async (req: Request, res: Response) => {
         if (!results[0].length) {
             const newClient = await formatNewClient(req.body);
             const insertRes: any = await connection.query(
-                `INSERT INTO ${DB_TABLE_LIST.CLIENT} (first_name, last_name, phone, email, address, city, state, country, postcode,) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                `INSERT INTO ${DB_TABLE_LIST.CLIENT} (first_name, last_name, phone, email, address, city, state, country, postcode) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                 newClient
             );
-            console.log("-> insert new client: ", insertRes[0]);
+            //console.log("-> insert new client: ", insertRes[0]);
+            logger.infoLog("client: successed in register a new client");
             res.status(201).json({
                 status: true,
                 msg: "new client created successfully",
+                errType: 0,
             });
         } else {
             console.log("-> fould existed phone or email: ", results[0]);
             res.status(406).json({
                 status: false,
                 msg: "conflict: accouont or phone or email",
+                errType: 2,
             });
         }
     } catch (error) {
+        console.log("-> insert single client error: ", error);
         return res.status(403).json({
             status: false,
             msg: "add new client failed",
+            errType: 1,
         });
     }
 };
