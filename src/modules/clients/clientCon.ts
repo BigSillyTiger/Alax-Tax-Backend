@@ -179,4 +179,56 @@ const clientSingleInstert = async (req: Request, res: Response) => {
     }
 };
 
-export { clientMulInstert, clientGetAll, clientSingleInstert };
+const clientSingleDel = async (req: Request, res: Response) => {
+    console.log("-> server - client: delete");
+    try {
+        const connection = await pool.getConnection();
+        await connection.query(
+            `DELETE FROM ${DB_TABLE_LIST.CLIENT} WHERE client_id = ?`,
+            [req.body.id]
+        );
+        return res.status(200).json({
+            status: 200,
+            msg: `Successed: delete client[id: ${req.body.id}]`,
+            data: "",
+        });
+    } catch (err) {
+        console.log("-> delete error: ", err);
+        return res.status(403).json({
+            status: 400,
+            msg: `Failed: delete client[id: ${req.body.id}]`,
+            data: "",
+        });
+    }
+};
+
+const clientSingleArchive = async (req: Request, res: Response) => {
+    console.log("-> server - client: archive");
+    try {
+        const connection = await pool.getConnection();
+        await connection.query(
+            `UPDATE ${DB_TABLE_LIST.CLIENT} SET archive = ? WHERE client_id = ?`,
+            [req.body.flag, req.body.id]
+        );
+        return res.status(200).json({
+            status: 200,
+            msg: `Successed: delete client[id: ${req.body.id}]`,
+            data: "",
+        });
+    } catch (err) {
+        console.log("-> archive error: ", err);
+        return res.status(403).json({
+            status: 400,
+            msg: `Failed: archive client[id: ${req.body.id}]`,
+            data: "",
+        });
+    }
+};
+
+export {
+    clientMulInstert,
+    clientGetAll,
+    clientSingleInstert,
+    clientSingleDel,
+    clientSingleArchive,
+};

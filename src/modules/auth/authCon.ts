@@ -151,13 +151,11 @@ const adminLogin = async (req: Request, res: Response) => {
     }
 };
 
-type TReqUser = {
-    userId: number;
-    username: string;
-};
-
 type TRequestWithUser = Request & {
-    user?: TReqUser;
+    user?: {
+        userId: number;
+        username: string;
+    };
 };
 
 const authCheck = async (req: TRequestWithUser, res: Response) => {
