@@ -51,8 +51,28 @@ const formatNewClient = async ({
 
 const phaseClientsData = (items: any /* placeholder */) => {
     return items.map((item: any) => {
-        const { first_name, last_name, phone, email, address } = item;
-        return [first_name, last_name, phone, email, address];
+        const {
+            first_name,
+            last_name,
+            phone,
+            email,
+            address,
+            city,
+            state,
+            country,
+            postcode,
+        } = item;
+        return [
+            first_name,
+            last_name,
+            phone,
+            email,
+            address,
+            city,
+            state,
+            country,
+            postcode,
+        ];
     });
 };
 
@@ -63,18 +83,28 @@ const clientMulInstert = async (req: Request, res: Response) => {
         const insertData = phaseClientsData(req.body);
         //console.log("-> parsed data: ", insertData);
 
-        const sql = `INSERT INTO ${DB_TABLE_LIST.CLIENT} (first_name, last_name, phone, email, address) VALUES ?`;
+        const sql = `INSERT INTO ${DB_TABLE_LIST.CLIENT} (first_name, last_name, phone, email, address, city, state, country, postcode) VALUES ?`;
         await connection.query(sql, [insertData]);
         connection.release();
-        res.status(200).json({ msg: "success: insert multiple clients" });
+        res.status(200).json({
+            status: 200,
+            msg: "success: insert multiple clients",
+            data: "",
+        });
     } catch (error: any) {
         logger.errLog(error);
         if (error?.code === "ER_DUP_ENTRY") {
             return res.status(400).json({
-                message: "Duplicate phone number. Data not inserted.",
+                status: 400,
+                msg: "Duplicate phone number. Data not inserted.",
+                data: null,
             });
         }
-        return res.status(400).json({ msg: "Failed: insert multiple clients" });
+        return res.status(400).json({
+            status: 400,
+            msg: "Failed: insert multiple clients",
+            data: null,
+        });
     }
 };
 
@@ -88,27 +118,32 @@ const clientGetAll = async (req: Request, res: Response) => {
         //console.log("-> ALL client from server: ", result);
         connection.release();
         return res.status(200).json({
-            status: true,
+            status: 200,
             msg: "successed retrieve all client",
             data: result[0],
         });
     } catch (error) {
         return res.status(403).json({
-            status: false,
+            status: 400,
             msg: "acquire all client failed",
+            data: "",
         });
     }
 };
 
 const clientSingleInstert = async (req: Request, res: Response) => {
-    console.log("-> server - client: add new");
+    console.log("-> server - client: add new: ", req.body);
     try {
         const connection = await pool.getConnection();
-        const results: any = await connection.query(
-            `SELECT phone, email FROM ${DB_TABLE_LIST.CLIENT} WHERE phone = ? OR email = ?`,
-            [req.body.phone, req.body.email]
+        const checkPhone: any = await connection.query(
+            `SELECT phone FROM ${DB_TABLE_LIST.CLIENT} WHERE phone = ?`,
+            [req.body.phone]
         );
-        if (!results[0].length) {
+        const checkEmail: any = await connection.query(
+            `SELECT email FROM ${DB_TABLE_LIST.CLIENT} WHERE email = ?`,
+            [req.body.email]
+        );
+        if (!checkPhone[0].length && !checkEmail[0].length) {
             const newClient = await formatNewClient(req.body);
             const insertRes: any = await connection.query(
                 `INSERT INTO ${DB_TABLE_LIST.CLIENT} (first_name, last_name, phone, email, address, city, state, country, postcode) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -116,25 +151,30 @@ const clientSingleInstert = async (req: Request, res: Response) => {
             );
             //console.log("-> insert new client: ", insertRes[0]);
             logger.infoLog("client: successed in register a new client");
+            connection.release();
             res.status(201).json({
-                status: true,
+                status: 200,
                 msg: "new client created successfully",
-                errType: 0,
+                data: "",
             });
         } else {
-            console.log("-> fould existed phone or email: ", results[0]);
-            res.status(406).json({
-                status: false,
+            let a = checkPhone[0][0] && "phone" in checkPhone[0][0];
+            let b = checkEmail[0][0] && "email" in checkEmail[0][0];
+            let temp = a && !b ? 401 : !a && b ? 402 : 403;
+            connection.release();
+            //res.status(406).json({
+            res.status(200).json({
+                status: temp, // 401-phone existed, 402-email existed, 403-both existed
                 msg: "conflict: accouont or phone or email",
-                errType: 2,
+                data: "",
             });
         }
     } catch (error) {
         console.log("-> insert single client error: ", error);
         return res.status(403).json({
-            status: false,
+            status: 400,
             msg: "add new client failed",
-            errType: 1,
+            data: "",
         });
     }
 };

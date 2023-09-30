@@ -5,17 +5,17 @@ import logger from "../utils/logger";
 
 dotenv.config();
 
-interface User {
+type TUser = {
     userId: number | null;
     username: string;
-}
+};
 
-interface RequestWithUser extends Request {
-    user?: User;
-}
+type TRequestWithUser = Request & {
+    user?: TUser;
+};
 
 const authenticateJWT = (
-    req: RequestWithUser,
+    req: TRequestWithUser,
     res: Response,
     next: NextFunction
 ) => {

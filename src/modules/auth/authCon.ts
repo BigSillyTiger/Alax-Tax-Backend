@@ -9,14 +9,14 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-interface userType {
+type TUser = {
     first_name: string;
     last_name: string;
     account: string;
     password: string;
     phone: string;
     email: string;
-}
+};
 
 const pool = mysql.createPool({
     host: process.env.DB_HOST,
@@ -51,7 +51,7 @@ const formatNewUser = async ({
     email,
     phone,
     password,
-}: userType) => {
+}: TUser) => {
     const hashedPW = await bcrypt.hash(password, 10);
     return [first_name, last_name, email, phone, hashedPW];
 };
@@ -151,16 +151,16 @@ const adminLogin = async (req: Request, res: Response) => {
     }
 };
 
-interface User {
+type TReqUser = {
     userId: number;
     username: string;
-}
+};
 
-interface RequestWithUser extends Request {
-    user?: User;
-}
+type TRequestWithUser = Request & {
+    user?: TReqUser;
+};
 
-const authCheck = async (req: RequestWithUser, res: Response) => {
+const authCheck = async (req: TRequestWithUser, res: Response) => {
     const uid = req.user!.userId;
     logger.infoLog(`Server - authCheck, userID = ${uid}`);
     try {
