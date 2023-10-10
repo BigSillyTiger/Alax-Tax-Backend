@@ -2,9 +2,10 @@ import express from "express";
 import * as managerCtl from "./universCon";
 const router = express.Router();
 
-router.get("/manage/univers_all", managerCtl.universAll);
+router.get("/manage/uni_all", managerCtl.universAll);
+router.post("/manage/uni_del", managerCtl.uniDel);
+router.put("/manage/uni_edit", managerCtl.uniEdit);
 router.post("/manage/service_add", managerCtl.serviceAdd);
 router.post("/manage/unit_add", managerCtl.unitAdd);
-router.post("/manage/uni_del", managerCtl.uniDel);
 
 export default router;

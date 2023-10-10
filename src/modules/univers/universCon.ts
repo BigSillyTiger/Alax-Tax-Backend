@@ -138,3 +138,38 @@ export const uniDel = async (req: Request, res: Response) => {
         });
     }
 };
+
+export const uniEdit = async (req: Request, res: Response) => {
+    console.log("-> server - service: edit: ", req.body);
+    try {
+        const connection = await pool.getConnection();
+        if (req.body.service) {
+            const result: any = await connection.query(
+                `UPDATE ${DB_TABLE_LIST.SERVICES} SET service = ?, unit = ?, unit_price = ? WHERE id = ?`,
+                [
+                    req.body.service,
+                    req.body.unit,
+                    req.body.unit_price,
+                    req.body.id,
+                ]
+            );
+        } else {
+            const result: any = await connection.query(
+                `UPDATE ${DB_TABLE_LIST.UNITS} SET unit_name = ? WHERE id = ?`,
+                [req.body.unit_name, req.body.id]
+            );
+        }
+        connection.release();
+        return res.status(200).json({
+            status: RESPONSE_STATUS.SUCCESS,
+            msg: "successed edit service / unit",
+            data: "",
+        });
+    } catch (error) {
+        return res.status(403).json({
+            status: RESPONSE_STATUS.FAILED,
+            msg: "edit service / unit failed",
+            data: "",
+        });
+    }
+};
