@@ -38,71 +38,27 @@ export const universAll = async (req: Request, res: Response) => {
     }
 };
 
-export const serviceAdd = async (req: Request, res: Response) => {
-    console.log("-> server - service: add new: ", req.body);
+export const uniAdd = async (req: Request, res: Response) => {
+    console.log("-> server - service / unit add ");
     try {
         const connection = await pool.getConnection();
-        const checkService: any = await connection.query(
-            `SELECT * FROM ${DB_TABLE_LIST.SERVICES} WHERE service = ?`,
-            [req.body.service]
-        );
-        /* if notduplicated */
-        if (!checkService[0].length) {
+        if (req.body.service) {
             const result: any = await connection.query(
                 `INSERT INTO ${DB_TABLE_LIST.SERVICES} (service, unit, unit_price) VALUES (?,?,?)`,
                 [req.body.service, req.body.unit, req.body.unit_price]
             );
-            connection.release();
-            return res.status(200).json({
-                status: RESPONSE_STATUS.SUCCESS,
-                msg: "successed add new service",
-                data: result[0],
-            });
         } else {
-            connection.release();
-            return res.status(200).json({
-                status: RESPONSE_STATUS.FAILED_DUP,
-                msg: "service / unit already exists",
-                data: "",
-            });
-        }
-    } catch (error) {
-        return res.status(403).json({
-            status: RESPONSE_STATUS.FAILED,
-            msg: "add new service failed",
-            data: "",
-        });
-    }
-};
-
-export const unitAdd = async (req: Request, res: Response) => {
-    console.log("-> server - unit: add new: ", req.body);
-    try {
-        const connection = await pool.getConnection();
-        const checkUnit: any = await connection.query(
-            `SELECT * FROM ${DB_TABLE_LIST.UNITS} WHERE unit_name = ?`,
-            [req.body.unit_name]
-        );
-        /* if notduplicated */
-        if (!checkUnit[0].length) {
-            const result: any = await connection.query(
+            const result = await connection.query(
                 `INSERT INTO ${DB_TABLE_LIST.UNITS} (unit_name) VALUES (?)`,
                 [req.body.unit_name]
             );
-            connection.release();
-            return res.status(200).json({
-                status: RESPONSE_STATUS.SUCCESS,
-                msg: "successed add new unit",
-                data: result[0],
-            });
-        } else {
-            connection.release();
-            return res.status(200).json({
-                status: RESPONSE_STATUS.FAILED_DUP,
-                msg: "service / unit already exists",
-                data: "",
-            });
         }
+        connection.release();
+        return res.status(200).json({
+            status: RESPONSE_STATUS.SUCCESS,
+            msg: "successed add new service / unit",
+            data: "",
+        });
     } catch (error) {
         return res.status(403).json({
             status: RESPONSE_STATUS.FAILED,
