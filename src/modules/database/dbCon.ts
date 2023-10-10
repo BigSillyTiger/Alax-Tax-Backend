@@ -8,7 +8,7 @@ import logger from "../../utils/logger";
 dotenv.config();
 
 const dbInit = async (req: Request, res: Response) => {
-    logger.infoLog(`db - create tabel: ${DB_TABLE_LIST.MANAGER}`);
+    logger.infoLog(`db - create tabel: ${DB_TABLE_LIST.MANAGERS}`);
     const pool: Pool = mysql.createPool({
         host: process.env.DB_HOST,
         user: process.env.DB_USER,
@@ -18,7 +18,7 @@ const dbInit = async (req: Request, res: Response) => {
     });
     try {
         const connection = await pool.getConnection();
-        const createTableManager = `CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.MANAGER} (
+        const createTableManager = `CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.MANAGERS} (
             uid INT AUTO_INCREMENT PRIMARY KEY,
             first_name VARCHAR(255) NOT NULL,
             last_name VARCHAR(255) NOT NULL,
@@ -39,9 +39,9 @@ const dbInit = async (req: Request, res: Response) => {
             employees TINYINT NOT NULL DEFAULT 2,		
             management TINYINT NOT NULL DEFAULT 0,
             PRIMARY KEY (admin_id, fk_uid),
-            FOREIGN KEY (fk_uid) REFERENCES ${DB_TABLE_LIST.MANAGER}(uid) ON UPDATE NO ACTION ON DELETE CASCADE
+            FOREIGN KEY (fk_uid) REFERENCES ${DB_TABLE_LIST.MANAGERS}(uid) ON UPDATE NO ACTION ON DELETE CASCADE
         )`;
-        const createTableClient = `CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.CLIENT} (
+        const createTableClient = `CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.CLIENTS} (
             client_id INT AUTO_INCREMENT PRIMARY KEY,
             first_name VARCHAR(255) NOT NULL,
             last_name VARCHAR(255) NOT NULL,
@@ -67,11 +67,24 @@ const dbInit = async (req: Request, res: Response) => {
                 country,
                 postcode
             FROM
-                ${DB_TABLE_LIST.CLIENT};`;
+                ${DB_TABLE_LIST.CLIENTS};`;
+        const createTableService = `CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.SERVICES} (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            service VARCHAR(255) NOT NULL UNIQUE,
+            unit VARCHAR(20),
+            unit_price MEDIUMINT UNSIGNED DEFAULT 0
+        )`;
+        const createTableUnit = `CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.UNITS} (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            unit_name VARCHAR(20) NOT NULL UNIQUE
+        )`;
         await connection.query(createTableManager);
         await connection.query(createTableAdminLv);
         await connection.query(createTableClient);
+        await connection.query(createTableService);
+        await connection.query(createTableUnit);
         await connection.query(createViewAllClient);
+
         connection.release();
         res.status(200).json({ msg: "success: create tables" });
     } catch (err) {
@@ -79,26 +92,5 @@ const dbInit = async (req: Request, res: Response) => {
         res.status(500).json({ msg: "Failed: create tables" });
     }
 };
-
-/* template
-const __ = async (req: Request, res: Response) => {
-    logger.infoLog(`db - **: ${}`);
-    const pool: Pool = mysql.createPool(ALAX_DB_CONFIG);
-    try {
-        const connection = await pool.getConnection();
-        const createDB = ``;
-        await connection.query(createDB);
-        connection.release();
-        res.status(200).json({
-            success: `success: * ${}`,
-        });
-    } catch (err) {
-        logger.errLog(err);
-        res.status(500).json({
-            error: `Failed: * ${}`,
-        });
-    }
-};
-*/
 
 export { dbInit };

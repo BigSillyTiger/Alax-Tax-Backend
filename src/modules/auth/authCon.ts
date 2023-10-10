@@ -56,19 +56,19 @@ const formatNewUser = async ({
     return [first_name, last_name, email, phone, hashedPW];
 };
 
-const registerNewUser = async (req: Request, res: Response) => {
+export const registerNewUser = async (req: Request, res: Response) => {
     logger.infoLog("server - register");
     try {
         const connection = await pool.getConnection();
         const results: any = await connection.query(
-            `SELECT phone, email FROM ${DB_TABLE_LIST.MANAGER} WHERE phone = ? OR email = ?`,
+            `SELECT phone, email FROM ${DB_TABLE_LIST.MANAGERS} WHERE phone = ? OR email = ?`,
             [req.body.phone, req.body.email]
         );
         //console.log("-> search result: ", results[0]);
         if (!results[0].length) {
             const newUser = await formatNewUser(req.body);
             const insertRes: any = await connection.query(
-                `INSERT INTO ${DB_TABLE_LIST.MANAGER} (first_name, last_name, email, phone, password) VALUES(?, ?, ?, ?, ?)
+                `INSERT INTO ${DB_TABLE_LIST.MANAGERS} (first_name, last_name, email, phone, password) VALUES(?, ?, ?, ?, ?)
             `,
                 newUser
             );
@@ -98,7 +98,7 @@ const registerNewUser = async (req: Request, res: Response) => {
     }
 };
 
-const adminLogin = async (req: Request, res: Response) => {
+export const adminLogin = async (req: Request, res: Response) => {
     console.log("server - login");
 
     try {
@@ -158,7 +158,7 @@ type TRequestWithUser = Request & {
     };
 };
 
-const authCheck = async (req: TRequestWithUser, res: Response) => {
+export const authCheck = async (req: TRequestWithUser, res: Response) => {
     const uid = req.user!.userId;
     logger.infoLog(`Server - authCheck, userID = ${uid}`);
     try {
@@ -181,7 +181,7 @@ const authCheck = async (req: TRequestWithUser, res: Response) => {
     }
 };
 
-const adminLogout = async (req: Request, res: Response) => {
+export const adminLogout = async (req: Request, res: Response) => {
     try {
         res.clearCookie("token");
         res.status(200).json({ msg: "successfully logout" });
@@ -190,7 +190,7 @@ const adminLogout = async (req: Request, res: Response) => {
     }
 };
 
-const permission = async (req: Request, res: Response) => {
+export const permission = async (req: Request, res: Response) => {
     try {
         const connection = await pool.getConnection();
         const [user]: any = await connection.query(
@@ -203,16 +203,7 @@ const permission = async (req: Request, res: Response) => {
     }
 };
 
-const test = async (req: Request, res: Response) => {
+export const test = async (req: Request, res: Response) => {
     await sleep(1000);
     res.status(200).json({ msg: "test ok" });
-};
-
-export {
-    registerNewUser,
-    adminLogin,
-    authCheck,
-    adminLogout,
-    permission,
-    test,
 };

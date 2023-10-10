@@ -5,12 +5,14 @@ const URL_LIST = {
 };
 
 const DB_TABLE_LIST = {
-    MANAGER: "managers",
+    MANAGERS: "managers",
     ADMIN_LEVEL: "admin_level",
-    CLIENT: "clients",
+    CLIENTS: "clients",
     OD_DETAIL: "order_details",
     OD_STATUS: "order_status",
     VIEW_CLIENTS: "view_clients",
+    SERVICES: "services",
+    UNITS: "units",
 };
 
 enum RESPONSE_STATUS {
@@ -19,10 +21,11 @@ enum RESPONSE_STATUS {
     SUC_UPDATE = 202,
     //
     FAILED = 400,
-    FAILED_DUP_PHONE = 401,
-    FAILED_DUP_EMAIL = 402,
-    FAILED_DUP_P_E = 403,
-    FAILED_DEL = 404,
+    FAILED_DUP = 401,
+    FAILED_DUP_PHONE = 402,
+    FAILED_DUP_EMAIL = 403,
+    FAILED_DUP_P_E = 404,
+    FAILED_DEL = 405,
 }
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
