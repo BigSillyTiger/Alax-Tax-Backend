@@ -5,12 +5,17 @@ const URL_LIST = {
 };
 
 const DB_TABLE_LIST = {
+    // admin
     MANAGERS: "managers",
     ADMIN_LEVEL: "admin_level",
+    // Job
     CLIENTS: "clients",
-    OD_DETAIL: "order_details",
-    OD_STATUS: "order_status",
-    VIEW_CLIENTS: "view_clients",
+    ORDERS: "orders",
+    ORDER_DESC: "order_desc",
+    QUOTATIONS: "quotations",
+    INVOICES: "invoices",
+    PAYMENTS: "payments",
+    // Assiste
     SERVICES: "services",
     UNITS: "units",
 };

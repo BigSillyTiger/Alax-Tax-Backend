@@ -86,7 +86,7 @@ export const clientMulInstert = async (req: Request, res: Response) => {
         const sql = `INSERT INTO ${DB_TABLE_LIST.CLIENTS} (first_name, last_name, phone, email, address, city, state, country, postcode) VALUES ?`;
         await connection.query(sql, [insertData]);
         connection.release();
-        res.status(200).json({
+        return res.status(200).json({
             status: RESPONSE_STATUS.SUCCESS,
             msg: "success: insert multiple clients",
             data: "",
@@ -113,7 +113,7 @@ export const clientGetAll = async (req: Request, res: Response) => {
     try {
         const connection = await pool.getConnection();
         const result: any = await connection.query(
-            `SELECT * FROM ${DB_TABLE_LIST.VIEW_CLIENTS}`
+            `SELECT * FROM ${DB_TABLE_LIST.CLIENTS}`
         );
         //console.log("-> ALL client from server: ", result);
         connection.release();
@@ -132,12 +132,12 @@ export const clientGetAll = async (req: Request, res: Response) => {
 };
 
 export const clientInfo = async (req: Request, res: Response) => {
-    console.log("-> server - client: info - ", req.body.id);
+    console.log("-> server - client: info - ", req.body.client_id);
     try {
         const connection = await pool.getConnection();
         const result: any = await connection.query(
-            `SELECT * FROM ${DB_TABLE_LIST.VIEW_CLIENTS} WHERE id = ?`,
-            [req.body.id]
+            `SELECT * FROM ${DB_TABLE_LIST.CLIENTS} WHERE client_id = ?`,
+            [req.body.client_id]
         );
         connection.release();
         return res.status(200).json({

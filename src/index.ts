@@ -11,10 +11,11 @@ import expressPinoLogger from "express-pino-logger";
 import cors from "cors";
 
 import logger from "./utils/logger";
-import dbRouter from "./modules/database/dbRoute";
-import authRouter from "./modules/auth/authRoute";
-import clientRouter from "./modules/clients/clientRoute";
-import managerRouter from "./modules/univers/universRoute";
+import dbRouter from "./controllers/database/dbRoute";
+import authRouter from "./controllers/auth/authRoute";
+import clientRouter from "./controllers/clients/clientRoute";
+import managerRouter from "./controllers/univers/universRoute";
+import orderRouter from "./controllers/orders/orderRoute";
 import dotenv from "dotenv";
 
 //dotenv.config({ path: "../../.env" });
@@ -35,6 +36,7 @@ app.use(express.static("public"));
 app.use(dbRouter);
 app.use(authRouter);
 app.use(clientRouter);
+app.use(orderRouter);
 app.use(managerRouter);
 
 app.listen(process.env.PORT || 5005, () => {
