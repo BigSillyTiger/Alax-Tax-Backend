@@ -3,7 +3,7 @@ import type { Request, Response } from "express";
 import mysql, { Connection, createConnection } from "mysql2/promise";
 import { DB_TABLE_LIST, RES_STATUS } from "../../utils/config";
 import logger from "../../utils/logger";
-import dotenv from "dotenv";
+
 import {
     m_clientGetAll,
     m_clientGetSingle,
@@ -13,16 +13,6 @@ import {
     m_clientUpdateProperty,
     m_clientUpdate,
 } from "../../models/clientsCtl";
-
-dotenv.config();
-
-const pool = mysql.createPool({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PW,
-    database: process.env.DATABASE,
-    connectionLimit: 5,
-});
 
 const phaseClientsData = (items: any /* placeholder */) => {
     return items.map((item: any) => {
@@ -137,6 +127,7 @@ export const clientSingleInstert = async (req: Request, res: Response) => {
 
     if (!emailDup && !phoneDup) {
         const newClient = phaseClientsData(req.body);
+        console.log("-> newClient insertData: ", newClient);
         const result = await m_clientInsert(newClient);
 
         if (result.insertId > 0) {
