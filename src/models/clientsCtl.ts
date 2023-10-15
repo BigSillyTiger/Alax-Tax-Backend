@@ -71,7 +71,6 @@ export const m_clientIsPropertyExist = async (
             [data, client_id]
         );
         connection.release();
-        console.log(`-> id[${client_id}] ${property} result: `, result);
         return result[0].length > 0 ? true : false;
     } catch (err) {
         console.log("err: check if client property exist: ", err);

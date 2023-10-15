@@ -124,16 +124,16 @@ export const clientSingleInstert = async (req: Request, res: Response) => {
     console.log("-> server - client: single insert: ", req.body[0]);
 
     const phoneDup = await m_clientIsPropertyExist(
-        0, // insert new client
+        0, // new client does not nedd to check client_id
         "phone",
         req.body[0].phone
     );
     const emailDup = await m_clientIsPropertyExist(
-        0,
+        0, // new client does not nedd to check client_id
         "email",
         req.body[0].email
     );
-    console.log(`-> phoneDup: ${phoneDup}, emailDup: ${emailDup}`);
+    //console.log(`-> phoneDup: ${phoneDup}, emailDup: ${emailDup}`);
 
     if (!emailDup && !phoneDup) {
         const newClient = phaseClientsData(req.body);
@@ -225,11 +225,9 @@ export const clientSingleUpdate = async (req: Request, res: Response) => {
     } = req.body[0];
     const phoneDup = await m_clientIsPropertyExist(client_id, "phone", phone);
     const emailDup = await m_clientIsPropertyExist(client_id, "email", email);
-    console.log("-> phone check: ", phoneDup);
-    console.log("-> email check: ", emailDup);
+
     if (!phoneDup && !emailDup) {
         console.log("-> update not duplicated");
-
         const result = await m_clientUpdate(
             first_name,
             last_name,
