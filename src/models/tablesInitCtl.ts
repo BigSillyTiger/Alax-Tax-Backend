@@ -29,16 +29,15 @@ export const createTables = async () => {
             client_id INT AUTO_INCREMENT PRIMARY KEY,
             first_name VARCHAR(255) NOT NULL,
             last_name VARCHAR(255) NOT NULL,
-            phone VARCHAR(25) NOT NULL,
-            email VARCHAR(255) NOT NULL,
+            phone VARCHAR(25) NOT NULL UNIQUE,
+            email VARCHAR(255) NOT NULL UNIQUE,
             address VARCHAR(255),
             suburb VARCHAR(100) DEFAULT 'Adelaide',
             city VARCHAR(100) DEFAULT 'Adelaide',
             state VARCHAR(10) DEFAULT 'SA',
             country VARCHAR(20) DEFAULT "Australia",
             postcode VARCHAR(10) DEFAULT '5000',
-            created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            UNIQUE(phone, email)
+            created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )`);
         await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.SERVICES} (
             id INT AUTO_INCREMENT PRIMARY KEY,

@@ -121,20 +121,21 @@ export const clientInfo = async (req: Request, res: Response) => {
 };
 
 export const clientSingleInstert = async (req: Request, res: Response) => {
-    console.log("-> server - client: single insert");
+    console.log("-> server - client: single insert: ", req.body[0]);
 
-    const checkPhone = await m_clientIsPropertyExist(
-        req.body[0].client_id,
+    const phoneDup = await m_clientIsPropertyExist(
+        0, // insert new client
         "phone",
         req.body[0].phone
     );
-    const checkEmail = await m_clientIsPropertyExist(
-        req.body[0].client_id,
+    const emailDup = await m_clientIsPropertyExist(
+        0,
         "email",
         req.body[0].email
     );
+    console.log(`-> phoneDup: ${phoneDup}, emailDup: ${emailDup}`);
 
-    if (!checkEmail && !checkPhone) {
+    if (!emailDup && !phoneDup) {
         const newClient = phaseClientsData(req.body);
         const result = await m_clientInsert(newClient);
 
@@ -148,9 +149,9 @@ export const clientSingleInstert = async (req: Request, res: Response) => {
         }
     } else {
         let temp =
-            checkPhone && !checkEmail
+            phoneDup && !emailDup
                 ? RES_STATUS.FAILED_DUP_PHONE
-                : !checkPhone && checkEmail
+                : !phoneDup && emailDup
                 ? RES_STATUS.FAILED_DUP_EMAIL
                 : RES_STATUS.FAILED_DUP_P_E;
         console.log("-> insert duplicated: ", temp);
@@ -222,10 +223,11 @@ export const clientSingleUpdate = async (req: Request, res: Response) => {
         postcode,
         client_id,
     } = req.body[0];
-    const checkPhone = await m_clientIsPropertyExist(client_id, "phone", phone);
-    const checkEmail = await m_clientIsPropertyExist(client_id, "email", email);
-
-    if (!checkPhone && !checkEmail) {
+    const phoneDup = await m_clientIsPropertyExist(client_id, "phone", phone);
+    const emailDup = await m_clientIsPropertyExist(client_id, "email", email);
+    console.log("-> phone check: ", phoneDup);
+    console.log("-> email check: ", emailDup);
+    if (!phoneDup && !emailDup) {
         console.log("-> update not duplicated");
 
         const result = await m_clientUpdate(
@@ -256,9 +258,9 @@ export const clientSingleUpdate = async (req: Request, res: Response) => {
         });
     } else {
         let temp =
-            checkPhone && !checkEmail
+            phoneDup && !emailDup
                 ? RES_STATUS.FAILED_DUP_PHONE
-                : !checkPhone && checkEmail
+                : !phoneDup && emailDup
                 ? RES_STATUS.FAILED_DUP_EMAIL
                 : RES_STATUS.FAILED_DUP_P_E;
         console.log("-> update duplicated: ", temp);
