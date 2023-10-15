@@ -4,53 +4,25 @@ import mysql, { Connection, createConnection } from "mysql2/promise";
 import { DB_TABLE_LIST, RES_STATUS } from "../../utils/config";
 import logger from "../../utils/logger";
 import dotenv from "dotenv";
+import {
+    m_clientGetAll,
+    m_clientGetSingle,
+    m_clientIsPropertyExist,
+    m_clientInsert,
+    m_clientDelSingle,
+    m_clientUpdateProperty,
+    m_clientUpdate,
+} from "../../models/clientsCtl";
+
+dotenv.config();
 
 const pool = mysql.createPool({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
     password: process.env.DB_PW,
     database: process.env.DATABASE,
-    connectionLimit: 15,
+    connectionLimit: 5,
 });
-
-type clientType = {
-    first_name: string;
-    last_name: string;
-    phone: string;
-    email: string;
-    address: string;
-    suburb: string;
-    city: string;
-    state: string;
-    country: string;
-    postcode: number;
-};
-
-const formatNewClient = async ({
-    first_name,
-    last_name,
-    phone,
-    email,
-    address,
-    suburb,
-    city,
-    state,
-    country,
-    postcode,
-}: clientType) => {
-    return [
-        first_name,
-        last_name,
-        phone,
-        email,
-        address,
-        suburb,
-        city,
-        state,
-        country,
-        postcode,
-    ];
-};
 
 const phaseClientsData = (items: any /* placeholder */) => {
     return items.map((item: any) => {
@@ -81,30 +53,23 @@ const phaseClientsData = (items: any /* placeholder */) => {
     });
 };
 
+/**
+ *  @description insert multiple clients
+ * @param req
+ * @param res
+ * @returns
+ */
 export const clientMulInstert = async (req: Request, res: Response) => {
-    console.log("server - client: multiple insert clients ");
-    try {
-        const connection = await pool.getConnection();
-        const insertData = phaseClientsData(req.body);
-        //console.log("-> parsed data: ", insertData);
-
-        const sql = `INSERT INTO ${DB_TABLE_LIST.CLIENTS} (first_name, last_name, phone, email, address, suburb, city, state, country, postcode) VALUES ?`;
-        await connection.query(sql, [insertData]);
-        connection.release();
+    console.log("server - client: insert clients ");
+    const insertData = phaseClientsData(req.body);
+    const insertResult = await m_clientInsert(insertData);
+    if (insertResult.affectedRows) {
         return res.status(200).json({
             status: RES_STATUS.SUCCESS,
             msg: "success: insert multiple clients",
-            data: "",
+            data: insertResult,
         });
-    } catch (error: any) {
-        logger.errLog(error);
-        if (error?.code === "ER_DUP_ENTRY") {
-            return res.status(400).json({
-                status: RES_STATUS.FAILED,
-                msg: "Duplicate phone number. Data not inserted.",
-                data: null,
-            });
-        }
+    } else {
         return res.status(400).json({
             status: RES_STATUS.FAILED,
             msg: "Failed: insert multiple clients",
@@ -113,44 +78,40 @@ export const clientMulInstert = async (req: Request, res: Response) => {
     }
 };
 
+/**
+ * @description retrieve all clients info
+ * @param req
+ * @param res
+ * @returns
+ */
 export const clientGetAll = async (req: Request, res: Response) => {
     console.log("-> server - client: all");
-    try {
-        const connection = await pool.getConnection();
-        const result: any = await connection.query(
-            `SELECT * FROM ${DB_TABLE_LIST.CLIENTS}`
-        );
-        //console.log("-> ALL client from server: ", result);
-        connection.release();
-        return res.status(200).json({
-            status: RES_STATUS.SUCCESS,
-            msg: "successed retrieve all client",
-            data: result[0],
-        });
-    } catch (error) {
-        return res.status(403).json({
-            status: RES_STATUS.FAILED,
-            msg: "acquire all client failed",
-            data: "",
-        });
-    }
+    const clients = await m_clientGetAll();
+    return res.status(200).json({
+        status: RES_STATUS.SUCCESS,
+        msg: clients?.length
+            ? "successed retrieve all client"
+            : "No client found",
+        data: clients,
+    });
 };
 
+/**
+ * @description retrieve single client info
+ * @param req
+ * @param res
+ * @returns
+ */
 export const clientInfo = async (req: Request, res: Response) => {
     console.log("-> server - client: info - ", req.body.client_id);
-    try {
-        const connection = await pool.getConnection();
-        const result: any = await connection.query(
-            `SELECT * FROM ${DB_TABLE_LIST.CLIENTS} WHERE client_id = ?`,
-            [req.body.client_id]
-        );
-        connection.release();
+    const client = await m_clientGetSingle(req.body.client_id);
+    if (client) {
         return res.status(200).json({
             status: RES_STATUS.SUCCESS,
             msg: "successed retrieve client info",
-            data: result[0],
+            data: client,
         });
-    } catch (err) {
+    } else {
         return res.status(403).json({
             status: RES_STATUS.FAILED,
             msg: "acquire client info failed",
@@ -160,53 +121,43 @@ export const clientInfo = async (req: Request, res: Response) => {
 };
 
 export const clientSingleInstert = async (req: Request, res: Response) => {
-    console.log("-> server - client: add new: ", req.body);
-    try {
-        const connection = await pool.getConnection();
-        const checkPhone: any = await connection.query(
-            `SELECT phone FROM ${DB_TABLE_LIST.CLIENTS} WHERE phone = ?`,
-            [req.body.phone]
-        );
-        const checkEmail: any = await connection.query(
-            `SELECT email FROM ${DB_TABLE_LIST.CLIENTS} WHERE email = ?`,
-            [req.body.email]
-        );
-        if (!checkPhone[0].length && !checkEmail[0].length) {
-            const newClient = await formatNewClient(req.body);
-            const insertRes: any = await connection.query(
-                `INSERT INTO ${DB_TABLE_LIST.CLIENTS} (first_name, last_name, phone, email, address, suburb, city, state, country, postcode) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-                newClient
-            );
-            //console.log("-> insert new client: ", insertRes[0]);
+    console.log("-> server - client: single insert");
+
+    const checkPhone = await m_clientIsPropertyExist(
+        req.body[0].client_id,
+        "phone",
+        req.body[0].phone
+    );
+    const checkEmail = await m_clientIsPropertyExist(
+        req.body[0].client_id,
+        "email",
+        req.body[0].email
+    );
+
+    if (!checkEmail && !checkPhone) {
+        const newClient = phaseClientsData(req.body);
+        const result = await m_clientInsert(newClient);
+
+        if (result.insertId > 0) {
             logger.infoLog("client: successed in register a new client");
-            connection.release();
-            res.status(201).json({
+            return res.status(201).json({
                 status: RES_STATUS.SUCCESS,
                 msg: "new client created successfully",
-                data: "",
-            });
-        } else {
-            let a = checkPhone[0][0] && "phone" in checkPhone[0][0];
-            let b = checkEmail[0][0] && "email" in checkEmail[0][0];
-            let temp =
-                a && !b
-                    ? RES_STATUS.FAILED_DUP_PHONE
-                    : !a && b
-                    ? RES_STATUS.FAILED_DUP_EMAIL
-                    : RES_STATUS.FAILED_DUP_P_E;
-            connection.release();
-            //res.status(406).json({
-            res.status(200).json({
-                status: temp, // 401-phone existed, 402-email existed, 403-both existed
-                msg: "conflict: accouont or phone or email",
-                data: "",
+                data: result,
             });
         }
-    } catch (error) {
-        console.log("-> insert single client error: ", error);
-        return res.status(403).json({
-            status: RES_STATUS.FAILED,
-            msg: "add new client failed",
+    } else {
+        let temp =
+            checkPhone && !checkEmail
+                ? RES_STATUS.FAILED_DUP_PHONE
+                : !checkPhone && checkEmail
+                ? RES_STATUS.FAILED_DUP_EMAIL
+                : RES_STATUS.FAILED_DUP_P_E;
+        console.log("-> insert duplicated: ", temp);
+
+        return res.status(200).json({
+            status: temp, // 401-phone existed, 402-email existed, 403-both existed
+            msg: "error: accouont or phone or email conflict, or error occurs",
             data: "",
         });
     }
@@ -215,20 +166,16 @@ export const clientSingleInstert = async (req: Request, res: Response) => {
 export const clientSingleDel = async (req: Request, res: Response) => {
     // Delete client
     console.log("-> server - client: delete clientID: ", req.body.client_id);
-    try {
-        const connection = await pool.getConnection();
-        await connection.query(
-            `DELETE FROM ${DB_TABLE_LIST.CLIENTS} WHERE client_id = ?`,
-            [req.body.id]
-        );
-        // Return success
+
+    const result = await m_clientDelSingle(req.body.client_id);
+    // Return success
+    if (result.affectedRows > 0) {
         return res.status(200).json({
             status: RES_STATUS.SUC_DEL_SINGLE, // delete success
             msg: `Successed: delete client[id: ${req.body.client_id}]`,
             data: "",
         });
-    } catch (err) {
-        // Return fail
+    } else {
         return res.status(403).json({
             status: RES_STATUS.FAILED_DEL,
             msg: `Failed: delete client[id: ${req.body.client_id}]`,
@@ -239,19 +186,18 @@ export const clientSingleDel = async (req: Request, res: Response) => {
 
 export const clientSingleArchive = async (req: Request, res: Response) => {
     console.log("-> server - client: archive");
-    try {
-        const connection = await pool.getConnection();
-        await connection.query(
-            `UPDATE ${DB_TABLE_LIST.CLIENTS} SET archive = ? WHERE client_id = ?`,
-            [req.body.flag, req.body.client_id]
-        );
+    const result = await m_clientUpdateProperty(
+        req.body.client_id,
+        "archive",
+        req.body.archive
+    );
+    if (result.affectedRows > 0) {
         return res.status(200).json({
-            status: 200,
-            msg: `Successed: delete client[id: ${req.body.client_id}]`,
+            status: RES_STATUS.SUCCESS,
+            msg: `Successed: archieve client[id: ${req.body.client_id}]`,
             data: "",
         });
-    } catch (err) {
-        console.log("-> archive error: ", err);
+    } else {
         return res.status(403).json({
             status: RES_STATUS.FAILED,
             msg: `Failed: archive client[id: ${req.body.client_id}]`,
@@ -263,69 +209,64 @@ export const clientSingleArchive = async (req: Request, res: Response) => {
 // for update client in mysql clients table
 export const clientSingleUpdate = async (req: Request, res: Response) => {
     console.log("-> server -client: update");
-    try {
-        const connection = await pool.getConnection();
-        const checkPhone: any = await connection.query(
-            `SELECT * FROM ${DB_TABLE_LIST.CLIENTS} WHERE phone = ? AND client_id != ?`,
-            [req.body.phone, req.body.client_id]
+    const {
+        first_name,
+        last_name,
+        phone,
+        email,
+        address,
+        suburb,
+        city,
+        state,
+        country,
+        postcode,
+        client_id,
+    } = req.body[0];
+    const checkPhone = await m_clientIsPropertyExist(client_id, "phone", phone);
+    const checkEmail = await m_clientIsPropertyExist(client_id, "email", email);
+
+    if (!checkPhone && !checkEmail) {
+        console.log("-> update not duplicated");
+
+        const result = await m_clientUpdate(
+            first_name,
+            last_name,
+            phone,
+            email,
+            address,
+            suburb,
+            city,
+            state,
+            country,
+            postcode,
+            client_id as number
         );
-        const checkEmail: any = await connection.query(
-            `SELECT * FROM ${DB_TABLE_LIST.CLIENTS} WHERE email = ? AND client_id != ?`,
-            [req.body.email, req.body.client_id]
-        );
-        // if the length of the result of checkPhone is 0, then the phone is not duplicated
-        const isPhoneDuplicated = checkPhone[0].length ? true : false;
-        // if the length of the result of checkEmail is 0, then the email is not duplicated
-        const isEmailDuplicated = checkEmail[0].length ? true : false;
-        //
-        if (!isPhoneDuplicated && !isPhoneDuplicated) {
-            const updateData = await formatNewClient(req.body);
-            console.log("-> update not duplicated");
-            await connection.query(
-                `
-                UPDATE ${DB_TABLE_LIST.CLIENTS} 
-                    SET 
-                        first_name = ?, 
-                        last_name = ?, 
-                        phone = ?, 
-                        email = ?, 
-                        address = ?, 
-                        suburb = ?,
-                        city = ?, 
-                        state = ?, 
-                        country = ?, 
-                        postcode = ?
-                    WHERE client_id = ?
-                `,
-                [...updateData, req.body.client_id]
-            );
-            connection.release();
+
+        if (result?.affectedRows > 0) {
             return res.status(200).json({
                 status: RES_STATUS.SUCCESS,
-                msg: `Successed: update client[id: ${req.body.client_id}]`,
-                data: "",
-            });
-        } else {
-            let temp =
-                isPhoneDuplicated && !isEmailDuplicated
-                    ? RES_STATUS.FAILED_DUP_PHONE
-                    : !isPhoneDuplicated && isEmailDuplicated
-                    ? RES_STATUS.FAILED_DUP_EMAIL
-                    : RES_STATUS.FAILED_DUP_P_E;
-            console.log("-> update duplicated: ", temp);
-            connection.release();
-            //res.status(406).json({
-            res.status(200).json({
-                status: temp, // 401-phone existed, 402-email existed, 403-both existed
-                msg: "Duplicated: phone or email",
-                data: "",
+                msg: `Successed: update client[id: ${client_id}]`,
+                data: result,
             });
         }
-    } catch (err) {
-        console.log("-> archive error: ", err);
         return res.status(403).json({
             status: RES_STATUS.FAILED,
-            msg: `Failed: update client[id: ${req.body.client_id}]`,
+            msg: `Failed: update client[id: ${client_id}]`,
+            data: "",
+        });
+    } else {
+        let temp =
+            checkPhone && !checkEmail
+                ? RES_STATUS.FAILED_DUP_PHONE
+                : !checkPhone && checkEmail
+                ? RES_STATUS.FAILED_DUP_EMAIL
+                : RES_STATUS.FAILED_DUP_P_E;
+        console.log("-> update duplicated: ", temp);
+
+        //res.status(406).json({
+        res.status(200).json({
+            status: temp, // 401-phone existed, 402-email existed, 403-both existed
+            msg: "Duplicated: phone or email",
             data: "",
         });
     }

@@ -9,8 +9,8 @@ export const createTables = async () => {
         uid INT AUTO_INCREMENT PRIMARY KEY,
         first_name VARCHAR(255) NOT NULL,
         last_name VARCHAR(255) NOT NULL,
-        email VARCHAR(255) NOT NULL,
-        phone VARCHAR(20) NOT NULL,
+        email VARCHAR(255) NOT NULL UNIQUE,
+        phone VARCHAR(20) NOT NULL UNIQUE,
         password VARCHAR(255) NOT NULL,
         address VARCHAR(255),
         created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -23,7 +23,7 @@ export const createTables = async () => {
             orders TINYINT NOT NULL DEFAULT 2,
             calendar TINYINT NOT NULL DEFAULT 2,
             employees TINYINT NOT NULL DEFAULT 2,		
-            management TINYINT NOT NULL DEFAULT 0,
+            management TINYINT NOT NULL DEFAULT 0
         )`);
         await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.CLIENTS} (
             client_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -96,7 +96,7 @@ export const createTables = async () => {
         connection.release();
         return true;
     } catch (err) {
-        logger.errLog(err);
+        console.log("Err: create tables: ", err);
         return false;
     }
 };

@@ -1,6 +1,6 @@
 import logger from "../utils/logger";
 import adminPool from "./adminPool";
-import { DB_TABLE_LIST, sleep } from "../utils/config";
+import { DB_TABLE_LIST } from "../utils/config";
 
 /**
  *
@@ -100,7 +100,7 @@ export const m_insertMLevel = async ({
             `INSERT INTO ${DB_TABLE_LIST.ADMIN_LEVEL} (fk_uid, dashboard, clients, orders, employees, management) VALUES(?,?,?,?,?,?)`,
             [fk_uid, dashboard, clients, orders, employees, management]
         );
-        console.log("-> insert new manager: ", result);
+        connection.release();
         return result[0].insertId;
     } catch (err) {
         logger.errLog(err);
