@@ -9,6 +9,6 @@ router.post("/register_new", authCtl.registerNewUser);
 router.post("/adminLogin", authCtl.adminLogin);
 router.get("/adminLogout", authCtl.adminLogout);
 router.get("/adminCheck", authenticateJWT, authCtl.authCheck);
-router.get("/permission", authenticateJWT, authCtl.permission);
+//router.get("/permission", authenticateJWT, authCtl.permission);
 
 export default router;

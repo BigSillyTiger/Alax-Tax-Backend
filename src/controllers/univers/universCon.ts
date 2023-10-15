@@ -2,7 +2,7 @@ import uuid from "uuid";
 import type { Request, Response } from "express";
 import mysql from "mysql2/promise";
 import logger from "@/utils/logger";
-import { DB_TABLE_LIST, RESPONSE_STATUS } from "../../utils/config";
+import { DB_TABLE_LIST, RES_STATUS } from "../../utils/config";
 
 const pool = mysql.createPool({
     host: process.env.DB_HOST,
@@ -24,14 +24,14 @@ export const universAll = async (req: Request, res: Response) => {
 
         connection.release();
         return res.status(200).json({
-            status: RESPONSE_STATUS.SUCCESS,
+            status: RES_STATUS.SUCCESS,
             msg: "successed retrieve all services",
             data: { services: sResult[0], units: uResult[0] },
         });
     } catch (error) {
         console.log("-> univers all error: ", error);
         return res.status(403).json({
-            status: RESPONSE_STATUS.FAILED,
+            status: RES_STATUS.FAILED,
             msg: "acquire all services failed",
             data: "",
         });
@@ -55,13 +55,13 @@ export const uniAdd = async (req: Request, res: Response) => {
         }
         connection.release();
         return res.status(200).json({
-            status: RESPONSE_STATUS.SUCCESS,
+            status: RES_STATUS.SUCCESS,
             msg: "successed add new service / unit",
             data: "",
         });
     } catch (error) {
         return res.status(403).json({
-            status: RESPONSE_STATUS.FAILED,
+            status: RES_STATUS.FAILED,
             msg: "add new unit failed",
             data: "",
         });
@@ -82,13 +82,13 @@ export const uniDel = async (req: Request, res: Response) => {
         );
         connection.release();
         return res.status(200).json({
-            status: RESPONSE_STATUS.SUCCESS,
+            status: RES_STATUS.SUCCESS,
             msg: "successed delete service / unit",
             data: result[0],
         });
     } catch (error) {
         return res.status(403).json({
-            status: RESPONSE_STATUS.FAILED,
+            status: RES_STATUS.FAILED,
             msg: "delete service / unit failed",
             data: "",
         });
@@ -117,13 +117,13 @@ export const uniEdit = async (req: Request, res: Response) => {
         }
         connection.release();
         return res.status(200).json({
-            status: RESPONSE_STATUS.SUCCESS,
+            status: RES_STATUS.SUCCESS,
             msg: "successed edit service / unit",
             data: "",
         });
     } catch (error) {
         return res.status(403).json({
-            status: RESPONSE_STATUS.FAILED,
+            status: RES_STATUS.FAILED,
             msg: "edit service / unit failed",
             data: "",
         });

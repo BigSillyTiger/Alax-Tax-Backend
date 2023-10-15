@@ -3,8 +3,15 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import mysql, { Connection, createConnection } from "mysql2/promise";
 import logger from "../../utils/logger";
-import { DB_TABLE_LIST, sleep } from "../../utils/config";
+import { DB_TABLE_LIST, sleep, RES_STATUS } from "../../utils/config";
 import { Request, Response } from "express";
+import {
+    m_addManager,
+    m_insertLevel,
+    m_levelCheck,
+    m_searchMPhoneEmail,
+    m_searchMbyEmail,
+} from "../../models/managerCtl";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -33,58 +40,38 @@ const generateToken = (userID: number): string => {
     });
 };
 
-/* const formDate = () => {
-    const date = new Date();
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0"); // Adding leading zero if needed
-    const day = String(date.getDate()).padStart(2, "0");
-    const hours = String(date.getHours()).padStart(2, "0");
-    const minutes = String(date.getMinutes()).padStart(2, "0");
-    const seconds = String(date.getSeconds()).padStart(2, "0");
-
-    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-}; */
-
-const formatNewUser = async ({
-    first_name,
-    last_name,
-    email,
-    phone,
-    password,
-}: TUser) => {
-    const hashedPW = await bcrypt.hash(password, 10);
-    return [first_name, last_name, email, phone, hashedPW];
+const encodePW = async (password: string) => {
+    const newPW = await bcrypt.hash(password, 10);
+    return newPW;
 };
 
 export const registerNewUser = async (req: Request, res: Response) => {
-    logger.infoLog("server - register");
+    logger.infoLog("server - register new manager");
     try {
         const connection = await pool.getConnection();
-        const results: any = await connection.query(
-            `SELECT phone, email FROM ${DB_TABLE_LIST.MANAGERS} WHERE phone = ? OR email = ?`,
-            [req.body.phone, req.body.email]
+        const result = await m_searchMPhoneEmail(
+            req.body.phone,
+            req.body.email
         );
-        //console.log("-> search result: ", results[0]);
-        if (!results[0].length) {
-            const newUser = await formatNewUser(req.body);
-            const insertRes: any = await connection.query(
-                `INSERT INTO ${DB_TABLE_LIST.MANAGERS} (first_name, last_name, email, phone, password) VALUES(?, ?, ?, ?, ?)
-            `,
-                newUser
+        if (!result) {
+            const newPW = await encodePW(req.body.password);
+            const insertRes = await m_addManager(
+                req.body.first_name,
+                req.body.last_name,
+                req.body.email,
+                req.body.phone,
+                newPW
             );
-            await connection.query(
-                `INSERT INTO ${DB_TABLE_LIST.ADMIN_LEVEL} (fk_uid, dashboard, clients, orders, employees, management) VALUES(?,?,?,?,?,?)`,
-                [
-                    insertRes[0].insertId,
-                    req.body.dashboard,
-                    req.body.clients,
-                    req.body.orders,
-                    req.body.employees,
-                    req.body.management,
-                ]
-            );
-            console.log("-> the new instered user: ", insertRes[0].insertId);
-            //const userID = "";
+
+            await m_insertLevel({
+                cid: insertRes,
+                dashboard: req.body.dashboard,
+                clients: req.body.clients,
+                orders: req.body.orders,
+                employees: req.body.employees,
+                management: req.body.management,
+            });
+            console.log("-> the new instered user: ", insertRes);
             res.status(201).json({ msg: "new user register successfully" });
         } else {
             res.status(406).json({
@@ -101,36 +88,23 @@ export const registerNewUser = async (req: Request, res: Response) => {
 export const adminLogin = async (req: Request, res: Response) => {
     console.log("server - login");
 
-    try {
-        const connection = await pool.getConnection();
-        const [user]: any = await connection.query(
-            `SELECT * FROM managers WHERE email = ?`,
-            [req.body.email]
+    const connection = await pool.getConnection();
+    const manager = await m_searchMbyEmail(req.body.email);
+    if (manager?.uid) {
+        const pwMatch = await bcrypt.compare(
+            req.body.password,
+            manager.password
         );
-        if (!user.length) {
+        if (!pwMatch) {
             connection.release();
+            logger.warnLog(`error: loggin pw wrong`);
             return res.status(404).json({ msg: "ERROR: wrong credentials" });
-        } else {
-            const pwMatch = await bcrypt.compare(
-                req.body.password,
-                user[0].password
-            );
-            if (!pwMatch) {
-                connection.release();
-                logger.warnLog(`error: loggin pw wrong`);
-                return res
-                    .status(404)
-                    .json({ msg: "ERROR: wrong credentials" });
-            }
-            const token = generateToken(user[0].uid);
-            logger.infoLog(`-> new login token: ${token}`);
-
-            const result: any = await connection.query(
-                `SELECT dashboard, clients, orders, employees, management FROM ${DB_TABLE_LIST.ADMIN_LEVEL}
-                WHERE fk_uid = (SELECT uid FROM managers WHERE email = ?)`,
-                [req.body.email]
-            );
-            connection.release();
+        }
+        const token = generateToken(manager.uid as number);
+        logger.infoLog(`-> new login token: ${token}`);
+        const result = await m_levelCheck(manager.uid);
+        connection.release();
+        if (result) {
             return res
                 .cookie("token", token, {
                     expires: new Date(
@@ -139,16 +113,18 @@ export const adminLogin = async (req: Request, res: Response) => {
                     httpOnly: true,
                 })
                 .json({
-                    status: true,
+                    status: RES_STATUS.SUCCESS,
                     msg: "login success~~",
-                    permission: result[0],
+                    data: result[0],
                 });
         }
-    } catch (err) {
-        logger.errLog(err);
-        console.log("-> login error: ", err);
-        return res.status(500).json({ msg: "Internet Server Error" });
     }
+    connection.release();
+    return res.status(404).json({
+        status: RES_STATUS.FAILED,
+        msg: "ERROR: login error",
+        data: null,
+    });
 };
 
 type TRequestWithUser = Request & {
@@ -161,22 +137,18 @@ type TRequestWithUser = Request & {
 export const authCheck = async (req: TRequestWithUser, res: Response) => {
     const uid = req.user!.userId;
     logger.infoLog(`Server - authCheck, userID = ${uid}`);
-    try {
-        const connection = await pool.getConnection();
-        const result: any = await connection.query(
-            `SELECT dashboard, clients, orders, calendar, employees, management FROM ${DB_TABLE_LIST.ADMIN_LEVEL} WHERE fk_uid = ${uid}`
-        );
-        //console.log("-> permission result: ", result[0]);
-        connection.release();
+    const result = await m_levelCheck(uid);
+    if (result) {
         return res.status(200).json({
-            status: true,
+            status: RES_STATUS.SUCCESS,
             msg: "welcome to the protected page",
-            permission: result[0][0],
+            data: result,
         });
-    } catch (err) {
+    } else {
         return res.status(403).json({
-            status: false,
+            status: RES_STATUS.FAILED,
             msg: "authcheck error",
+            data: null,
         });
     }
 };

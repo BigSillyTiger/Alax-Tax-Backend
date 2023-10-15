@@ -20,7 +20,7 @@ const DB_TABLE_LIST = {
     UNITS: "units",
 };
 
-enum RESPONSE_STATUS {
+enum RES_STATUS {
     SUCCESS = 200,
     SUC_DEL_SINGLE = 201,
     SUC_UPDATE = 202,
@@ -35,4 +35,4 @@ enum RESPONSE_STATUS {
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-export { SERVER_NAME, URL_LIST, DB_TABLE_LIST, sleep, RESPONSE_STATUS };
+export { SERVER_NAME, URL_LIST, DB_TABLE_LIST, sleep, RES_STATUS };

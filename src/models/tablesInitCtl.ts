@@ -1,17 +1,8 @@
 import { DB_TABLE_LIST } from "../utils/config";
-//import { adminPool } from "./dbPool";
-import mysql from "mysql2/promise";
 import logger from "../utils/logger";
+import adminPool from "./adminPool";
 
-const adminPool = mysql.createPool({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PW,
-    database: process.env.DATABASE,
-    connectionLimit: 15,
-});
-
-const createTables = async () => {
+export const createTables = async () => {
     try {
         const connection = await adminPool.getConnection();
         await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.MANAGERS} (
@@ -41,7 +32,7 @@ const createTables = async () => {
             phone VARCHAR(25) NOT NULL,
             email VARCHAR(255) NOT NULL,
             address VARCHAR(255),
-            suburb VARCHAR(100),
+            suburb VARCHAR(100) DEFAULT 'Adelaide',
             city VARCHAR(100) DEFAULT 'Adelaide',
             state VARCHAR(10) DEFAULT 'SA',
             country VARCHAR(20) DEFAULT "Australia",
@@ -64,7 +55,7 @@ const createTables = async () => {
             fk_client_id SMALLINT UNSIGNED,
             fk_invoice_id MEDIUMINT UNSIGNED,
             order_address  VARCHAR(255),
-            order_suburb VARCHAR(100),
+            order_suburb VARCHAR(100) DEFAULT 'Adelaide',
             order_city VARCHAR(20) DEFAULT 'Adelaide',
             order_state VARCHAR(20) DEFAULT 'SA',
             order_country VARCHAR(20) DEFAULT "Australia",
@@ -88,9 +79,10 @@ const createTables = async () => {
             discount VARCHAR(100),
             quotation_date TIMESTAMP,
             quotation_update TIMESTAMP
-    )`);
+        )`);
         await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.INVOICES} (
             invoice_id MEDIUMINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            discount VARCHAR(100),
             issued_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_date TIMESTAMP
         )`);
@@ -109,4 +101,17 @@ const createTables = async () => {
     }
 };
 
-export { createTables };
+export const testAPI = async () => {
+    try {
+        const connection = await adminPool.getConnection();
+        await connection.query(`CREATE TABLE IF NOT EXISTS tests (
+        uid INT AUTO_INCREMENT PRIMARY KEY,
+        first_name VARCHAR(255) NOT NULL)`);
+        console.log("-> test api OK ");
+        connection.release();
+        return { msg: "test ok" };
+    } catch (err) {
+        console.log("-> test api error: ", err);
+        return { msg: "test failed" };
+    }
+};

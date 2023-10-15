@@ -1,7 +1,7 @@
 import uuid from "uuid";
 import type { Request, Response } from "express";
 import mysql from "mysql2/promise";
-import { DB_TABLE_LIST, RESPONSE_STATUS } from "../../utils/config";
+import { DB_TABLE_LIST, RES_STATUS } from "../../utils/config";
 import logger from "../../utils/logger";
 
 const pool = mysql.createPool({
@@ -20,14 +20,14 @@ export const orderAll = async (req: Request, res: Response) => {
         );
         connection.release();
         return res.status(200).json({
-            status: RESPONSE_STATUS.SUCCESS,
+            status: RES_STATUS.SUCCESS,
             msg: "successed retrieve all orders",
             data: result[0],
         });
     } catch (err) {
         logger.errLog(err);
         return res.status(400).json({
-            status: RESPONSE_STATUS.FAILED,
+            status: RES_STATUS.FAILED,
             msg: "Failed: retrieve all orders",
             data: null,
         });
