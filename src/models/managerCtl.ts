@@ -4,7 +4,11 @@ import { DB_TABLE_LIST, sleep } from "../utils/config";
 
 /**
  *
- * @param param0
+ * @param first_name
+ * @param last_name
+ * @param email
+ * @param phone
+ * @param password
  * @returns number: uid always > 0, false if error
  */
 export const m_addManager = async (
@@ -24,7 +28,8 @@ export const m_addManager = async (
         connection.release();
         return result[0].insertId;
     } catch (err) {
-        return false;
+        logger.errLog(err);
+        return null;
     }
 };
 
@@ -45,7 +50,7 @@ export const m_searchMPhoneEmail = async (phone: string, email: string) => {
         return result[0][0];
     } catch (err) {
         logger.errLog(err);
-        return "";
+        return null;
     }
 };
 
@@ -72,17 +77,17 @@ export const m_searchMbyEmail = async (email: string) => {
 /**
  *
  * @param param0
- * @returns boolean true if success, false if error
+ * @returns number: uid always > 0, false if error
  */
-export const m_insertLevel = async ({
-    cid,
+export const m_insertMLevel = async ({
+    fk_uid,
     dashboard,
     clients,
     orders,
     employees,
     management,
 }: {
-    cid: number;
+    fk_uid: number;
     dashboard: number;
     clients: number;
     orders: number;
@@ -91,30 +96,23 @@ export const m_insertLevel = async ({
 }) => {
     try {
         const connection = await adminPool.getConnection();
-        const result = await connection.query(
+        const result: any = await connection.query(
             `INSERT INTO ${DB_TABLE_LIST.ADMIN_LEVEL} (fk_uid, dashboard, clients, orders, employees, management) VALUES(?,?,?,?,?,?)`,
-            [cid, dashboard, clients, orders, employees, management]
+            [fk_uid, dashboard, clients, orders, employees, management]
         );
-        return result;
+        console.log("-> insert new manager: ", result);
+        return result[0].insertId;
     } catch (err) {
         logger.errLog(err);
-        return "";
+        return null;
     }
 };
 
-type Tlv = [
-    [
-        {
-            dashboard: number;
-            clients: number;
-            orders: number;
-            calendar: number;
-            employees: number;
-            management: number;
-        }
-    ]
-];
-
+/**
+ *
+ * @param uid manager's uid
+ * @returns {dashboard: number, clients: number, orders: number, calendar: number, employees: number, management: number} | null
+ */
 export const m_levelCheck = async (uid: number) => {
     try {
         const connection = await adminPool.getConnection();
@@ -129,6 +127,12 @@ export const m_levelCheck = async (uid: number) => {
     }
 };
 
+/**
+ *
+ * @param email manager's email
+ * @returns {uid: number, first_name: string, last_name: string, email: string, phone: string, address: string, created_date: string} | null
+ */
+
 export const m_checkEmail = async (email: string) => {
     try {
         const connection = await adminPool.getConnection();
@@ -140,6 +144,6 @@ export const m_checkEmail = async (email: string) => {
         return result;
     } catch (err) {
         logger.errLog(err);
-        return "";
+        return null;
     }
 };
