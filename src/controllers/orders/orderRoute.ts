@@ -3,8 +3,10 @@ import * as orderCtl from "./orderCon";
 const router = express.Router();
 
 router.get("/order/all", orderCtl.orderAll);
+router.post("/order/withClientID", orderCtl.orderWcid);
 router.post("/order/add", orderCtl.orderAdd);
 router.post("/order/del", orderCtl.orderDel);
 router.put("/order/update", orderCtl.orderUpdate);
+router.post("/order/clientOrders", orderCtl.clientOrders);
 
 export default router;

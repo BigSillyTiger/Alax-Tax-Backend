@@ -6,6 +6,8 @@ import {
     m_orderDescInsert,
     m_orderGetAll,
     m_orderInsert,
+    m_clientOrders,
+    m_clientOrderWichId,
 } from "../../models/ordersCtl";
 
 export const orderAll = async (req: Request, res: Response) => {
@@ -21,6 +23,31 @@ export const orderAll = async (req: Request, res: Response) => {
         return res.status(400).json({
             status: RES_STATUS.FAILED,
             msg: "Failed: retrieve all orders",
+            data: null,
+        });
+    }
+};
+
+export const orderWcid = async (req: Request, res: Response) => {
+    console.log(
+        "server - order: get order with client id: ",
+        req.body.client_id
+    );
+    const result = await m_clientOrderWichId(req.body.client_id);
+    if (result) {
+        return res.status(200).json({
+            status: RES_STATUS.SUCCESS,
+            msg: `successed retrieve client[${req.body.client_id}] orders`,
+            data: result,
+        });
+    } else {
+        console.log(
+            "ERROR: server - orderWcid: get order with client id: ",
+            req.body
+        );
+        return res.status(400).json({
+            status: RES_STATUS.FAILED,
+            msg: `Failed: retrieve client[${req.body.client_id}] orders`,
             data: null,
         });
     }
@@ -59,3 +86,21 @@ export const orderAdd = async (req: Request, res: Response) => {
 export const orderDel = async (req: Request, res: Response) => {};
 
 export const orderUpdate = async (req: Request, res: Response) => {};
+
+export const clientOrders = async (req: Request, res: Response) => {
+    console.log("server - order: get client orders: ", req.body.client_id);
+    const result = await m_clientOrders(req.body.client_id);
+    if (result) {
+        return res.status(200).json({
+            status: RES_STATUS.SUCCESS,
+            msg: `successed retrieve client[${req.body.client_id}] all orders`,
+            data: result,
+        });
+    } else {
+        return res.status(400).json({
+            status: RES_STATUS.FAILED,
+            msg: `Failed: retrieve client[${req.body.client_id}] orders`,
+            data: null,
+        });
+    }
+};

@@ -262,3 +262,4 @@ export const clientSingleUpdate = async (req: Request, res: Response) => {
         });
     }
 };
+
