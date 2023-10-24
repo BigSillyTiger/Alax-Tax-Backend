@@ -122,6 +122,8 @@ export const m_clientOrderWichId = async (client_id: number) => {
                 fk_order_id,
                 JSON_ARRAYAGG(
                     JSON_OBJECT(
+                        'des_id', des_id,
+                        'fk_order_id', fk_order_id,
                         'ranking', ranking,
                         'description', description,
                         'qty', qty,
@@ -142,6 +144,22 @@ export const m_clientOrderWichId = async (client_id: number) => {
         return Object.values(result[0][0])[0];
     } catch (err) {
         console.log("err: get client order with id: ", err);
+        return null;
+    }
+};
+
+export const m_orderDel = async (order_id: number) => {
+    try {
+        const connection = await adminPool.getConnection();
+        const result: any = await connection.query(
+            `DELETE FROM ${DB_TABLE_LIST.ORDERS} WHERE order_id = ?`,
+            [order_id]
+        );
+        connection.release();
+        console.log("-> delete order result: ", result);
+        return result[0];
+    } catch (err) {
+        console.log("err: delete order: ", err);
         return null;
     }
 };

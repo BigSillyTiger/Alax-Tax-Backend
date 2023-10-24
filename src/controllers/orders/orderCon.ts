@@ -8,6 +8,7 @@ import {
     m_orderInsert,
     m_clientOrders,
     m_clientOrderWichId,
+    m_orderDel,
 } from "../../models/ordersCtl";
 
 export const orderAll = async (req: Request, res: Response) => {
@@ -83,7 +84,23 @@ export const orderAdd = async (req: Request, res: Response) => {
     }
 };
 
-export const orderDel = async (req: Request, res: Response) => {};
+export const orderDel = async (req: Request, res: Response) => {
+    console.log("server - order: delete order: ", req.body.order_id);
+    const result = await m_orderDel(req.body.order_id);
+    if (result) {
+        return res.status(200).json({
+            status: RES_STATUS.SUC_DEL,
+            msg: `successed delete order[${req.body.order_id}]`,
+            data: result,
+        });
+    } else {
+        return res.status(400).json({
+            status: RES_STATUS.FAILED_DEL,
+            msg: `Failed: delete order[${req.body.order_id}]`,
+            data: null,
+        });
+    }
+};
 
 export const orderUpdate = async (req: Request, res: Response) => {};
 

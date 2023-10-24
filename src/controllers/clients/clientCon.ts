@@ -163,7 +163,7 @@ export const clientSingleDel = async (req: Request, res: Response) => {
     // Return success
     if (result.affectedRows > 0) {
         return res.status(200).json({
-            status: RES_STATUS.SUC_DEL_SINGLE, // delete success
+            status: RES_STATUS.SUC_DEL, // delete success
             msg: `Successed: delete client[id: ${req.body.client_id}]`,
             data: "",
         });
@@ -262,4 +262,3 @@ export const clientSingleUpdate = async (req: Request, res: Response) => {
         });
     }
 };
-
