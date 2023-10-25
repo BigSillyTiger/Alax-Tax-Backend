@@ -9,6 +9,7 @@ import {
     m_clientOrders,
     m_clientOrderWichId,
     m_orderDel,
+    m_orderStatusUpdate,
 } from "../../models/ordersCtl";
 
 export const orderAll = async (req: Request, res: Response) => {
@@ -117,6 +118,27 @@ export const clientOrders = async (req: Request, res: Response) => {
         return res.status(400).json({
             status: RES_STATUS.FAILED,
             msg: `Failed: retrieve client[${req.body.client_id}] orders`,
+            data: null,
+        });
+    }
+};
+
+export const orderChangeStatus = async (req: Request, res: Response) => {
+    console.log("server - order: change order status: ", req.body);
+    const result = await m_orderStatusUpdate(
+        req.body.order_id,
+        req.body.status
+    );
+    if (result.affectedRows) {
+        return res.status(200).json({
+            status: RES_STATUS.SUC_UPDATE_STATUS,
+            msg: `successed change order[${req.body.order_id}] status`,
+            data: result,
+        });
+    } else {
+        return res.status(400).json({
+            status: RES_STATUS.FAILED,
+            msg: `Failed: change order[${req.body.order_id}]`,
             data: null,
         });
     }

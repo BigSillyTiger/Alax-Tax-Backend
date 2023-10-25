@@ -24,6 +24,7 @@ enum RES_STATUS {
     SUCCESS = 200,
     SUC_DEL = 201,
     SUC_UPDATE = 202,
+    SUC_UPDATE_STATUS = 203,
     //
     FAILED = 400,
     FAILED_DUP = 401,

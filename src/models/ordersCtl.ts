@@ -104,6 +104,7 @@ export const m_clientOrderWichId = async (client_id: number) => {
             JSON_ARRAYAGG(
                 JSON_OBJECT(
                     'order_id', A.order_id, 
+                    'fk_client_id', A.fk_client_id,  
                     'fk_invoice_id', A.fk_invoice_id,  
                     'order_address', A.order_address,
                     'order_suburb', A.order_suburb,
@@ -160,6 +161,22 @@ export const m_orderDel = async (order_id: number) => {
         return result[0];
     } catch (err) {
         console.log("err: delete order: ", err);
+        return null;
+    }
+};
+
+export const m_orderStatusUpdate = async (order_id: number, status: string) => {
+    try {
+        const connection = await adminPool.getConnection();
+        const result: any = await connection.query(
+            `UPDATE ${DB_TABLE_LIST.ORDERS} SET order_status = ? WHERE order_id = ?`,
+            [status, order_id]
+        );
+        connection.release();
+        console.log("-> update order status result: ", result[0]);
+        return result[0];
+    } catch (err) {
+        console.log("err: update order status: ", err);
         return null;
     }
 };

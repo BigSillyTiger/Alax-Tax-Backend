@@ -7,6 +7,7 @@ router.post("/order/withClientID", orderCtl.orderWcid);
 router.post("/order/add", orderCtl.orderAdd);
 router.delete("/order/del", orderCtl.orderDel);
 router.put("/order/update", orderCtl.orderUpdate);
+router.put("/order/status", orderCtl.orderChangeStatus);
 router.post("/order/clientOrders", orderCtl.clientOrders);
 
 export default router;
