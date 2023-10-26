@@ -10,6 +10,7 @@ type Torder = {
     order_state: string;
     order_country: string;
     order_pc: string;
+    order_status: string;
 };
 
 type TorderDesc = {
@@ -41,7 +42,7 @@ export const m_orderInsert = async (order: Torder) => {
         console.log("-> inser order: ", order);
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `INSERT INTO ${DB_TABLE_LIST.ORDERS} (fk_client_id, order_address, order_suburb, order_city, order_state, order_country, order_pc) VALUES ?`,
+            `INSERT INTO ${DB_TABLE_LIST.ORDERS} (fk_client_id, order_address, order_suburb, order_city, order_state, order_country, order_pc, order_status) VALUES ?`,
             [
                 [
                     [
@@ -52,6 +53,7 @@ export const m_orderInsert = async (order: Torder) => {
                         order.order_state,
                         order.order_country,
                         order.order_pc,
+                        order.order_status,
                     ],
                 ],
             ]

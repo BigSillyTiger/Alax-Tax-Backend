@@ -59,7 +59,7 @@ export const createTables = async () => {
             order_state VARCHAR(20) DEFAULT 'SA',
             order_country VARCHAR(20) DEFAULT "Australia",
             order_pc VARCHAR(10) DEFAULT '5000',
-            order_status VARCHAR(10) DEFAULT 'pending',
+            order_status VARCHAR(10) DEFAULT 'Pending',
             order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )`);
         await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.ORDER_DESC} (
