@@ -51,7 +51,7 @@ export const createTables = async () => {
         )`);
         await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.ORDERS} (
             order_id SMALLINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-            fk_client_id SMALLINT UNSIGNED,
+            fk_client_id SMALLINT UNSIGNED NOT NULL,
             fk_invoice_id MEDIUMINT UNSIGNED,
             order_address  VARCHAR(255),
             order_suburb VARCHAR(100) DEFAULT 'Adelaide',
@@ -69,10 +69,9 @@ export const createTables = async () => {
             invoice_update_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )`);
         await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.ORDER_DESC} (
-            des_id MEDIUMINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
             fk_order_id SMALLINT UNSIGNED,
-            ranking TINYINT UNSIGNED,
-            description VARCHAR(255) NOT NULL,
+            title VARCHAR(255) NOT NULL,
+            description VARCHAR(1000),
             qty SMALLINT UNSIGNED NOT NULL DEFAULT 1,
             unit VARCHAR(20) NOT NULL,
             unit_price MEDIUMINT UNSIGNED NOT NULL,

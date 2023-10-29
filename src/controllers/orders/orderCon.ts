@@ -1,7 +1,6 @@
 import uuid from "uuid";
 import type { Request, Response } from "express";
 import { RES_STATUS } from "../../utils/config";
-import logger from "../../utils/logger";
 import {
     m_orderDescInsert,
     m_orderGetAll,
@@ -10,7 +9,10 @@ import {
     m_clientOrderWichId,
     m_orderDel,
     m_orderStatusUpdate,
+    m_orderUpdate,
+    m_orderDescDel,
 } from "../../models/ordersCtl";
+import { formOrderDesc } from "../../utils/utils";
 
 export const orderAll = async (req: Request, res: Response) => {
     console.log("server - order: get all orders");
@@ -55,13 +57,6 @@ export const orderWcid = async (req: Request, res: Response) => {
     }
 };
 
-const formOrderDesc = (id: number, items: any) => {
-    return items.map((item: any, index: number) => {
-        const { description, qty, unit, unit_price, netto } = item;
-        return [id, index, description, qty, unit, unit_price, netto];
-    });
-};
-
 export const orderAdd = async (req: Request, res: Response) => {
     console.log("server - order: add order: ", req.body);
     const order = req.body.order;
@@ -71,18 +66,19 @@ export const orderAdd = async (req: Request, res: Response) => {
         const odResult = await m_orderDescInsert(
             formOrderDesc(orResult.insertId, order_desc)
         );
-        return res.status(200).json({
-            status: RES_STATUS.SUCCESS,
-            msg: "successed insert order",
-            data: { order: orResult, order_desc: odResult },
-        });
-    } else {
-        return res.status(400).json({
-            status: RES_STATUS.FAILED,
-            msg: "Failed: insert order",
-            data: null,
-        });
+        if (odResult.affectedRows) {
+            return res.status(200).json({
+                status: RES_STATUS.SUCCESS,
+                msg: "successed insert order",
+                data: { order: orResult, order_desc: odResult },
+            });
+        }
     }
+    return res.status(400).json({
+        status: RES_STATUS.FAILED,
+        msg: "Failed: insert order",
+        data: null,
+    });
 };
 
 export const orderDel = async (req: Request, res: Response) => {
@@ -103,7 +99,33 @@ export const orderDel = async (req: Request, res: Response) => {
     }
 };
 
-export const orderUpdate = async (req: Request, res: Response) => {};
+export const orderUpdate = async (req: Request, res: Response) => {
+    console.log("server - order: update order: ", req.body);
+    const order = req.body.order;
+    const order_desc = req.body.order_desc;
+    const result = await m_orderUpdate(order);
+    if (result.affectedRows) {
+        // delete previous order_desc
+        const descDelRes = await m_orderDescDel(order.order_id);
+        if (descDelRes.affectedRows) {
+            const insertDescRes = await m_orderDescInsert(
+                formOrderDesc(req.body.order.order_id, order_desc)
+            );
+            if (insertDescRes.affectedRows) {
+                return res.status(200).json({
+                    status: RES_STATUS.SUC_UPDATE,
+                    msg: `successed update order[${order.order_id}]`,
+                    data: result,
+                });
+            }
+        }
+    }
+    return res.status(400).json({
+        status: RES_STATUS.FAILED,
+        msg: `Failed: update order[${order.order_id}]`,
+        data: null,
+    });
+};
 
 export const clientOrders = async (req: Request, res: Response) => {
     console.log("server - order: get client orders: ", req.body.client_id);
