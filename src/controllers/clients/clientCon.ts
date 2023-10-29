@@ -12,6 +12,7 @@ import {
     m_clientDelSingle,
     m_clientUpdateProperty,
     m_clientUpdate,
+    m_clientArchiveSingle,
 } from "../../models/clientsCtl";
 
 const phaseClientsData = (items: any /* placeholder */) => {
@@ -159,7 +160,8 @@ export const clientSingleDel = async (req: Request, res: Response) => {
     // Delete client
     console.log("-> server - client: delete clientID: ", req.body.client_id);
 
-    const result = await m_clientDelSingle(req.body.client_id);
+    //const result = await m_clientDelSingle(req.body.client_id);
+    const result = await m_clientArchiveSingle(req.body.client_id);
     // Return success
     if (result.affectedRows > 0) {
         return res.status(200).json({

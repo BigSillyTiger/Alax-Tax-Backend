@@ -34,7 +34,7 @@ export const m_clientGetAll = async () => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `SELECT * FROM ${DB_TABLE_LIST.CLIENTS}`
+            `SELECT * FROM ${DB_TABLE_LIST.CLIENTS} WHERE archive = 0`
         );
         connection.release();
         return result[0];
@@ -48,7 +48,7 @@ export const m_clientGetSingle = async (client_id: number) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `SELECT * FROM ${DB_TABLE_LIST.CLIENTS} WHERE client_id = ?`,
+            `SELECT * FROM ${DB_TABLE_LIST.CLIENTS} WHERE client_id = ? AND archive = 0`,
             [client_id]
         );
         connection.release();
@@ -89,6 +89,22 @@ export const m_clientDelSingle = async (client_id: number) => {
         return result[0];
     } catch (err) {
         console.log("err: delete single client: ", err);
+        return null;
+    }
+};
+
+export const m_clientArchiveSingle = async (client_id: number) => {
+    try {
+        const connection = await adminPool.getConnection();
+        const result: any = await connection.query(
+            `UPDATE ${DB_TABLE_LIST.CLIENTS} SET archive = ? WHERE client_id = ?`,
+            [1, client_id]
+        );
+        connection.release();
+        console.log("-> archive client result: ", result);
+        return result[0];
+    } catch (err) {
+        console.log("err: archive client: ", err);
         return null;
     }
 };
