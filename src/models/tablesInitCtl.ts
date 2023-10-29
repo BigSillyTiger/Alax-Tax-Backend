@@ -60,7 +60,13 @@ export const createTables = async () => {
             order_country VARCHAR(20) DEFAULT "Australia",
             order_pc VARCHAR(10) DEFAULT '5000',
             order_status VARCHAR(10) DEFAULT 'Pending',
-            order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            order_total MEDIUMINT UNSIGNED DEFAULT 0,
+            order_gst MEDIUMINT UNSIGNED DEFAULT 0,
+            order_deposit MEDIUMINT UNSIGNED DEFAULT 0,
+            order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            quotation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            invoice_issue_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            invoice_update_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )`);
         await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.ORDER_DESC} (
             des_id MEDIUMINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -70,6 +76,7 @@ export const createTables = async () => {
             qty SMALLINT UNSIGNED NOT NULL DEFAULT 1,
             unit VARCHAR(20) NOT NULL,
             unit_price MEDIUMINT UNSIGNED NOT NULL,
+            gst MEDIUMINT UNSIGNED NOT NULL,
             netto MEDIUMINT UNSIGNED NOT NULL
         )`);
         await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.QUOTATIONS} (
