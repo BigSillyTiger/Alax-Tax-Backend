@@ -151,7 +151,7 @@ export const m_clientOrderWichId = async (client_id: number) => {
             FROM order_desc
             GROUP BY fk_order_id
         ) B ON A.order_id = B.fk_order_id
-        WHERE A.fk_client_id = ?;
+        WHERE A.fk_client_id = ? AND A.archive = 0;
         `,
             [client_id]
         );
@@ -176,6 +176,22 @@ export const m_orderDel = async (order_id: number) => {
         return result[0];
     } catch (err) {
         console.log("err: delete order: ", err);
+        return null;
+    }
+};
+
+export const m_orderArchive = async (order_id: number) => {
+    try {
+        const connection = await adminPool.getConnection();
+        const result: any = await connection.query(
+            `UPDATE ${DB_TABLE_LIST.ORDERS} SET archive = ? WHERE order_id = ?`,
+            [1, order_id]
+        );
+        connection.release();
+        console.log("-> archive order result: ", result);
+        return result[0];
+    } catch (err) {
+        console.log("err: archive order: ", err);
         return null;
     }
 };

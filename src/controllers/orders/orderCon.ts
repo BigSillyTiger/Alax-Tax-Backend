@@ -7,6 +7,7 @@ import {
     m_orderInsert,
     m_clientOrders,
     m_clientOrderWichId,
+    m_orderArchive,
     m_orderDel,
     m_orderStatusUpdate,
     m_orderUpdate,
@@ -83,7 +84,8 @@ export const orderAdd = async (req: Request, res: Response) => {
 
 export const orderDel = async (req: Request, res: Response) => {
     console.log("server - order: delete order: ", req.body.order_id);
-    const result = await m_orderDel(req.body.order_id);
+    //const result = await m_orderDel(req.body.order_id);
+    const result = await m_orderArchive(req.body.order_id);
     if (result) {
         return res.status(200).json({
             status: RES_STATUS.SUC_DEL,
