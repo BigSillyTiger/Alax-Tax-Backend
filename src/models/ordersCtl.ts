@@ -80,7 +80,7 @@ export const m_orderDescInsert = async (order_desc: TorderDesc) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `INSERT INTO ${DB_TABLE_LIST.ORDER_DESC} (fk_order_id, title, description, qty, unit, unit_price, gst, netto) VALUES ?`,
+            `INSERT INTO ${DB_TABLE_LIST.ORDER_DESC} (fk_order_id, title, description, qty, taxable, unit, unit_price, gst, netto) VALUES ?`,
             [order_desc]
         );
         connection.release();
@@ -116,7 +116,6 @@ export const m_clientOrderWichId = async (client_id: number) => {
                 JSON_OBJECT(
                     'order_id', A.order_id, 
                     'fk_client_id', A.fk_client_id,  
-                    'fk_invoice_id', A.fk_invoice_id,  
                     'order_address', A.order_address,
                     'order_suburb', A.order_suburb,
                     'order_city', A.order_city,
@@ -127,8 +126,10 @@ export const m_clientOrderWichId = async (client_id: number) => {
                     'order_deposit', A.order_deposit,
                     'order_gst', A.order_gst,
                     'order_total', A.order_total,
+                    'order_paid', A.order_paid,
                     'order_date', A.order_date,
-                    'order_desc', descriptions
+                    'order_desc', descriptions,
+                    'payments', paymentData
                 )
             )
         FROM orders A
@@ -151,12 +152,29 @@ export const m_clientOrderWichId = async (client_id: number) => {
             FROM order_desc
             GROUP BY fk_order_id
         ) B ON A.order_id = B.fk_order_id
+        LEFT JOIN (
+            SELECT 
+                fk_order_id,
+                JSON_ARRAYAGG(
+                    JSON_OBJECT(
+                        'fk_order_id', fk_order_id,
+                        'pay_id', pay_id,
+                        'paid', paid,
+                        'paid_date', paid_date
+                    )
+                ) AS paymentData
+            FROM payments
+            GROUP BY fk_order_id 
+        ) P ON A.order_id = P.fk_order_id
         WHERE A.fk_client_id = ? AND A.archive = 0;
         `,
             [client_id]
         );
         connection.release();
-        //console.log(`-> id[${client_id}] orders: `, result[0][0]);
+        console.log(
+            `-> id[${client_id}] orders: `,
+            Object.values(result[0][0])[0]
+        );
         return Object.values(result[0][0])[0];
     } catch (err) {
         console.log("err: get client order with id: ", err);

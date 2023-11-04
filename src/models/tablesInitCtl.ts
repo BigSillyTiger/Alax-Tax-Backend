@@ -44,7 +44,7 @@ export const createTables = async () => {
             id INT AUTO_INCREMENT PRIMARY KEY,
             service VARCHAR(255) NOT NULL UNIQUE,
             unit VARCHAR(20),
-            unit_price MEDIUMINT UNSIGNED DEFAULT 0
+            unit_price DECIMAL(8,2) UNSIGNED DEFAULT 0
         )`);
         await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.UNITS} (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -54,7 +54,6 @@ export const createTables = async () => {
             order_id SMALLINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
             archive BOOLEAN DEFAULT FALSE NOT NULL,
             fk_client_id SMALLINT UNSIGNED NOT NULL,
-            fk_invoice_id MEDIUMINT UNSIGNED,
             order_address  VARCHAR(255),
             order_suburb VARCHAR(100) DEFAULT 'Adelaide',
             order_city VARCHAR(20) DEFAULT 'Adelaide',
@@ -62,9 +61,10 @@ export const createTables = async () => {
             order_country VARCHAR(20) DEFAULT "Australia",
             order_pc VARCHAR(10) DEFAULT '5000',
             order_status VARCHAR(10) DEFAULT 'Pending',
-            order_total MEDIUMINT UNSIGNED DEFAULT 0,
-            order_gst MEDIUMINT UNSIGNED DEFAULT 0,
-            order_deposit MEDIUMINT UNSIGNED DEFAULT 0,
+            order_total DECIMAL(10,2) UNSIGNED DEFAULT 0,
+            order_gst DECIMAL(9,2) UNSIGNED DEFAULT 0,
+            order_deposit DECIMAL(9,2) UNSIGNED DEFAULT 0,
+            order_paid DECIMAL(10,2) UNSIGNED DEFAULT 0,
             order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             quotation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             invoice_issue_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -76,27 +76,14 @@ export const createTables = async () => {
             description VARCHAR(1000),
             qty SMALLINT UNSIGNED NOT NULL DEFAULT 1,
             unit VARCHAR(20) NOT NULL,
-            unit_price MEDIUMINT UNSIGNED NOT NULL,
-            gst MEDIUMINT UNSIGNED NOT NULL,
-            netto MEDIUMINT UNSIGNED NOT NULL
-        )`);
-        await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.QUOTATIONS} (
-            fk_order_id SMALLINT UNSIGNED PRIMARY KEY,
-            deposit MEDIUMINT UNSIGNED,
-            discount VARCHAR(100),
-            quotation_date TIMESTAMP,
-            quotation_update TIMESTAMP
-        )`);
-        await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.INVOICES} (
-            invoice_id MEDIUMINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-            discount VARCHAR(100),
-            issued_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            updated_date TIMESTAMP
+            unit_price DECIMAL(10,2) UNSIGNED NOT NULL,
+            gst DECIMAL(9,2) UNSIGNED NOT NULL,
+            netto DECIMAL(10,2) UNSIGNED NOT NULL
         )`);
         await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.PAYMENTS} (
             pay_id INT AUTO_INCREMENT PRIMARY KEY,
-            fk_invoice_id MEDIUMINT UNSIGNED,
-            paid MEDIUMINT UNSIGNED DEFAULT 0,
+            fk_order_id MEDIUMINT UNSIGNED NOT NULL,
+            paid DECIMAL(10,2) UNSIGNED DEFAULT 0,
             paid_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )`);
         //await connection.query();
