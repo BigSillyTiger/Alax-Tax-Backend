@@ -12,8 +12,11 @@ import {
     m_orderStatusUpdate,
     m_orderUpdate,
     m_orderDescDel,
+    m_deletePayment,
+    m_updatePayments,
+    m_orderUpdateProperty,
 } from "../../models/ordersCtl";
-import { formOrderDesc } from "../../utils/utils";
+import { formOrderDesc, formPayment } from "../../utils/utils";
 
 export const orderAll = async (req: Request, res: Response) => {
     console.log("server - order: get all orders");
@@ -166,4 +169,31 @@ export const orderChangeStatus = async (req: Request, res: Response) => {
             data: null,
         });
     }
+};
+
+export const orderUpdatePayments = async (req: Request, res: Response) => {
+    console.log("server - order: update payments: ", req.body);
+    const delResult = await m_deletePayment(req.body.fk_order_id);
+    //if (delResult.affectedRows) {
+    const updatePayRes = await m_updatePayments(
+        formPayment(req.body.fk_order_id, req.body.payments)
+    );
+    const updatePaidRes = await m_orderUpdateProperty(
+        "order_paid",
+        req.body.paid,
+        req.body.fk_order_id
+    );
+    if (updatePayRes.affectedRows && updatePaidRes.affectedRows) {
+        return res.status(200).json({
+            status: RES_STATUS.SUC_UPDATE_PAYMENTS,
+            msg: `successed update payments[${req.body.fk_order_id}] payments`,
+            data: "",
+        });
+    }
+    //}
+    return res.status(400).json({
+        status: RES_STATUS.FAILED,
+        msg: `Failed: update order[${req.body.order_id}] payments`,
+        data: null,
+    });
 };

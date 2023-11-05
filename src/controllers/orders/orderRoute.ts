@@ -9,5 +9,6 @@ router.delete("/order/del", orderCtl.orderDel);
 router.put("/order/update", orderCtl.orderUpdate);
 router.put("/order/status", orderCtl.orderChangeStatus);
 router.post("/order/clientOrders", orderCtl.clientOrders);
+router.put("/order/updatePayments", orderCtl.orderUpdatePayments);
 
 export default router;

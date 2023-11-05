@@ -29,6 +29,12 @@ type TorderDesc = {
     netto: number;
 }[];
 
+type Tpayment = {
+    fk_order_id: number;
+    paid: number;
+    paid_date: string;
+};
+
 export const m_orderGetAll = async () => {
     try {
         const connection = await adminPool.getConnection();
@@ -80,7 +86,7 @@ export const m_orderDescInsert = async (order_desc: TorderDesc) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `INSERT INTO ${DB_TABLE_LIST.ORDER_DESC} (fk_order_id, title, description, qty, taxable, unit, unit_price, gst, netto) VALUES ?`,
+            `INSERT INTO ${DB_TABLE_LIST.ORDER_DESC} (fk_order_id, ranking, title, description, qty, taxable, unit, unit_price, gst, netto) VALUES ?`,
             [order_desc]
         );
         connection.release();
@@ -138,12 +144,13 @@ export const m_clientOrderWichId = async (client_id: number) => {
                 fk_order_id,
                 JSON_ARRAYAGG(
                     JSON_OBJECT(
-                        'des_id', des_id,
+                        'ranking', ranking,
                         'fk_order_id', fk_order_id,
                         'title', title,
                         'description', description,
                         'qty', qty,
                         'unit', unit,
+                        'taxable', taxable,
                         'unit_price', unit_price,
                         'gst', gst,
                         'netto', netto
@@ -158,7 +165,6 @@ export const m_clientOrderWichId = async (client_id: number) => {
                 JSON_ARRAYAGG(
                     JSON_OBJECT(
                         'fk_order_id', fk_order_id,
-                        'pay_id', pay_id,
                         'paid', paid,
                         'paid_date', paid_date
                     )
@@ -171,10 +177,10 @@ export const m_clientOrderWichId = async (client_id: number) => {
             [client_id]
         );
         connection.release();
-        console.log(
+        /* console.log(
             `-> id[${client_id}] orders: `,
             Object.values(result[0][0])[0]
-        );
+        ); */
         return Object.values(result[0][0])[0];
     } catch (err) {
         console.log("err: get client order with id: ", err);
@@ -246,6 +252,26 @@ export const m_orderStatusUpdate = async (order_id: number, status: string) => {
     }
 };
 
+export const m_orderUpdateProperty = async (
+    property: string,
+    value: any,
+    order_id: number
+) => {
+    try {
+        const connection = await adminPool.getConnection();
+        const result: any = await connection.query(
+            `UPDATE ${DB_TABLE_LIST.ORDERS} SET ${property} = ? WHERE order_id = ?`,
+            [value, order_id]
+        );
+        connection.release();
+        console.log(`-> update order[${property}] result: `, result[0]);
+        return result[0];
+    } catch (error) {
+        console.log(`err: update order[${property}] : `, error);
+        return null;
+    }
+};
+
 export const m_orderUpdate = async (order: Torder) => {
     try {
         const connection = await adminPool.getConnection();
@@ -281,6 +307,40 @@ export const m_orderUpdate = async (order: Torder) => {
         return result[0];
     } catch (error) {
         console.log("err: update order: ", error);
+        return null;
+    }
+};
+
+export const m_deletePayment = async (fk_order_id: number) => {
+    try {
+        console.log("-> delete payment: ", fk_order_id);
+        const connection = await adminPool.getConnection();
+        const result: any = await connection.query(
+            `DELETE FROM ${DB_TABLE_LIST.PAYMENTS} WHERE fk_order_id = ?`,
+            [fk_order_id]
+        );
+        connection.release();
+        console.log("-> delete payment result: ", result[0]);
+        return result[0];
+    } catch (error) {
+        console.log("err: delete payment: ", error);
+        return null;
+    }
+};
+
+export const m_updatePayments = async (payments: Tpayment) => {
+    try {
+        console.log("-> before insert payments: ", payments);
+        const connection = await adminPool.getConnection();
+        const result: any = await connection.query(
+            `INSERT INTO ${DB_TABLE_LIST.PAYMENTS} (fk_order_id, paid, paid_date) VALUES ?`,
+            [payments]
+        );
+        connection.release();
+        console.log("-> update payment result: ", result[0]);
+        return result[0];
+    } catch (error) {
+        console.log("err: update payment: ", error);
         return null;
     }
 };

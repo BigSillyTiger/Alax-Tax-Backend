@@ -2,6 +2,7 @@ export const formOrderDesc = (id: number, items: any) => {
     return items.map((item: any, index: number) => {
         const {
             title,
+            ranking,
             description,
             qty,
             taxable,
@@ -12,6 +13,7 @@ export const formOrderDesc = (id: number, items: any) => {
         } = item;
         return [
             id,
+            ranking,
             title,
             description,
             qty,
@@ -21,5 +23,11 @@ export const formOrderDesc = (id: number, items: any) => {
             gst,
             netto,
         ];
+    });
+};
+
+export const formPayment = (fk_client_id: number, items: any) => {
+    return items.map((item: any, index: number) => {
+        return [fk_client_id, item.paid, item.paid_date];
     });
 };
