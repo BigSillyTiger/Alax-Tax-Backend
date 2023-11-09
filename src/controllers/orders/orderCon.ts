@@ -8,15 +8,17 @@ import {
     m_clientOrders,
     m_clientOrderWichId,
     m_orderArchive,
-    m_orderDel,
     m_orderStatusUpdate,
     m_orderUpdate,
     m_orderDescDel,
     m_deletePayment,
     m_updatePayments,
     m_orderUpdateProperty,
+    m_findClientID,
+    m_findOrder,
 } from "../../models/ordersCtl";
 import { formOrderDesc, formPayment } from "../../utils/utils";
+import { m_clientGetSingle } from "../../models/clientsCtl";
 
 export const orderAll = async (req: Request, res: Response) => {
     console.log("server - order: get all orders");
@@ -87,7 +89,6 @@ export const orderAdd = async (req: Request, res: Response) => {
 
 export const orderDel = async (req: Request, res: Response) => {
     console.log("server - order: delete order: ", req.body.order_id);
-    //const result = await m_orderDel(req.body.order_id);
     const result = await m_orderArchive(req.body.order_id);
     if (result) {
         return res.status(200).json({
@@ -194,6 +195,43 @@ export const orderUpdatePayments = async (req: Request, res: Response) => {
     return res.status(400).json({
         status: RES_STATUS.FAILED,
         msg: `Failed: update order[${req.body.order_id}] payments`,
+        data: null,
+    });
+};
+
+export const findClient = async (req: Request, res: Response) => {
+    console.log("-> server - order: find client: ", req.body.order_id);
+    const clientID = await m_findClientID(req.body.order_id);
+    if (clientID) {
+        const client = await m_clientGetSingle(clientID);
+        if (client) {
+            return res.status(200).json({
+                status: RES_STATUS.SUCCESS,
+                msg: `successed find client[${req.body.order_id}]`,
+                data: client,
+            });
+        }
+    }
+    return res.status(400).json({
+        status: RES_STATUS.FAILED,
+        msg: `Failed: find client[${req.body.order_id}]`,
+        data: null,
+    });
+};
+
+export const findOrder = async (req: Request, res: Response) => {
+    console.log("-> server - order: find order: ", req.body.order_id);
+    const order = await m_findOrder(req.body.order_id);
+    if (order) {
+        return res.status(200).json({
+            status: RES_STATUS.SUCCESS,
+            msg: `successed find order[${req.body.order_id}]`,
+            data: order,
+        });
+    }
+    return res.status(400).json({
+        status: RES_STATUS.FAILED,
+        msg: `Failed: find order[${req.body.order_id}]`,
         data: null,
     });
 };
