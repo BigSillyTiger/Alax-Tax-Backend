@@ -14,7 +14,7 @@ import logger from "./utils/logger";
 import dbRouter from "./controllers/database/dbRoute";
 import authRouter from "./controllers/auth/authRoute";
 import clientRouter from "./controllers/clients/clientRoute";
-import managerRouter from "./controllers/univers/universRoute";
+import managerRouter from "./controllers/management/manageRoute";
 import orderRouter from "./controllers/orders/orderRoute";
 import dotenv from "dotenv";
 

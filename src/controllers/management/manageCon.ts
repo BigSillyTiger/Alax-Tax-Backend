@@ -1,8 +1,12 @@
 import uuid from "uuid";
 import type { Request, Response } from "express";
 import mysql from "mysql2/promise";
-import logger from "@/utils/logger";
 import { DB_TABLE_LIST, RES_STATUS } from "../../utils/config";
+import {
+    m_getCompany,
+    m_updateCompany,
+    m_insertCompany,
+} from "../../models/managerCtl";
 
 const pool = mysql.createPool({
     host: process.env.DB_HOST,
@@ -128,4 +132,39 @@ export const uniEdit = async (req: Request, res: Response) => {
             data: "",
         });
     }
+};
+
+export const getCompany = async (req: Request, res: Response) => {
+    console.log("-> server - company: get company info");
+    const result = await m_getCompany();
+    return res.status(200).json({
+        status: RES_STATUS.SUCCESS,
+        msg: "successed get company info",
+        data: result,
+    });
+};
+
+export const updateCompany = async (req: Request, res: Response) => {
+    console.log("-> server - company: update company info: ", req.body);
+    let affectRows: any;
+    if (req.body.id) {
+        // update
+        const result = await m_updateCompany(req.body);
+        affectRows = result.affectedRows;
+    } else {
+        const result = await m_insertCompany(req.body);
+        affectRows = result.affectedRows;
+    }
+    if (affectRows) {
+        return res.status(200).json({
+            status: RES_STATUS.SUC_UPDATE_COMPANY,
+            msg: "successed updated company info",
+            data: "",
+        });
+    }
+    return res.status(403).json({
+        status: RES_STATUS.FAILED,
+        msg: "Faile: update company info",
+        data: "",
+    });
 };

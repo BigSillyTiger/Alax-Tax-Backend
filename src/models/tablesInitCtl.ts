@@ -25,6 +25,19 @@ export const createTables = async () => {
             employees TINYINT NOT NULL DEFAULT 2,		
             management TINYINT NOT NULL DEFAULT 0
         )`);
+        await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.COMPANY} (
+            id TINYINT UNSIGNED PRIMARY KEY,
+            name VARCHAR(255) NOT NULL,
+            bld VARCHAR(20),
+            phone VARCHAR(25) NOT NULL,
+            email VARCHAR(255) NOT NULL,
+            address VARCHAR(255),
+            abn VARCHAR(15) NOT NULL,
+            bsb VARCHAR(15) NOT NULL ,
+            acc  VARCHAR(25) NOT NULL,
+            logo MEDIUMBLOB
+        )`);
+
         await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.CLIENTS} (
             client_id INT AUTO_INCREMENT PRIMARY KEY,
             archive BOOLEAN DEFAULT FALSE NOT NULL,
@@ -67,8 +80,7 @@ export const createTables = async () => {
             order_paid DECIMAL(10,2) UNSIGNED DEFAULT 0,
             order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             quotation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            invoice_issue_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            invoice_update_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            invoice_issue_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )`);
         await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.ORDER_DESC} (
             fk_order_id SMALLINT UNSIGNED,

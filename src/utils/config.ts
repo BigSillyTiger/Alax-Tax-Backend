@@ -8,6 +8,7 @@ const DB_TABLE_LIST = {
     // admin
     MANAGERS: "managers",
     ADMIN_LEVEL: "admin_level",
+    COMPANY: "company",
     // Job
     CLIENTS: "clients",
     ORDERS: "orders",
@@ -26,6 +27,7 @@ enum RES_STATUS {
     SUC_UPDATE = 202,
     SUC_UPDATE_STATUS = 203,
     SUC_UPDATE_PAYMENTS = 204,
+    SUC_UPDATE_COMPANY = 205,
     //
     FAILED = 400,
     FAILED_DUP = 401,

@@ -134,6 +134,7 @@ export const m_clientOrderWichId = async (client_id: number) => {
                     'order_total', A.order_total,
                     'order_paid', A.order_paid,
                     'order_date', A.order_date,
+                    'invoice_issue_date', A.invoice_issue_date,
                     'order_desc', descriptions,
                     'payments', paymentData
                 )

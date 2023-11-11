@@ -2,6 +2,19 @@ import logger from "../utils/logger";
 import adminPool from "./adminPool";
 import { DB_TABLE_LIST } from "../utils/config";
 
+type Tcompany = {
+    id: number;
+    name: string;
+    address: string;
+    phone: string;
+    email: string;
+    bld: string;
+    abn: string;
+    bsb: string;
+    acc: string;
+    logoName: string;
+};
+
 /**
  *
  * @param first_name
@@ -144,6 +157,72 @@ export const m_checkEmail = async (email: string) => {
         return result;
     } catch (err) {
         logger.errLog(err);
+        return null;
+    }
+};
+
+export const m_getCompany = async () => {
+    try {
+        const connection = await adminPool.getConnection();
+        const result: any = await connection.query(`
+            SELECT * FROM ${DB_TABLE_LIST.COMPANY}
+        `);
+        connection.release();
+        //console.log("->get company result: ", result[0]);
+        return result[0][0];
+    } catch (error) {
+        logger.errLog(error);
+        return null;
+    }
+};
+
+export const m_updateCompany = async (company: Tcompany) => {
+    try {
+        const connection = await adminPool.getConnection();
+        const result: any = await connection.query(
+            `
+            UPDATE ${DB_TABLE_LIST.COMPANY} SET name = ?, bld = ?, phone = ?, email = ?, address = ?, abn = ?, bsb = ?, acc = ? WHERE id = 1
+        `,
+            [
+                company.name,
+                company.bld,
+                company.phone,
+                company.email,
+                company.address,
+                company.abn,
+                company.bsb,
+                company.acc,
+            ]
+        );
+        connection.release();
+        return result[0];
+    } catch (error) {
+        console.log(error);
+        return null;
+    }
+};
+
+export const m_insertCompany = async (company: Tcompany) => {
+    try {
+        const connection = await adminPool.getConnection();
+        const result: any = await connection.query(
+            `INSERT INTO ${DB_TABLE_LIST.COMPANY} (id, name, bld, phone, email, address, abn, bsb, acc) VALUES(?,?,?,?,?,?,?,?,?)`,
+            [
+                1,
+                company.name,
+                company.bld,
+                company.phone,
+                company.email,
+                company.address,
+                company.abn,
+                company.bsb,
+                company.acc,
+            ]
+        );
+        connection.release();
+        return result[0];
+    } catch (error) {
+        console.log(error);
         return null;
     }
 };
