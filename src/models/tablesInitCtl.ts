@@ -34,8 +34,7 @@ export const createTables = async () => {
             address VARCHAR(255),
             abn VARCHAR(15) NOT NULL,
             bsb VARCHAR(15) NOT NULL ,
-            acc  VARCHAR(25) NOT NULL,
-            logo MEDIUMBLOB
+            acc  VARCHAR(25) NOT NULL
         )`);
 
         await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.CLIENTS} (

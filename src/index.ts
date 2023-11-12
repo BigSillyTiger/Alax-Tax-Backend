@@ -38,6 +38,7 @@ app.use(authRouter);
 app.use(clientRouter);
 app.use(orderRouter);
 app.use(managerRouter);
+app.use(express.static("./public"));
 
 app.listen(process.env.PORT || 5005, () => {
     logger.infoLog(`server runs on ${process.env.PORT || 5005}`);

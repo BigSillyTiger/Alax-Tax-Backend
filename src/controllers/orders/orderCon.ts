@@ -235,3 +235,24 @@ export const findOrder = async (req: Request, res: Response) => {
         data: null,
     });
 };
+
+export const updateInvoiceIssue = async (req: Request, res: Response) => {
+    console.log("-> server - order: update invoice issue: ", req.body);
+    const order = await m_orderUpdateProperty(
+        "invoice_issue_date",
+        req.body.date,
+        req.body.order_id
+    );
+    if (order.affectedRows) {
+        return res.status(200).json({
+            status: RES_STATUS.SUCCESS,
+            msg: `successed update invoice issue date[${req.body.order_id}]`,
+            data: order,
+        });
+    }
+    return res.status(400).json({
+        status: RES_STATUS.FAILED,
+        msg: `Failed: update invoice issue date[${req.body.order_id}]`,
+        data: null,
+    });
+};

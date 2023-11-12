@@ -12,5 +12,6 @@ router.put("/order/update", orderCtl.orderUpdate);
 router.put("/order/status", orderCtl.orderChangeStatus);
 router.post("/order/clientOrders", orderCtl.clientOrders);
 router.put("/order/updatePayments", orderCtl.orderUpdatePayments);
+router.put("/order/updateInvoiceIssue", orderCtl.updateInvoiceIssue);
 
 export default router;

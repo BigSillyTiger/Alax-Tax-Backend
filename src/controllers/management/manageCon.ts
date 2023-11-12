@@ -7,6 +7,8 @@ import {
     m_updateCompany,
     m_insertCompany,
 } from "../../models/managerCtl";
+import fs from "fs";
+import path from "path";
 
 const pool = mysql.createPool({
     host: process.env.DB_HOST,
@@ -166,5 +168,27 @@ export const updateCompany = async (req: Request, res: Response) => {
         status: RES_STATUS.FAILED,
         msg: "Faile: update company info",
         data: "",
+    });
+};
+
+export const updateLogo = async (req: Request, res: Response) => {
+    console.log("-> server - company: update logo ");
+    const logo = req.file;
+    if (logo) {
+        return res.status(200).json({
+            status: RES_STATUS.SUC_UPDATE_LOGO,
+            msg: "successed: updating logo",
+            data: `http://localhost:6464/logo/${logo.filename}`,
+        });
+    }
+};
+
+export const getLogo = async (req: Request, res: Response) => {
+    console.log("-> server - company: get logo: ", req.body.logoFile[0]);
+
+    return res.status(200).json({
+        status: RES_STATUS.SUCCESS,
+        msg: "successed: get logo",
+        data: `http://localhost:6464/logo/${req.body.logoFile[0]}`,
     });
 };
