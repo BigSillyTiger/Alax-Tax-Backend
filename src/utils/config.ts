@@ -1,5 +1,13 @@
 const SERVER_NAME: string = "AlaxTax";
 
+const ALAX_DB_CONFIG = {
+    //connectionLimit: 5,
+    host: "localhost",
+    user: "root",
+    password: "",
+    database: "alax_tax_db",
+};
+
 const URL_LIST = {
     test: "/test",
 };
@@ -40,4 +48,11 @@ enum RES_STATUS {
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-export { SERVER_NAME, URL_LIST, DB_TABLE_LIST, sleep, RES_STATUS };
+export {
+    SERVER_NAME,
+    URL_LIST,
+    DB_TABLE_LIST,
+    sleep,
+    RES_STATUS,
+    ALAX_DB_CONFIG,
+};
