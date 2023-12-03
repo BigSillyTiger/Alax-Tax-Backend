@@ -1,4 +1,5 @@
 {
+    "watch": ["src"],
     "signal": "SIGTERM",
     "env": {
         "NODE_ENV": "development"

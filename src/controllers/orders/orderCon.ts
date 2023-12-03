@@ -1,4 +1,3 @@
-import uuid from "uuid";
 import type { Request, Response } from "express";
 import { RES_STATUS } from "../../utils/config";
 import {

@@ -1,7 +1,5 @@
-import uuid from "uuid";
 import type { Request, Response } from "express";
-import mysql, { Connection, createConnection } from "mysql2/promise";
-import { DB_TABLE_LIST, RES_STATUS } from "../../utils/config";
+import { RES_STATUS } from "../../utils/config";
 import logger from "../../utils/logger";
 
 import {
