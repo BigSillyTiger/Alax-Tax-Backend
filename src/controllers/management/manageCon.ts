@@ -8,14 +8,14 @@ import {
     m_insertCompany,
 } from "../../models/managerCtl";
 
-/* const pool = mysql.createPool({
+const pool = mysql.createPool({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
     password: process.env.DB_PW,
     database: process.env.DATABASE,
     connectionLimit: 15,
-}); */
-const pool = mysql.createPool(process.env.JAWSDB_URL as string);
+});
+//const pool = mysql.createPool(process.env.JAWSDB_URL as string);
 
 export const universAll = async (req: Request, res: Response) => {
     console.log("-> server - manage: service all");
