@@ -3,6 +3,8 @@ import { createTables, testAPI } from "../../models/tablesInitCtl";
 import { RES_STATUS } from "../../utils/config";
 
 const dbInit = async (req: Request, res: Response) => {
+    console.log("-> database init req");
+    console.log("-> the default port is: ", Number(process.env.MYSQL_PORT));
     const result = await createTables();
     if (result) {
         return res.status(200).json({

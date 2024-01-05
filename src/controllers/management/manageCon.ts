@@ -9,10 +9,10 @@ import {
 } from "../../models/managerCtl";
 
 const pool = mysql.createPool({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PW,
-    database: process.env.DATABASE,
+    host: process.env.MYSQL_HOST,
+    user: process.env.MYSQL_USER,
+    password: process.env.MYSQL_PASSWORD,
+    database: process.env.MYSQL_DB,
     connectionLimit: 15,
 });
 //const pool = mysql.createPool(process.env.JAWSDB_URL as string);

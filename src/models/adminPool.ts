@@ -4,12 +4,21 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
+const {
+    MYSQL_HOST: HOST,
+    MYSQL_USER: USER,
+    MYSQL_PASSWORD: PW,
+    MYSQL_DB: DB,
+    MYSQL_PORT: PORT,
+} = process.env;
+
 const adminPool: Pool = mysql.createPool({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PW,
-    database: process.env.DATABASE,
-    connectionLimit: 15,
+    host: HOST,
+    user: USER,
+    password: PW,
+    database: DB,
+    connectionLimit: 5,
+    port: Number(PORT),
 });
 
 //const adminPool = mysql.createPool(process.env.JAWSDB_URL as string);

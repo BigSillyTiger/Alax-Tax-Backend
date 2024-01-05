@@ -3,8 +3,10 @@ import logger from "../utils/logger";
 import adminPool from "./adminPool";
 
 export const createTables = async () => {
+    console.log("-> test 1");
     try {
         const connection = await adminPool.getConnection();
+        console.log("-> test 2");
         await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.MANAGERS} (
         uid INT AUTO_INCREMENT PRIMARY KEY,
         first_name VARCHAR(255) NOT NULL,

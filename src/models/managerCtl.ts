@@ -74,6 +74,7 @@ export const m_searchMPhoneEmail = async (phone: string, email: string) => {
  */
 export const m_searchMbyEmail = async (email: string) => {
     try {
+        console.log("-> test1 - search email");
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
             `SELECT uid, password FROM ${DB_TABLE_LIST.MANAGERS} WHERE email = ?`,
@@ -82,6 +83,7 @@ export const m_searchMbyEmail = async (email: string) => {
         connection.release();
         return result[0][0];
     } catch (err) {
+        console.log("-> search email error");
         logger.errLog(err);
         return null;
     }
