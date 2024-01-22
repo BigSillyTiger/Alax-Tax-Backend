@@ -7,6 +7,18 @@ import {
     m_updateCompany,
     m_insertCompany,
 } from "../../models/managerCtl";
+import dotenv from "dotenv";
+
+dotenv.config();
+
+const {
+    ADDR: serverAddr,
+    MYSQL_HOST: HOST,
+    MYSQL_USER: USER,
+    MYSQL_PASSWORD: PW,
+    MYSQL_DB: DB,
+    MYSQL_PORT: PORT,
+} = process.env;
 
 const pool = mysql.createPool({
     host: process.env.MYSQL_HOST,
@@ -177,7 +189,7 @@ export const updateLogo = async (req: Request, res: Response) => {
         return res.status(200).json({
             status: RES_STATUS.SUC_UPDATE_LOGO,
             msg: "successed: updating logo",
-            data: `http://localhost:6464/logo/${logo.filename}`,
+            data: `http://${serverAddr}:${HOST}/logo/${logo.filename}`,
         });
     }
 };
@@ -188,6 +200,6 @@ export const getLogo = async (req: Request, res: Response) => {
     return res.status(200).json({
         status: RES_STATUS.SUCCESS,
         msg: "successed: get logo",
-        data: `http://localhost:6464/logo/${req.body.logoFile[0]}`,
+        data: `http://${serverAddr}:${HOST}/logo/${req.body.logoFile[0]}`,
     });
 };

@@ -7,7 +7,7 @@ export const createTables = async () => {
     try {
         const connection = await adminPool.getConnection();
         console.log("-> test 2");
-        await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.MANAGERS} (
+        await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.STAFF} (
         uid INT AUTO_INCREMENT PRIMARY KEY,
         first_name VARCHAR(255) NOT NULL,
         last_name VARCHAR(255) NOT NULL,
@@ -15,6 +15,7 @@ export const createTables = async () => {
         phone VARCHAR(20) NOT NULL UNIQUE,
         password VARCHAR(255) NOT NULL,
         address VARCHAR(255),
+        role VARCHAR(10) NOT NULL DEFAULT 'employee',
         created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )`);
         await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.ADMIN_LEVEL} (
@@ -24,7 +25,7 @@ export const createTables = async () => {
             clients TINYINT NOT NULL DEFAULT 2,
             orders TINYINT NOT NULL DEFAULT 2,
             calendar TINYINT NOT NULL DEFAULT 2,
-            employees TINYINT NOT NULL DEFAULT 2,		
+            staff TINYINT NOT NULL DEFAULT 2,		
             management TINYINT NOT NULL DEFAULT 0
         )`);
         await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.COMPANY} (

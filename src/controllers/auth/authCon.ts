@@ -46,7 +46,7 @@ export const registerNewUser = async (req: Request, res: Response) => {
             dashboard: req.body.dashboard,
             clients: req.body.clients,
             orders: req.body.orders,
-            employees: req.body.employees,
+            staff: req.body.staff,
             management: req.body.management,
         });
         if (insertMRes && insertLvRes) {

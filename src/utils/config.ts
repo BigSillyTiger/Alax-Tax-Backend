@@ -14,6 +14,7 @@ const URL_LIST = {
 
 const DB_TABLE_LIST = {
     // admin
+    STAFF: "staff",
     MANAGERS: "managers",
     ADMIN_LEVEL: "admin_level",
     COMPANY: "company",
