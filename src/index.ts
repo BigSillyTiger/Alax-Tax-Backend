@@ -16,6 +16,7 @@ import authRouter from "./controllers/auth/authRoute";
 import clientRouter from "./controllers/clients/clientRoute";
 import managerRouter from "./controllers/management/manageRoute";
 import orderRouter from "./controllers/orders/orderRoute";
+import staffRouter from "./controllers/staff/staffRoute";
 import dotenv from "dotenv";
 
 //dotenv.config({ path: "../../.env" });
@@ -39,6 +40,7 @@ app.use(authRouter);
 app.use(clientRouter);
 app.use(orderRouter);
 app.use(managerRouter);
+app.use(staffRouter);
 app.use(express.static("./public"));
 
 app.listen(process.env.PORT || 5005, () => {
