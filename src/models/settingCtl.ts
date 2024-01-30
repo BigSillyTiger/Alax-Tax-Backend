@@ -24,18 +24,50 @@ type Tcompany = {
  * @param password
  * @returns number: uid always > 0, false if error
  */
-export const m_addManager = async (
+export const m_addStaff = async (
     first_name: string,
     last_name: string,
     email: string,
     phone: string,
-    password: string
+    password: string,
+    role: "manager" | "employee",
+    address: string,
+    suburb: string,
+    city: string,
+    state: string,
+    country: string,
+    postcode: string,
+    dashboard: 0 | 1 | 2,
+    clients: 0 | 1 | 2,
+    orders: 0 | 1 | 2,
+    calendar: 0 | 1 | 2,
+    staff: 0 | 1 | 2,
+    setting: 0 | 1 | 2
 ) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `INSERT INTO ${DB_TABLE_LIST.STAFF} (first_name, last_name, email, phone, password) VALUES(?,?,?,?,?)`,
-            [first_name, last_name, email, phone, password]
+            `INSERT INTO ${DB_TABLE_LIST.STAFF} (first_name, last_name, email, phone, password, role, address, suburb, city, state, country, postcode, dashboard, clients, orders, calendar, staff, setting) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+            [
+                first_name,
+                last_name,
+                email,
+                phone,
+                password,
+                role,
+                address,
+                suburb,
+                city,
+                state,
+                country,
+                postcode,
+                dashboard,
+                clients,
+                orders,
+                calendar,
+                staff,
+                setting,
+            ]
         );
         console.log("-> insert result: ", result);
         connection.release();
@@ -91,48 +123,14 @@ export const m_searchMbyEmail = async (email: string) => {
 
 /**
  *
- * @param param0
- * @returns number: uid always > 0, false if error
- */
-export const m_insertMLevel = async ({
-    fk_uid,
-    dashboard,
-    clients,
-    orders,
-    staff,
-    setting,
-}: {
-    fk_uid: number;
-    dashboard: number;
-    clients: number;
-    orders: number;
-    staff: number;
-    setting: number;
-}) => {
-    try {
-        const connection = await adminPool.getConnection();
-        const result: any = await connection.query(
-            `INSERT INTO ${DB_TABLE_LIST.ADMIN_LEVEL} (fk_uid, dashboard, clients, orders, staff, setting) VALUES(?,?,?,?,?,?)`,
-            [fk_uid, dashboard, clients, orders, staff, setting]
-        );
-        connection.release();
-        return result[0].insertId;
-    } catch (err) {
-        logger.errLog(err);
-        return null;
-    }
-};
-
-/**
- *
- * @param uid manager's uid
+ * @param uid staff's uid
  * @returns {dashboard: number, clients: number, orders: number, calendar: number, staff: number, setting: number} | null
  */
 export const m_levelCheck = async (uid: number) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `SELECT dashboard, clients, orders, calendar, staff, setting FROM ${DB_TABLE_LIST.ADMIN_LEVEL} WHERE fk_uid = ${uid}`
+            `SELECT dashboard, clients, orders, calendar, staff, setting FROM ${DB_TABLE_LIST.STAFF} WHERE uid = ${uid}`
         );
         connection.release();
         return result[0][0];

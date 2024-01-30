@@ -6,7 +6,7 @@ import {
     m_getCompany,
     m_updateCompany,
     m_insertCompany,
-} from "../../models/managerCtl";
+} from "../../models/settingCtl";
 import dotenv from "dotenv";
 
 dotenv.config();

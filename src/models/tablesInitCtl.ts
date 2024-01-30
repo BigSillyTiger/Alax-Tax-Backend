@@ -22,18 +22,15 @@ export const createTables = async () => {
         postcode VARCHAR(10) DEFAULT '5000',
         role VARCHAR(10) NOT NULL DEFAULT 'employee',
         archive BOOLEAN DEFAULT FALSE NOT NULL,
+        dashboard TINYINT NOT NULL DEFAULT 2,
+        clients TINYINT NOT NULL DEFAULT 0,
+        orders TINYINT NOT NULL DEFAULT 0,
+        calendar TINYINT NOT NULL DEFAULT 1,
+        staff TINYINT NOT NULL DEFAULT 0,		
+        setting TINYINT NOT NULL DEFAULT 0,
         created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )`);
-        await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.ADMIN_LEVEL} (
-            admin_id TINYINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-            fk_uid TINYINT UNSIGNED UNIQUE,
-            dashboard TINYINT NOT NULL DEFAULT 2,
-            clients TINYINT NOT NULL DEFAULT 2,
-            orders TINYINT NOT NULL DEFAULT 2,
-            calendar TINYINT NOT NULL DEFAULT 2,
-            staff TINYINT NOT NULL DEFAULT 2,		
-            setting TINYINT NOT NULL DEFAULT 0
-        )`);
+
         await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.COMPANY} (
             id TINYINT UNSIGNED PRIMARY KEY,
             name VARCHAR(255) NOT NULL,

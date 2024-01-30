@@ -5,12 +5,11 @@ import logger from "../../utils/logger";
 import { sleep, RES_STATUS } from "../../utils/config";
 import { Request, Response } from "express";
 import {
-    m_addManager,
-    m_insertMLevel,
+    m_addStaff,
     m_levelCheck,
     m_searchMPhoneEmail,
     m_searchMbyEmail,
-} from "../../models/managerCtl";
+} from "../../models/settingCtl";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -33,23 +32,36 @@ export const registerNewUser = async (req: Request, res: Response) => {
     const peResult = await m_searchMPhoneEmail(req.body.phone, req.body.email);
     if (!peResult) {
         const newPW = await encodePW(req.body.password);
-        const insertMRes = await m_addManager(
+        const insertMRes = await m_addStaff(
             req.body.first_name,
             req.body.last_name,
             req.body.email,
             req.body.phone,
-            newPW
+            newPW,
+            req.body.role,
+            req.body.address,
+            req.body.suburb,
+            req.body.city,
+            req.body.state,
+            req.body.country,
+            req.body.postcode,
+            req.body.dashboard,
+            req.body.clients,
+            req.body.orders,
+            req.body.calendar,
+            req.body.staff,
+            req.body.setting
         );
 
-        const insertLvRes = await m_insertMLevel({
+        /* const insertLvRes = await m_insertMLevel({
             fk_uid: insertMRes,
             dashboard: req.body.dashboard,
             clients: req.body.clients,
             orders: req.body.orders,
             staff: req.body.staff,
             setting: req.body.setting,
-        });
-        if (insertMRes && insertLvRes) {
+        }); */
+        if (insertMRes) {
             return res.status(201).json({
                 status: RES_STATUS.SUCCESS,
                 msg: "new user register successfully",
