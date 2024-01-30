@@ -15,7 +15,13 @@ export const createTables = async () => {
         phone VARCHAR(20) NOT NULL UNIQUE,
         password VARCHAR(255) NOT NULL,
         address VARCHAR(255),
+        suburb VARCHAR(100) DEFAULT 'Adelaide',
+        city VARCHAR(100) DEFAULT 'Adelaide',
+        state VARCHAR(10) DEFAULT 'SA',
+        country VARCHAR(20) DEFAULT "Australia",
+        postcode VARCHAR(10) DEFAULT '5000',
         role VARCHAR(10) NOT NULL DEFAULT 'employee',
+        archive BOOLEAN DEFAULT FALSE NOT NULL,
         created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )`);
         await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.ADMIN_LEVEL} (
@@ -26,7 +32,7 @@ export const createTables = async () => {
             orders TINYINT NOT NULL DEFAULT 2,
             calendar TINYINT NOT NULL DEFAULT 2,
             staff TINYINT NOT NULL DEFAULT 2,		
-            management TINYINT NOT NULL DEFAULT 0
+            setting TINYINT NOT NULL DEFAULT 0
         )`);
         await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.COMPANY} (
             id TINYINT UNSIGNED PRIMARY KEY,

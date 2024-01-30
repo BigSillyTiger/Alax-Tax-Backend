@@ -1,5 +1,5 @@
 import express from "express";
-import * as managerCtl from "./manageCon";
+import * as managerCtl from "./settingCon";
 import uploadMW from "../../middleware/uploader";
 import clearDirectoryMW from "../../middleware/clearDirectory";
 import findLogoMW from "../../middleware/findLogo";

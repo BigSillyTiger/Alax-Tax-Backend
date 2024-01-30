@@ -100,20 +100,20 @@ export const m_insertMLevel = async ({
     clients,
     orders,
     staff,
-    management,
+    setting,
 }: {
     fk_uid: number;
     dashboard: number;
     clients: number;
     orders: number;
     staff: number;
-    management: number;
+    setting: number;
 }) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `INSERT INTO ${DB_TABLE_LIST.ADMIN_LEVEL} (fk_uid, dashboard, clients, orders, staff, management) VALUES(?,?,?,?,?,?)`,
-            [fk_uid, dashboard, clients, orders, staff, management]
+            `INSERT INTO ${DB_TABLE_LIST.ADMIN_LEVEL} (fk_uid, dashboard, clients, orders, staff, setting) VALUES(?,?,?,?,?,?)`,
+            [fk_uid, dashboard, clients, orders, staff, setting]
         );
         connection.release();
         return result[0].insertId;
@@ -126,13 +126,13 @@ export const m_insertMLevel = async ({
 /**
  *
  * @param uid manager's uid
- * @returns {dashboard: number, clients: number, orders: number, calendar: number, staff: number, management: number} | null
+ * @returns {dashboard: number, clients: number, orders: number, calendar: number, staff: number, setting: number} | null
  */
 export const m_levelCheck = async (uid: number) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `SELECT dashboard, clients, orders, calendar, staff, management FROM ${DB_TABLE_LIST.ADMIN_LEVEL} WHERE fk_uid = ${uid}`
+            `SELECT dashboard, clients, orders, calendar, staff, setting FROM ${DB_TABLE_LIST.ADMIN_LEVEL} WHERE fk_uid = ${uid}`
         );
         connection.release();
         return result[0][0];

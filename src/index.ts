@@ -14,7 +14,7 @@ import logger from "./utils/logger";
 import dbRouter from "./controllers/database/dbRoute";
 import authRouter from "./controllers/auth/authRoute";
 import clientRouter from "./controllers/clients/clientRoute";
-import managerRouter from "./controllers/management/manageRoute";
+import settingRouter from "./controllers/setting/settingRoute";
 import orderRouter from "./controllers/orders/orderRoute";
 import staffRouter from "./controllers/staff/staffRoute";
 import dotenv from "dotenv";
@@ -39,7 +39,7 @@ app.use(dbRouter);
 app.use(authRouter);
 app.use(clientRouter);
 app.use(orderRouter);
-app.use(managerRouter);
+app.use(settingRouter);
 app.use(staffRouter);
 app.use(express.static("./public"));
 
