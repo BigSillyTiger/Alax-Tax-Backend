@@ -183,3 +183,27 @@ export const staffSingleUpdate = async (req: Request, res: Response) => {
         data: null,
     });
 };
+
+/**
+ * @description update staff password
+ * @param req
+ * @param res
+ * @returns
+ */
+export const staffUpdatePW = async (req: Request, res: Response) => {
+    logger.infoLog("server - staff: update password");
+    const newPW = await encodePW(req.body.pw);
+    const result = await m_staffUpdateProperty(req.body.uid, "password", newPW);
+    if (result) {
+        return res.status(200).json({
+            status: RES_STATUS.SUCCESS,
+            msg: "success: update staff password",
+            data: result,
+        });
+    }
+    return res.status(500).json({
+        status: RES_STATUS.FAILED,
+        msg: "fail: update staff password",
+        data: null,
+    });
+};
