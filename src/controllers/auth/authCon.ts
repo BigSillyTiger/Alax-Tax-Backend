@@ -11,6 +11,7 @@ import {
     m_searchMbyEmail,
 } from "../../models/settingCtl";
 import dotenv from "dotenv";
+import { encodePW } from "../../utils/utils";
 
 dotenv.config();
 
@@ -21,14 +22,9 @@ const generateToken = (userID: number): string => {
     });
 };
 
-const encodePW = async (password: string) => {
-    const newPW = await bcrypt.hash(password, 10);
-    return newPW;
-};
-
 export const registerNewUser = async (req: Request, res: Response) => {
-    logger.infoLog("server - register new manager");
-
+    logger.infoLog("server - register new staff");
+    console.log("-> backend receive new staff: ", req.body);
     const peResult = await m_searchMPhoneEmail(req.body.phone, req.body.email);
     if (!peResult) {
         const newPW = await encodePW(req.body.password);
@@ -53,14 +49,6 @@ export const registerNewUser = async (req: Request, res: Response) => {
             req.body.setting
         );
 
-        /* const insertLvRes = await m_insertMLevel({
-            fk_uid: insertMRes,
-            dashboard: req.body.dashboard,
-            clients: req.body.clients,
-            orders: req.body.orders,
-            staff: req.body.staff,
-            setting: req.body.setting,
-        }); */
         if (insertMRes) {
             return res.status(201).json({
                 status: RES_STATUS.SUCCESS,

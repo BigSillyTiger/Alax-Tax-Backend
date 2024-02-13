@@ -1,16 +1,7 @@
 import { DB_TABLE_LIST } from "../utils/config";
 import logger from "../utils/logger";
 import adminPool from "./adminPool";
-
-type TstaffData = {
-    first_name: string;
-    last_name: string;
-    phone: string;
-    email: string;
-    password: string;
-    address: string;
-    role: "manager" | "employee";
-};
+import { TstaffData } from "../utils/utils";
 
 /**
  * @description retrieve all staff info which is not archived
@@ -53,9 +44,10 @@ export const m_staffGetSingle = async (uid: number) => {
 
 export const m_staffInsert = async (staff: TstaffData) => {
     try {
+        console.log("-> m_staffInsert, staff: ", staff);
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `INSERT INTO ${DB_TABLE_LIST.STAFF} (first_name, last_name, phone, email, password, address, role) VALUES (?,?,?,?,?,?,?)`,
+            `INSERT INTO ${DB_TABLE_LIST.STAFF} (first_name, last_name, phone, email, password, address, role, suburb, city, state, country, postcode, dashboard, clients, orders, calendar, staff, setting) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
             [
                 staff.first_name,
                 staff.last_name,
@@ -64,6 +56,17 @@ export const m_staffInsert = async (staff: TstaffData) => {
                 staff.password,
                 staff.address,
                 staff.role,
+                staff.suburb,
+                staff.city,
+                staff.state,
+                staff.country,
+                staff.postcode,
+                staff.dashboard,
+                staff.clients,
+                staff.orders,
+                staff.calendar,
+                staff.staff,
+                staff.setting,
             ]
         );
         connection.release();
@@ -81,6 +84,7 @@ export const m_staffInsert = async (staff: TstaffData) => {
  */
 export const m_staffArchiveSingle = async (uid: number) => {
     try {
+        console.log("-> archieve uid: ", uid);
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
             `UPDATE ${DB_TABLE_LIST.STAFF} SET archive = 1 WHERE uid = ?`,
@@ -150,15 +154,25 @@ export const m_staffUpdate = async (staff: any) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `UPDATE ${DB_TABLE_LIST.STAFF} SET first_name = ?, last_name = ?, phone = ?, email = ?, password= ?, address = ? role = ? WHERE uid = ?`,
+            `UPDATE ${DB_TABLE_LIST.STAFF} SET first_name = ?, last_name = ?, phone = ?, email = ?, address = ?, role = ?, suburb = ?, city = ?, state = ?, country = ?, postcode = ?, dashboard = ?, clients = ?, orders = ?, calendar = ?, staff = ?, setting = ? WHERE uid = ?`,
             [
                 staff.first_name,
                 staff.last_name,
                 staff.phone,
                 staff.email,
-                staff.password,
                 staff.address,
                 staff.role,
+                staff.suburb,
+                staff.city,
+                staff.state,
+                staff.country,
+                staff.postcode,
+                staff.dashboard,
+                staff.clients,
+                staff.orders,
+                staff.calendar,
+                staff.staff,
+                staff.setting,
                 staff.uid,
             ]
         );
@@ -189,7 +203,7 @@ export const m_staffIsPropertyExist = async (
             [data, uid]
         );
         connection.release();
-        return result[0];
+        return result[0].length > 0 ? true : false;
     } catch (err) {
         console.log("err: check staff property: ", err);
         return null;

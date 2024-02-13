@@ -11,14 +11,7 @@ import {
     m_staffUpdate,
     m_staffIsPropertyExist,
 } from "../../models/staffCtl";
-
-const phaseStaffData = (items: any /* placeholder */) => {
-    return items.map((item: any) => {
-        const { first_name, last_name, phone, email, password, address, role } =
-            item;
-        return [first_name, last_name, phone, email, password, address, role];
-    });
-};
+import { encodePW, replaceStaffPW } from "../../utils/utils";
 
 /**
  * @description retrieve list of all staff with info
@@ -29,11 +22,12 @@ const phaseStaffData = (items: any /* placeholder */) => {
 export const staffAllInfo = async (req: Request, res: Response) => {
     logger.infoLog("server - staff: get all staff info");
     const result = await m_staffGetAll();
+
     if (result) {
         return res.status(200).json({
             status: RES_STATUS.SUCCESS,
             msg: "success: get all staff info",
-            data: result,
+            data: replaceStaffPW(result),
         });
     }
     return res.status(500).json({
@@ -56,7 +50,7 @@ export const staffSingleInfo = async (req: Request, res: Response) => {
         return res.status(200).json({
             status: RES_STATUS.SUCCESS,
             msg: "success: get single staff info",
-            data: result,
+            data: { ...result, password: "" },
         });
     }
     return res.status(500).json({
@@ -74,7 +68,7 @@ export const staffSingleInfo = async (req: Request, res: Response) => {
  */
 // this function is similar to clientSingleInsert
 export const staffSingleInstert = async (req: Request, res: Response) => {
-    console.log("-> server - staff: single insert: ", req.body[0]);
+    console.log("-> server - staff: single insert: ", req.body);
 
     const phoneDup = await m_staffIsPropertyExist(
         0, // new client does not nedd to check client_id
@@ -89,9 +83,11 @@ export const staffSingleInstert = async (req: Request, res: Response) => {
     //console.log(`-> phoneDup: ${phoneDup}, emailDup: ${emailDup}`);
 
     if (!emailDup && !phoneDup) {
-        const newStaff = phaseStaffData(req.body);
-        console.log("-> newClient insertData: ", newStaff);
-        const result = await m_staffInsert(newStaff);
+        const newPW = await encodePW(req.body[0].password);
+        const result = await m_staffInsert({
+            ...req.body[0],
+            password: newPW,
+        });
 
         if (result.insertId > 0) {
             logger.infoLog("staff: successed in register a new staff");
@@ -126,6 +122,7 @@ export const staffSingleInstert = async (req: Request, res: Response) => {
  */
 export const staffSingleArchive = async (req: Request, res: Response) => {
     logger.infoLog("server - staff: archive single staff");
+    console.log("-> archieve single staff, ", req.body.uid);
     const result = await m_staffArchiveSingle(req.body.uid);
     if (result) {
         return res.status(200).json({
@@ -152,27 +149,26 @@ export const staffSingleDel = async (req: Request, res: Response) => {
     const result = await m_staffDelSingle(req.body.uid);
     if (result) {
         return res.status(200).json({
-            status: RES_STATUS.SUCCESS,
-            msg: "success: delete single staff",
+            status: RES_STATUS.SUC_DEL,
+            msg: `success: delete single staff[id: ${req.body.uid}]`,
             data: result,
         });
     }
     return res.status(500).json({
-        status: RES_STATUS.FAILED,
-        msg: "fail: delete single staff",
+        status: RES_STATUS.FAILED_DEL,
+        msg: `fail: delete single staff[id: ${req.body.uid}]`,
         data: null,
     });
 };
 
 /**
- *
+ * @description update staff personal info without password
  * @param req
  * @param res
  * @returns
  */
 export const staffSingleUpdate = async (req: Request, res: Response) => {
     logger.infoLog("server - staff: update single staff");
-    console.log(123);
     const result = await m_staffUpdate(req.body);
     if (result) {
         return res.status(200).json({

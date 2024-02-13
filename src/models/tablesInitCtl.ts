@@ -28,6 +28,7 @@ export const createTables = async () => {
         calendar TINYINT NOT NULL DEFAULT 1,
         staff TINYINT NOT NULL DEFAULT 0,		
         setting TINYINT NOT NULL DEFAULT 0,
+        access TINYINT NOT NULL DEFAULT 1,
         created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )`);
 
