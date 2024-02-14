@@ -138,10 +138,27 @@ export const adminLogout = async (req: Request, res: Response) => {
     }
 };
 
-// not used
-export const permission = async (req: Request, res: Response) => {};
-
-export const test = async (req: Request, res: Response) => {
-    await sleep(1000);
-    res.status(200).json({ msg: "test ok" });
+/**
+ * @description check if user has access to the page
+ * @param req
+ * @param res
+ * @returns
+ */
+export const accessCheck = async (req: TRequestWithUser, res: Response) => {
+    console.log("-> server - access check: ", req.body);
+    const uid = req.user!.userId;
+    const access = await m_levelCheck(uid);
+    if (access[req.body.page] !== 0) {
+        return res.status(200).json({
+            status: RES_STATUS.SUCCESS,
+            msg: "access check success",
+            data: access,
+        });
+    } else {
+        return res.status(500).json({
+            status: RES_STATUS.FAILED,
+            msg: "access check error",
+            data: false,
+        });
+    }
 };
