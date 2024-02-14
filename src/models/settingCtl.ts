@@ -106,7 +106,6 @@ export const m_searchMPhoneEmail = async (phone: string, email: string) => {
  */
 export const m_searchMbyEmail = async (email: string) => {
     try {
-        console.log("-> test1 - search email");
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
             `SELECT uid, password FROM ${DB_TABLE_LIST.STAFF} WHERE email = ?`,
@@ -130,7 +129,7 @@ export const m_levelCheck = async (uid: number) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `SELECT dashboard, clients, orders, calendar, staff, setting FROM ${DB_TABLE_LIST.STAFF} WHERE uid = ${uid}`
+            `SELECT uid, first_name, last_name, role, access, dashboard, clients, orders, calendar, staff, setting FROM ${DB_TABLE_LIST.STAFF} WHERE uid = ${uid}`
         );
         connection.release();
         return result[0][0];

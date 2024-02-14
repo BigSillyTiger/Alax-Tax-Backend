@@ -14,7 +14,6 @@ export const m_staffGetAll = async () => {
             `SELECT * FROM ${DB_TABLE_LIST.STAFF} WHERE archive = 0`
         );
         connection.release();
-        console.log("-> retrieve all staff: ", result[0]);
         return result[0];
     } catch (err) {
         console.log("err: get all staff: ", err);
