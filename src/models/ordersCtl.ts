@@ -35,11 +35,15 @@ type Tpayment = {
     paid_date: string;
 };
 
+/**
+ *
+ * @returns
+ */
 export const m_orderGetAll = async () => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `SELECT * FROM ${DB_TABLE_LIST.ORDERS}`
+            `SELECT ${DB_TABLE_LIST.ORDERS}.*, ${DB_TABLE_LIST.CLIENTS}.first_name, ${DB_TABLE_LIST.CLIENTS}.last_name, ${DB_TABLE_LIST.CLIENTS}.phone FROM ${DB_TABLE_LIST.ORDERS} INNER JOIN ${DB_TABLE_LIST.CLIENTS} ON ${DB_TABLE_LIST.ORDERS}.fk_client_id = ${DB_TABLE_LIST.CLIENTS}.client_id`
         );
         connection.release();
         return result[0];
@@ -433,4 +437,3 @@ export const m_findOrder = async (order_id: number) => {
         return null;
     }
 };
-

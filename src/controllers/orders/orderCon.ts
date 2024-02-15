@@ -19,9 +19,16 @@ import {
 import { formOrderDesc, formPayment } from "../../utils/utils";
 import { m_clientGetSingle } from "../../models/clientsCtl";
 
+/**
+ * @description return all orders from orders table with client first name and last name from clients table
+ * @param req
+ * @param res
+ * @returns
+ */
 export const orderAll = async (req: Request, res: Response) => {
     console.log("server - order: get all orders");
     const result = await m_orderGetAll();
+    //console.log("-> all oreder from db: ", result);
     if (result) {
         return res.status(200).json({
             status: RES_STATUS.SUCCESS,
