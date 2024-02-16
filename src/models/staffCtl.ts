@@ -43,11 +43,11 @@ export const m_staffGetSingle = async (uid: number) => {
 
 export const m_staffInsert = async (staff: TstaffData) => {
     try {
-        console.log("-> m_staffInsert, staff: ", staff);
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `INSERT INTO ${DB_TABLE_LIST.STAFF} (first_name, last_name, phone, email, password, address, role, suburb, city, state, country, postcode, dashboard, clients, orders, calendar, staff, setting) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+            `INSERT INTO ${DB_TABLE_LIST.STAFF} (uid, first_name, last_name, phone, email, password, address, role, suburb, city, state, country, postcode, dashboard, clients, orders, calendar, staff, setting) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
             [
+                staff.uid,
                 staff.first_name,
                 staff.last_name,
                 staff.phone,
@@ -90,7 +90,6 @@ export const m_staffArchiveSingle = async (uid: number) => {
             [uid]
         );
         connection.release();
-        console.log("-> archive staff result: ", result);
         return result[0];
     } catch (err) {
         console.log("err: archive single staff: ", err);
@@ -191,7 +190,7 @@ export const m_staffUpdate = async (staff: any) => {
  * @returns
  */
 export const m_staffIsPropertyExist = async (
-    uid: number,
+    uid: string,
     property: string,
     data: string | number
 ) => {

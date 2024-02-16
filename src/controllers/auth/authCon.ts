@@ -1,8 +1,7 @@
-import uuid from "uuid";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import logger from "../../utils/logger";
-import { sleep, RES_STATUS } from "../../utils/config";
+import { RES_STATUS } from "../../utils/config";
 import { Request, Response } from "express";
 import {
     m_addStaff,
@@ -15,7 +14,7 @@ import { encodePW } from "../../utils/utils";
 
 dotenv.config();
 
-const generateToken = (userID: number): string => {
+const generateToken = (userID: string): string => {
     const payload = { userID };
     return jwt.sign(payload, process.env.JWT_SECRET as string, {
         expiresIn: process.env.JWT_EXPIRE,
@@ -66,20 +65,21 @@ export const registerNewUser = async (req: Request, res: Response) => {
 
 export const adminLogin = async (req: Request, res: Response) => {
     console.log("server - login");
-
     const manager = await m_searchMbyEmail(req.body.email);
+
     if (manager?.uid) {
         const pwMatch = await bcrypt.compare(
             req.body.password,
             manager.password
         );
+
         if (!pwMatch) {
             logger.warnLog(`error: loggin pw wrong`);
             return res.status(404).json({ msg: "ERROR: wrong credentials" });
         }
-        const token = generateToken(manager.uid as number);
+        const token = generateToken(manager.uid as string);
         logger.infoLog(`-> new login token: ${token}`);
-        const level = await m_levelCheck(manager.uid);
+        const level = await m_levelCheck(manager.uid as string);
         level;
         if (level) {
             return res
@@ -105,7 +105,7 @@ export const adminLogin = async (req: Request, res: Response) => {
 
 type TRequestWithUser = Request & {
     user?: {
-        userId: number;
+        userId: string;
         username: string;
     };
 };

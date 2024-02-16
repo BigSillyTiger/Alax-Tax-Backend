@@ -1,6 +1,6 @@
 import logger from "../utils/logger";
 import adminPool from "./adminPool";
-import { DB_TABLE_LIST } from "../utils/config";
+import { DB_TABLE_LIST, uidPrefix } from "../utils/config";
 
 type Tcompany = {
     id: number;
@@ -125,11 +125,11 @@ export const m_searchMbyEmail = async (email: string) => {
  * @param uid staff's uid
  * @returns {dashboard: number, clients: number, orders: number, calendar: number, staff: number, setting: number} | null
  */
-export const m_levelCheck = async (uid: number) => {
+export const m_levelCheck = async (uid: string) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `SELECT uid, first_name, last_name, role, access, dashboard, clients, orders, calendar, staff, setting FROM ${DB_TABLE_LIST.STAFF} WHERE uid = ${uid}`
+            `SELECT uid, first_name, last_name, role, access, dashboard, clients, orders, calendar, staff, setting FROM ${DB_TABLE_LIST.STAFF} WHERE uid = '${uid}'`
         );
         connection.release();
         return result[0][0];
@@ -222,6 +222,52 @@ export const m_insertCompany = async (company: Tcompany) => {
         return result[0];
     } catch (error) {
         console.log(error);
+        return null;
+    }
+};
+
+export const m_uidGetLastStaff = async (
+    prefix: (typeof uidPrefix)[keyof typeof uidPrefix]
+) => {
+    try {
+        const connection = await adminPool.getConnection();
+        const result: any = await connection.query(
+            `SELECT uid FROM ${DB_TABLE_LIST.STAFF} WHERE uid LIKE '${prefix}%' AND archive = 0 ORDER BY uid DESC LIMIT 1`
+        );
+        connection.release();
+        return result[0];
+    } catch (err) {
+        logger.errLog(err);
+        return null;
+    }
+};
+
+export const m_uidGetLastClient = async () => {
+    try {
+        const connection = await adminPool.getConnection();
+        const result: any = await connection.query(
+            `SELECT client_id FROM ${DB_TABLE_LIST.CLIENTS} WHERE archive = 0 ORDER BY client_id DESC LIMIT 1`
+        );
+        connection.release();
+        return result[0];
+    } catch (err) {
+        logger.errLog(err);
+        return null;
+    }
+};
+
+export const m_uidGetLastOrder = async () => {};
+
+export const m_uidClearTable = async () => {
+    try {
+        const connection = await adminPool.getConnection();
+        const result: any = await connection.query(
+            `DELETE FROM ${DB_TABLE_LIST.UID_CHECK}`
+        );
+        connection.release();
+        return result[0];
+    } catch (err) {
+        logger.errLog(err);
         return null;
     }
 };

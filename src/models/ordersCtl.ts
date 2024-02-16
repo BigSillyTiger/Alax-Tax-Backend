@@ -43,7 +43,7 @@ export const m_orderGetAll = async () => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `SELECT ${DB_TABLE_LIST.ORDERS}.*, ${DB_TABLE_LIST.CLIENTS}.first_name, ${DB_TABLE_LIST.CLIENTS}.last_name, ${DB_TABLE_LIST.CLIENTS}.phone FROM ${DB_TABLE_LIST.ORDERS} INNER JOIN ${DB_TABLE_LIST.CLIENTS} ON ${DB_TABLE_LIST.ORDERS}.fk_client_id = ${DB_TABLE_LIST.CLIENTS}.client_id`
+            `SELECT ${DB_TABLE_LIST.ORDERS}.*, ${DB_TABLE_LIST.CLIENTS}.first_name, ${DB_TABLE_LIST.CLIENTS}.last_name, ${DB_TABLE_LIST.CLIENTS}.phone FROM ${DB_TABLE_LIST.ORDERS} INNER JOIN ${DB_TABLE_LIST.CLIENTS} ON ${DB_TABLE_LIST.ORDERS}.fk_client_id = ${DB_TABLE_LIST.CLIENTS}.client_id ORDER BY order_date DESC`
         );
         connection.release();
         return result[0];

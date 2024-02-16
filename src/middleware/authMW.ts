@@ -8,7 +8,7 @@ dotenv.config();
 
 type TRequestWithUser = Request & {
     user?: {
-        userId: number | null;
+        userId: string | null;
         username: string;
     };
 };
@@ -30,12 +30,12 @@ const authenticateJWT = (
     }
     try {
         const decoded = verify(token, process.env.JWT_SECRET as string) as {
-            userID: number;
+            userID: string;
             iat: number;
             exp: number;
         };
         // add user attr to req
-        req.user = { userId: null, username: "" };
+        req.user = { userId: "", username: "" };
         req.user!.userId = decoded.userID;
         console.log("-> verifed jwt");
         next();

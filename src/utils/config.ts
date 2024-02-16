@@ -27,6 +27,7 @@ const DB_TABLE_LIST = {
     // Assiste
     SERVICES: "services",
     UNITS: "units",
+    UID_CHECK: "uid_check",
 };
 
 enum RES_STATUS {
@@ -48,6 +49,14 @@ enum RES_STATUS {
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+const uidPrefix = {
+    manager: "M",
+    employee: "E",
+    client: "C",
+    order: "J",
+    workLog: "W",
+};
+
 export {
     SERVER_NAME,
     URL_LIST,
@@ -55,4 +64,5 @@ export {
     sleep,
     RES_STATUS,
     ALAX_DB_CONFIG,
+    uidPrefix,
 };

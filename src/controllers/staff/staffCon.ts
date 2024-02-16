@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import { RES_STATUS } from "../../utils/config";
+import { RES_STATUS, uidPrefix } from "../../utils/config";
 import logger from "../../utils/logger";
 import {
     m_staffGetAll,
@@ -11,7 +11,7 @@ import {
     m_staffUpdate,
     m_staffIsPropertyExist,
 } from "../../models/staffCtl";
-import { encodePW, replaceStaffPW } from "../../utils/utils";
+import { encodePW, genStaffUid, replaceStaffPW } from "../../utils/utils";
 
 /**
  * @description retrieve list of all staff with info
@@ -71,12 +71,12 @@ export const staffSingleInstert = async (req: Request, res: Response) => {
     console.log("-> server - staff: single insert: ", req.body);
 
     const phoneDup = await m_staffIsPropertyExist(
-        0, // new client does not nedd to check client_id
+        "0", // new client does not nedd to check client_id
         "phone",
         req.body[0].phone
     );
     const emailDup = await m_staffIsPropertyExist(
-        0, // new client does not nedd to check client_id
+        "0", // new client does not nedd to check client_id
         "email",
         req.body[0].email
     );
@@ -84,16 +84,28 @@ export const staffSingleInstert = async (req: Request, res: Response) => {
 
     if (!emailDup && !phoneDup) {
         const newPW = await encodePW(req.body[0].password);
+        const newUid = await genStaffUid(
+            req.body[0].role === "employee"
+                ? uidPrefix.employee
+                : uidPrefix.manager
+        );
         const result = await m_staffInsert({
             ...req.body[0],
+            uid: newUid,
             password: newPW,
         });
 
-        if (result.insertId > 0) {
+        if (result.affectedRows > 0) {
             logger.infoLog("staff: successed in register a new staff");
             return res.status(201).json({
                 status: RES_STATUS.SUCCESS,
                 msg: "new staff created successfully",
+                data: result,
+            });
+        } else {
+            return res.status(403).json({
+                status: RES_STATUS.FAILED,
+                msg: "new staff created failed",
                 data: result,
             });
         }

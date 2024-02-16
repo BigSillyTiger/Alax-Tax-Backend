@@ -8,7 +8,7 @@ export const createTables = async () => {
         const connection = await adminPool.getConnection();
         console.log("-> test 2");
         await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.STAFF} (
-        uid INT AUTO_INCREMENT PRIMARY KEY,
+        uid VARCHAR(12) NOT NULL PRIMARY KEY,
         first_name VARCHAR(255) NOT NULL,
         last_name VARCHAR(255) NOT NULL,
         email VARCHAR(255) NOT NULL UNIQUE,
@@ -103,6 +103,11 @@ export const createTables = async () => {
             fk_order_id MEDIUMINT UNSIGNED NOT NULL,
             paid DECIMAL(10,2) UNSIGNED DEFAULT 0,
             paid_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )`);
+        await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.UID_CHECK} (
+            id SMALLINT AUTO_INCREMENT PRIMARY KEY,
+            uid_date VARCHAR(6) NOT NULL,
+            uid_random VARCHAR(3) NOT NULL
         )`);
         //await connection.query();
         connection.release();

@@ -34,7 +34,7 @@ export const m_clientGetAll = async () => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `SELECT * FROM ${DB_TABLE_LIST.CLIENTS} WHERE archive = 0`
+            `SELECT * FROM ${DB_TABLE_LIST.CLIENTS} WHERE archive = 0 ORDER BY created_date DESC`
         );
         connection.release();
         return result[0];
