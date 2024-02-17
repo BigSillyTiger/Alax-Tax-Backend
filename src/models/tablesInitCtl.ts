@@ -8,7 +8,7 @@ export const createTables = async () => {
         const connection = await adminPool.getConnection();
         console.log("-> test 2");
         await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.STAFF} (
-        uid VARCHAR(12) NOT NULL PRIMARY KEY,
+        uid VARCHAR(4) NOT NULL PRIMARY KEY,
         first_name VARCHAR(255) NOT NULL,
         last_name VARCHAR(255) NOT NULL,
         email VARCHAR(255) NOT NULL UNIQUE,
@@ -45,7 +45,7 @@ export const createTables = async () => {
         )`);
 
         await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.CLIENTS} (
-            client_id INT AUTO_INCREMENT PRIMARY KEY,
+            client_id VARCHAR(5) NOT NULL PRIMARY KEY,
             archive BOOLEAN DEFAULT FALSE NOT NULL,
             first_name VARCHAR(255) NOT NULL,
             last_name VARCHAR(255) NOT NULL,
@@ -70,9 +70,9 @@ export const createTables = async () => {
             unit_name VARCHAR(20) NOT NULL UNIQUE
         )`);
         await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.ORDERS} (
-            order_id SMALLINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            order_id VARCHAR(11) NOT NULL PRIMARY KEY,
             archive BOOLEAN DEFAULT FALSE NOT NULL,
-            fk_client_id SMALLINT UNSIGNED NOT NULL,
+            fk_client_id VARCHAR(5) NOT NULL,
             order_address  VARCHAR(255),
             order_suburb VARCHAR(100) DEFAULT 'Adelaide',
             order_city VARCHAR(20) DEFAULT 'Adelaide',

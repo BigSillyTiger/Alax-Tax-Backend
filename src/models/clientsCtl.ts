@@ -3,6 +3,7 @@ import logger from "../utils/logger";
 import adminPool from "./adminPool";
 
 type TclientData = {
+    client_id: string;
     first_name: string;
     last_name: string;
     phone: string;
@@ -19,7 +20,7 @@ export const m_clientInsert = async (client: TclientData) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `INSERT INTO ${DB_TABLE_LIST.CLIENTS} (first_name, last_name, phone, email, address, suburb, city, state, country, postcode) VALUES ?`,
+            `INSERT INTO ${DB_TABLE_LIST.CLIENTS} (client_id, first_name, last_name, phone, email, address, suburb, city, state, country, postcode) VALUES ?`,
             [client]
         );
         connection.release();
@@ -44,7 +45,7 @@ export const m_clientGetAll = async () => {
     }
 };
 
-export const m_clientGetSingle = async (client_id: number) => {
+export const m_clientGetSingle = async (client_id: string) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
@@ -60,7 +61,7 @@ export const m_clientGetSingle = async (client_id: number) => {
 };
 
 export const m_clientIsPropertyExist = async (
-    client_id: number,
+    client_id: string,
     property: string,
     data: string | number
 ) => {
@@ -78,7 +79,7 @@ export const m_clientIsPropertyExist = async (
     }
 };
 
-export const m_clientDelSingle = async (client_id: number) => {
+export const m_clientDelSingle = async (client_id: string) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
@@ -93,7 +94,7 @@ export const m_clientDelSingle = async (client_id: number) => {
     }
 };
 
-export const m_clientArchiveSingle = async (client_id: number) => {
+export const m_clientArchiveSingle = async (client_id: string) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
@@ -139,7 +140,7 @@ export const m_clientUpdate = async (
     state: string,
     country: string,
     postcode: string,
-    client_id: number
+    client_id: string
 ) => {
     try {
         const connection = await adminPool.getConnection();
@@ -163,6 +164,20 @@ export const m_clientUpdate = async (
         return result[0];
     } catch (err) {
         console.log("err: update client: ", err);
+        return null;
+    }
+};
+
+export const m_uidGetLastClient = async () => {
+    try {
+        const connection = await adminPool.getConnection();
+        const result: any = await connection.query(
+            `SELECT client_id FROM ${DB_TABLE_LIST.CLIENTS} ORDER BY client_id DESC LIMIT 1`
+        );
+        connection.release();
+        return result[0];
+    } catch (err) {
+        console.log("err: get last client uid: ", err);
         return null;
     }
 };

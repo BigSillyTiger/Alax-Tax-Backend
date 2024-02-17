@@ -12,8 +12,10 @@ import {
     m_clientUpdate,
     m_clientArchiveSingle,
 } from "../../models/clientsCtl";
+import { genClientUid } from "../../utils/utils";
 
-const phaseClientsData = (items: any /* placeholder */) => {
+const phaseClientsData = async (items: any /* placeholder */) => {
+    const client_id = await genClientUid();
     return items.map((item: any) => {
         const {
             first_name,
@@ -28,6 +30,7 @@ const phaseClientsData = (items: any /* placeholder */) => {
             postcode,
         } = item;
         return [
+            client_id,
             first_name,
             last_name,
             phone,
@@ -50,7 +53,7 @@ const phaseClientsData = (items: any /* placeholder */) => {
  */
 export const clientMulInstert = async (req: Request, res: Response) => {
     console.log("server - client: insert clients ");
-    const insertData = phaseClientsData(req.body);
+    const insertData = await phaseClientsData(req.body);
     const insertResult = await m_clientInsert(insertData);
     if (insertResult.affectedRows) {
         return res.status(200).json({
@@ -113,23 +116,24 @@ export const clientSingleInstert = async (req: Request, res: Response) => {
     console.log("-> server - client: single insert: ", req.body[0]);
 
     const phoneDup = await m_clientIsPropertyExist(
-        0, // new client does not nedd to check client_id
+        "0", // new client does not nedd to check client_id
         "phone",
         req.body[0].phone
     );
     const emailDup = await m_clientIsPropertyExist(
-        0, // new client does not nedd to check client_id
+        "0", // new client does not nedd to check client_id
         "email",
         req.body[0].email
     );
     //console.log(`-> phoneDup: ${phoneDup}, emailDup: ${emailDup}`);
 
     if (!emailDup && !phoneDup) {
-        const newClient = phaseClientsData(req.body);
+        const newClient = await phaseClientsData(req.body);
         console.log("-> newClient insertData: ", newClient);
         const result = await m_clientInsert(newClient);
+        console.log("-> after insert new client result: ", result);
 
-        if (result.insertId > 0) {
+        if (result.affectedRows > 0) {
             logger.infoLog("client: successed in register a new client");
             return res.status(201).json({
                 status: RES_STATUS.SUCCESS,
@@ -230,7 +234,7 @@ export const clientSingleUpdate = async (req: Request, res: Response) => {
             state,
             country,
             postcode,
-            client_id as number
+            client_id
         );
 
         if (result?.affectedRows > 0) {

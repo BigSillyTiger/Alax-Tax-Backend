@@ -3,8 +3,8 @@ import logger from "../utils/logger";
 import adminPool from "./adminPool";
 
 type Torder = {
-    order_id?: number; // new order does not have order_id
-    fk_client_id: number;
+    order_id?: string; // new order does not have order_id
+    fk_client_id: string;
     order_address: string;
     order_suburb: string;
     order_city: string;
@@ -18,7 +18,7 @@ type Torder = {
 };
 
 type TorderDesc = {
-    fk_order_id: number;
+    fk_order_id: string;
     tital: string;
     taxable: boolean;
     description: string;
@@ -30,7 +30,7 @@ type TorderDesc = {
 }[];
 
 type Tpayment = {
-    fk_order_id: number;
+    fk_order_id: string;
     paid: number;
     paid_date: string;
 };
@@ -101,7 +101,7 @@ export const m_orderDescInsert = async (order_desc: TorderDesc) => {
     }
 };
 
-export const m_clientOrders = async (client_id: number) => {
+export const m_clientOrders = async (client_id: string) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
@@ -117,7 +117,7 @@ export const m_clientOrders = async (client_id: number) => {
     }
 };
 
-export const m_clientOrderWichId = async (client_id: number) => {
+export const m_clientOrderWichId = async (client_id: string) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
@@ -193,7 +193,7 @@ export const m_clientOrderWichId = async (client_id: number) => {
     }
 };
 
-export const m_orderDel = async (order_id: number) => {
+export const m_orderDel = async (order_id: string) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
@@ -209,7 +209,7 @@ export const m_orderDel = async (order_id: number) => {
     }
 };
 
-export const m_orderArchive = async (order_id: number) => {
+export const m_orderArchive = async (order_id: string) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
@@ -225,7 +225,7 @@ export const m_orderArchive = async (order_id: number) => {
     }
 };
 
-export const m_orderDescDel = async (order_id: number) => {
+export const m_orderDescDel = async (order_id: string) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
@@ -241,7 +241,7 @@ export const m_orderDescDel = async (order_id: number) => {
     }
 };
 
-export const m_orderStatusUpdate = async (order_id: number, status: string) => {
+export const m_orderStatusUpdate = async (order_id: string, status: string) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
@@ -260,7 +260,7 @@ export const m_orderStatusUpdate = async (order_id: number, status: string) => {
 export const m_orderUpdateProperty = async (
     property: string,
     value: any,
-    order_id: number
+    order_id: string
 ) => {
     try {
         const connection = await adminPool.getConnection();
@@ -316,7 +316,7 @@ export const m_orderUpdate = async (order: Torder) => {
     }
 };
 
-export const m_deletePayment = async (fk_order_id: number) => {
+export const m_deletePayment = async (fk_order_id: string) => {
     try {
         //console.log("-> delete payment: ", fk_order_id);
         const connection = await adminPool.getConnection();
@@ -350,7 +350,7 @@ export const m_updatePayments = async (payments: Tpayment) => {
     }
 };
 
-export const m_findClientID = async (order_id: number) => {
+export const m_findClientID = async (order_id: string) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
@@ -365,7 +365,7 @@ export const m_findClientID = async (order_id: number) => {
     }
 };
 
-export const m_findOrder = async (order_id: number) => {
+export const m_findOrder = async (order_id: string) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(

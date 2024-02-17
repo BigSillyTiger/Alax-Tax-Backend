@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt";
 import { uidPrefix } from "./config";
-import { m_uidClearTable, m_uidGetLastStaff } from "../models/settingCtl";
+import { m_uidGetLastStaff } from "../models/staffCtl";
+import { m_uidGetLastClient } from "../models/clientsCtl";
 
 export const formOrderDesc = (id: number, items: any) => {
     return items.map((item: any, index: number) => {
@@ -30,7 +31,7 @@ export const formOrderDesc = (id: number, items: any) => {
     });
 };
 
-export const formPayment = (fk_client_id: number, items: any) => {
+export const formPayment = (fk_client_id: string, items: any) => {
     return items.map((item: any, index: number) => {
         return [fk_client_id, item.paid, item.paid_date];
     });
@@ -82,7 +83,7 @@ const genDate = () => {
 };
 
 /**
- * @description generate uid
+ * @description generate staff uid
  */
 export const genStaffUid = async (
     prefix: (typeof uidPrefix)[keyof typeof uidPrefix]
@@ -96,8 +97,24 @@ export const genStaffUid = async (
               "0"
           ))
         : (newId = "001");
+    //console.log("-> generated newId: ", newId);
+    return `${prefix}${newId}`;
+};
+
+/**
+ * @description generate client uid
+ */
+export const genClientUid = async () => {
+    const result = await m_uidGetLastClient();
+    console.log("-> get last client uid: ", result);
+    let newId = "";
+    result.length
+        ? (newId = String(
+              parseInt(result[0].client_id.slice(1), 10) + 1
+          ).padStart(4, "0"))
+        : (newId = "0001");
 
     console.log("-> generated newId: ", newId);
 
-    return `${prefix}${newId}`;
+    return `${uidPrefix.client}${newId}`;
 };

@@ -1,4 +1,4 @@
-import { DB_TABLE_LIST } from "../utils/config";
+import { DB_TABLE_LIST, uidPrefix } from "../utils/config";
 import logger from "../utils/logger";
 import adminPool from "./adminPool";
 import { TstaffData } from "../utils/utils";
@@ -204,6 +204,22 @@ export const m_staffIsPropertyExist = async (
         return result[0].length > 0 ? true : false;
     } catch (err) {
         console.log("err: check staff property: ", err);
+        return null;
+    }
+};
+
+export const m_uidGetLastStaff = async (
+    prefix: (typeof uidPrefix)[keyof typeof uidPrefix]
+) => {
+    try {
+        const connection = await adminPool.getConnection();
+        const result: any = await connection.query(
+            `SELECT uid FROM ${DB_TABLE_LIST.STAFF} WHERE uid LIKE '${prefix}%' AND archive = 0 ORDER BY uid DESC LIMIT 1`
+        );
+        connection.release();
+        return result[0];
+    } catch (err) {
+        logger.errLog(err);
         return null;
     }
 };
