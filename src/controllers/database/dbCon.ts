@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { createTables, testAPI } from "../../models/tablesInitCtl";
+import { createTables, testAPI } from "../../models/tablesInitModel";
 import { RES_STATUS } from "../../utils/config";
 
 const dbInit = async (req: Request, res: Response) => {

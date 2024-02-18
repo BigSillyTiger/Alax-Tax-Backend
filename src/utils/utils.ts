@@ -1,7 +1,8 @@
 import bcrypt from "bcrypt";
 import { uidPrefix } from "./config";
-import { m_uidGetLastStaff } from "../models/staffCtl";
-import { m_uidGetLastClient } from "../models/clientsCtl";
+import { m_uidGetLastStaff } from "../models/staffModel";
+import { m_uidGetLastClient } from "../models/clientsModel";
+import { m_uidGetLastOrder } from "../models/ordersModel";
 
 export const formOrderDesc = (id: number, items: any) => {
     return items.map((item: any, index: number) => {
@@ -31,9 +32,9 @@ export const formOrderDesc = (id: number, items: any) => {
     });
 };
 
-export const formPayment = (fk_client_id: string, items: any) => {
-    return items.map((item: any, index: number) => {
-        return [fk_client_id, item.paid, item.paid_date];
+export const formPayment = (fk_order_id: string, items: any) => {
+    return items.map((item: any) => {
+        return [fk_order_id, item.paid, item.paid_date];
     });
 };
 
@@ -72,17 +73,6 @@ export const replaceStaffPW = (data: TstaffData[]) => {
 };
 
 /**
- * @description generate date of 6 digits with format of ddmmyy
- */
-const genDate = () => {
-    const date = new Date();
-    const day = date.getDate().toString().padStart(2, "0");
-    const month = (date.getMonth() + 1).toString().padStart(2, "0");
-    const year = date.getFullYear().toString().slice(2);
-    return day + month + year;
-};
-
-/**
  * @description generate staff uid
  */
 export const genStaffUid = async (
@@ -97,7 +87,6 @@ export const genStaffUid = async (
               "0"
           ))
         : (newId = "001");
-    //console.log("-> generated newId: ", newId);
     return `${prefix}${newId}`;
 };
 
@@ -113,8 +102,34 @@ export const genClientUid = async () => {
               parseInt(result[0].client_id.slice(1), 10) + 1
           ).padStart(4, "0"))
         : (newId = "0001");
-
-    console.log("-> generated newId: ", newId);
-
     return `${uidPrefix.client}${newId}`;
+};
+
+/**
+ * @description generate date of 6 digits with format of ddmmyy
+ */
+const genDate = () => {
+    const date = new Date();
+    const day = date.getDate().toString().padStart(2, "0");
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    const year = date.getFullYear().toString().slice(2);
+    return day + month + year;
+};
+
+/**
+ * @description generate order id
+ */
+export const genOrderId = async () => {
+    const result = await m_uidGetLastOrder();
+    const date = genDate();
+    let newId = "001";
+    if (result.length) {
+        const dateCmp = date === result[0].order_id.slice(1, 7);
+        result.length && dateCmp
+            ? (newId = String(
+                  parseInt(result[0].order_id.slice(-3), 10) + 1
+              ).padStart(3, "0"))
+            : (newId = "001");
+    }
+    return `${uidPrefix.order}${date}${newId}`;
 };

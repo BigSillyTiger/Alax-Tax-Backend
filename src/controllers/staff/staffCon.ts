@@ -10,7 +10,7 @@ import {
     m_staffUpdateProperty,
     m_staffUpdate,
     m_staffIsPropertyExist,
-} from "../../models/staffCtl";
+} from "../../models/staffModel";
 import { encodePW, genStaffUid, replaceStaffPW } from "../../utils/utils";
 
 /**

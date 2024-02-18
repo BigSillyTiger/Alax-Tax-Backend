@@ -6,7 +6,7 @@ import {
     m_getCompany,
     m_updateCompany,
     m_insertCompany,
-} from "../../models/settingCtl";
+} from "../../models/settingModel";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -72,13 +72,13 @@ export const uniAdd = async (req: Request, res: Response) => {
         }
         connection.release();
         return res.status(200).json({
-            status: RES_STATUS.SUCCESS,
+            status: RES_STATUS.SUC_ADD_NEW_SU,
             msg: "successed add new service / unit",
             data: "",
         });
     } catch (error) {
         return res.status(403).json({
-            status: RES_STATUS.FAILED,
+            status: RES_STATUS.FAILED_ADD_NEW_SU,
             msg: "add new unit failed",
             data: "",
         });

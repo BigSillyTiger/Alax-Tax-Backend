@@ -15,9 +15,9 @@ import {
     m_orderUpdateProperty,
     m_findClientID,
     m_findOrder,
-} from "../../models/ordersCtl";
-import { formOrderDesc, formPayment } from "../../utils/utils";
-import { m_clientGetSingle } from "../../models/clientsCtl";
+} from "../../models/ordersModel";
+import { formOrderDesc, formPayment, genOrderId } from "../../utils/utils";
+import { m_clientGetSingle } from "../../models/clientsModel";
 
 /**
  * @description return all orders from orders table with client first name and last name from clients table
@@ -73,10 +73,11 @@ export const orderAdd = async (req: Request, res: Response) => {
     console.log("server - order: add order: ", req.body);
     const order = req.body.order;
     const order_desc = req.body.order_desc;
+    req.body.order.order_id = await genOrderId();
     const orResult = await m_orderInsert(order);
-    if (orResult.insertId) {
+    if (orResult.affectedRows) {
         const odResult = await m_orderDescInsert(
-            formOrderDesc(orResult.insertId, order_desc)
+            formOrderDesc(req.body.order.order_id, order_desc)
         );
         if (odResult.affectedRows) {
             return res.status(200).json({

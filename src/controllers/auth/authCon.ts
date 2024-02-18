@@ -8,9 +8,9 @@ import {
     m_levelCheck,
     m_searchMPhoneEmail,
     m_searchMbyEmail,
-} from "../../models/settingCtl";
+} from "../../models/settingModel";
 import dotenv from "dotenv";
-import { encodePW, genClientUid } from "../../utils/utils";
+import { encodePW, genOrderId } from "../../utils/utils";
 
 dotenv.config();
 
@@ -113,7 +113,6 @@ type TRequestWithUser = Request & {
 export const authCheck = async (req: TRequestWithUser, res: Response) => {
     const uid = req.user!.userId;
     logger.infoLog(`Server - authCheck, userID = ${uid}`);
-    console.log("-> test gen client uid: ", genClientUid());
     const level = await m_levelCheck(uid);
     if (level) {
         return res.status(200).json({

@@ -11,7 +11,7 @@ import {
     m_clientUpdateProperty,
     m_clientUpdate,
     m_clientArchiveSingle,
-} from "../../models/clientsCtl";
+} from "../../models/clientsModel";
 import { genClientUid } from "../../utils/utils";
 
 const phaseClientsData = async (items: any /* placeholder */) => {
@@ -129,9 +129,7 @@ export const clientSingleInstert = async (req: Request, res: Response) => {
 
     if (!emailDup && !phoneDup) {
         const newClient = await phaseClientsData(req.body);
-        console.log("-> newClient insertData: ", newClient);
         const result = await m_clientInsert(newClient);
-        console.log("-> after insert new client result: ", result);
 
         if (result.affectedRows > 0) {
             logger.infoLog("client: successed in register a new client");

@@ -89,7 +89,8 @@ export const createTables = async () => {
             invoice_issue_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )`);
         await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.ORDER_DESC} (
-            fk_order_id SMALLINT UNSIGNED,
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            fk_order_id VARCHAR(11) NOT NULL,
             title VARCHAR(255) NOT NULL,
             description VARCHAR(1000),
             qty SMALLINT UNSIGNED NOT NULL DEFAULT 1,

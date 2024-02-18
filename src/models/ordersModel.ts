@@ -58,10 +58,11 @@ export const m_orderInsert = async (order: Torder) => {
         console.log("-> inser order: ", order);
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `INSERT INTO ${DB_TABLE_LIST.ORDERS} (fk_client_id, order_address, order_suburb, order_city, order_state, order_country, order_pc, order_status, order_deposit, order_gst, order_total ) VALUES ?`,
+            `INSERT INTO ${DB_TABLE_LIST.ORDERS} (order_id, fk_client_id, order_address, order_suburb, order_city, order_state, order_country, order_pc, order_status, order_deposit, order_gst, order_total ) VALUES ?`,
             [
                 [
                     [
+                        order.order_id,
                         order.fk_client_id,
                         order.order_address,
                         order.order_suburb,
@@ -434,6 +435,20 @@ export const m_findOrder = async (order_id: string) => {
         return Object.values(result[0][0])[0];
     } catch (err) {
         console.log("err: get order with id: ", err);
+        return null;
+    }
+};
+
+export const m_uidGetLastOrder = async () => {
+    try {
+        const connection = await adminPool.getConnection();
+        const result: any = await connection.query(
+            `SELECT order_id FROM ${DB_TABLE_LIST.ORDERS} ORDER BY order_date DESC LIMIT 1`
+        );
+        connection.release();
+        return result[0];
+    } catch (error) {
+        console.log("err: get last uid: ", error);
         return null;
     }
 };
