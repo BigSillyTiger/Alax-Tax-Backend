@@ -72,18 +72,18 @@ export const orderWcid = async (req: Request, res: Response) => {
 export const orderAdd = async (req: Request, res: Response) => {
     console.log("server - order: add order: ", req.body);
     const order = req.body.order;
-    const order_desc = req.body.order_desc;
+    const order_services = req.body.order_services;
     req.body.order.order_id = await genOrderId();
     const orResult = await m_orderInsert(order);
     if (orResult.affectedRows) {
         const odResult = await m_orderDescInsert(
-            formOrderDesc(req.body.order.order_id, order_desc)
+            formOrderDesc(req.body.order.order_id, order_services)
         );
         if (odResult.affectedRows) {
             return res.status(200).json({
                 status: RES_STATUS.SUCCESS,
                 msg: "successed insert order",
-                data: { order: orResult, order_desc: odResult },
+                data: { order: orResult, order_services: odResult },
             });
         }
     }
@@ -115,14 +115,14 @@ export const orderDel = async (req: Request, res: Response) => {
 export const orderUpdate = async (req: Request, res: Response) => {
     console.log("server - order: update order: ", req.body);
     const order = req.body.order;
-    const order_desc = req.body.order_desc;
+    const order_services = req.body.order_services;
     const result = await m_orderUpdate(order);
     if (result.affectedRows) {
-        // delete previous order_desc
+        // delete previous order_services
         const descDelRes = await m_orderDescDel(order.order_id);
         if (descDelRes.affectedRows) {
             const insertDescRes = await m_orderDescInsert(
-                formOrderDesc(req.body.order.order_id, order_desc)
+                formOrderDesc(req.body.order.order_id, order_services)
             );
             if (insertDescRes.affectedRows) {
                 return res.status(200).json({

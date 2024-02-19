@@ -20,7 +20,7 @@ const DB_TABLE_LIST = {
     // Job
     CLIENTS: "clients",
     ORDERS: "orders",
-    ORDER_DESC: "order_desc",
+    ORDER_SERVICES: "order_services",
     QUOTATIONS: "quotations",
     INVOICES: "invoices",
     PAYMENTS: "payments",

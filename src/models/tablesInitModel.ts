@@ -88,7 +88,7 @@ export const createTables = async () => {
             quotation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             invoice_issue_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )`);
-        await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.ORDER_DESC} (
+        await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.ORDER_SERVICES} (
             id INT AUTO_INCREMENT PRIMARY KEY,
             fk_order_id VARCHAR(11) NOT NULL,
             title VARCHAR(255) NOT NULL,
@@ -101,7 +101,7 @@ export const createTables = async () => {
         )`);
         await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.PAYMENTS} (
             pay_id INT AUTO_INCREMENT PRIMARY KEY,
-            fk_order_id MEDIUMINT UNSIGNED NOT NULL,
+            fk_order_id VARCHAR(11) NOT NULL,
             paid DECIMAL(10,2) UNSIGNED DEFAULT 0,
             paid_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )`);

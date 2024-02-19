@@ -87,17 +87,17 @@ export const m_orderInsert = async (order: Torder) => {
     }
 };
 
-export const m_orderDescInsert = async (order_desc: TorderDesc) => {
+export const m_orderDescInsert = async (order_services: TorderDesc) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `INSERT INTO ${DB_TABLE_LIST.ORDER_DESC} (fk_order_id, ranking, title, description, qty, taxable, unit, unit_price, gst, netto) VALUES ?`,
-            [order_desc]
+            `INSERT INTO ${DB_TABLE_LIST.ORDER_SERVICES} (fk_order_id, ranking, title, description, qty, taxable, unit, unit_price, gst, netto) VALUES ?`,
+            [order_services]
         );
         connection.release();
         return result[0];
     } catch (err) {
-        console.log("err: insert order_desc: ", err);
+        console.log("err: insert order_services: ", err);
         return null;
     }
 };
@@ -140,11 +140,11 @@ export const m_clientOrderWichId = async (client_id: string) => {
                     'order_paid', A.order_paid,
                     'order_date', A.order_date,
                     'invoice_issue_date', A.invoice_issue_date,
-                    'order_desc', descriptions,
+                    'order_services', descriptions,
                     'payments', paymentData
                 )
             )
-        FROM orders A
+        FROM ${DB_TABLE_LIST.ORDERS} A
         JOIN (
             SELECT 
                 fk_order_id,
@@ -162,7 +162,7 @@ export const m_clientOrderWichId = async (client_id: string) => {
                         'netto', netto
                     )
                 ) AS descriptions
-            FROM order_desc
+            FROM ${DB_TABLE_LIST.ORDER_SERVICES}
             GROUP BY fk_order_id
         ) B ON A.order_id = B.fk_order_id
         LEFT JOIN (
@@ -230,14 +230,14 @@ export const m_orderDescDel = async (order_id: string) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `DELETE FROM ${DB_TABLE_LIST.ORDER_DESC} WHERE fk_order_id = ?`,
+            `DELETE FROM ${DB_TABLE_LIST.ORDER_SERVICES} WHERE fk_order_id = ?`,
             [order_id]
         );
         connection.release();
-        //console.log("-> delete order_desc result: ", result);
+        //console.log("-> delete order_services result: ", result);
         return result[0];
     } catch (error) {
-        console.log("err: delete order_desc: ", error);
+        console.log("err: delete order_services: ", error);
         return null;
     }
 };
@@ -343,7 +343,7 @@ export const m_updatePayments = async (payments: Tpayment) => {
             [payments]
         );
         connection.release();
-        //console.log("-> update payment result: ", result[0]);
+        console.log("-> update payment result: ", result);
         return result[0];
     } catch (error) {
         console.log("err: update payment: ", error);
@@ -386,7 +386,7 @@ export const m_findOrder = async (order_id: string) => {
                     'order_total', A.order_total,
                     'order_paid', A.order_paid,
                     'order_date', A.order_date,
-                    'order_desc', descriptions,
+                    'order_services', descriptions,
                     'payments', paymentData
                 )
                 FROM orders A
@@ -407,7 +407,7 @@ export const m_findOrder = async (order_id: string) => {
                                 'netto', netto
                             )
                         ) AS descriptions
-                    FROM order_desc
+                    FROM order_services
                     GROUP BY fk_order_id
                 ) B ON A.order_id = B.fk_order_id
                 LEFT JOIN (
