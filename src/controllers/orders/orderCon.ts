@@ -15,6 +15,7 @@ import {
     m_orderUpdateProperty,
     m_findClientID,
     m_findOrder,
+    m_orderGetAllWithDetails,
 } from "../../models/ordersModel";
 import { formOrderDesc, formPayment, genOrderId } from "../../utils/utils";
 import { m_clientGetSingle } from "../../models/clientsModel";
@@ -27,8 +28,9 @@ import { m_clientGetSingle } from "../../models/clientsModel";
  */
 export const orderAll = async (req: Request, res: Response) => {
     console.log("server - order: get all orders");
-    const result = await m_orderGetAll();
-    //console.log("-> all oreder from db: ", result);
+    //const result = await m_orderGetAll();
+    const result = await m_orderGetAllWithDetails();
+    console.log("-> all oreder from db: ", result);
     if (result) {
         return res.status(200).json({
             status: RES_STATUS.SUCCESS,

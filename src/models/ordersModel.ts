@@ -53,6 +53,81 @@ export const m_orderGetAll = async () => {
     }
 };
 
+export const m_orderGetAllWithDetails = async () => {
+    try {
+        const connection = await adminPool.getConnection();
+        const result: any = await connection.query(
+            `SELECT 
+                A.order_id, 
+                A.fk_client_id,
+                A.order_address,
+                A.order_suburb,
+                A.order_city,
+                A.order_state,
+                A.order_country,
+                A.order_pc,
+                A.order_status,
+                A.order_deposit,
+                A.order_gst,
+                A.order_total,
+                A.order_paid,
+                A.order_date,
+                A.invoice_issue_date,
+                (SELECT 
+                    JSON_ARRAYAGG(
+                        JSON_OBJECT(
+                            'ranking', B.ranking,
+                            'fk_order_id', B.fk_order_id,
+                            'title', B.title,
+                            'description', B.description,
+                            'qty', B.qty,
+                            'unit', B.unit,
+                            'taxable', B.taxable,
+                            'unit_price', B.unit_price,
+                            'gst', B.gst,
+                            'netto', B.netto
+                        )
+                    ) 
+                FROM ${DB_TABLE_LIST.ORDER_SERVICES} B 
+                WHERE B.fk_order_id = A.order_id) AS order_services,
+                (SELECT 
+                    JSON_ARRAYAGG(
+                        JSON_OBJECT(
+                            'fk_order_id', P.fk_order_id,
+                            'paid', P.paid,
+                            'paid_date', P.paid_date
+                        )
+                    ) 
+                FROM ${DB_TABLE_LIST.PAYMENTS} P 
+                WHERE P.fk_order_id = A.order_id) AS payments,
+                (SELECT 
+                    JSON_OBJECT(
+                        'client_id', C.client_id,
+                        'first_name', C.first_name,
+                        'last_name', C.last_name,
+                        'phone', C.phone,
+                        'email', C.email,
+                        'address', C.address,
+                        'suburb', C.suburb,
+                        'city', C.city,
+                        'state', C.state,
+                        'country', C.country,
+                        'postcode', C.postcode
+                    )
+                FROM ${DB_TABLE_LIST.CLIENTS} C 
+                WHERE C.client_id = A.fk_client_id) AS client_info
+            FROM ${DB_TABLE_LIST.ORDERS} A
+            WHERE A.archive = 0;
+            `
+        );
+        connection.release();
+        return result[0];
+    } catch (err) {
+        console.log("err: get all orders with details: ", err);
+        return null;
+    }
+};
+
 export const m_orderInsert = async (order: Torder) => {
     try {
         console.log("-> inser order: ", order);
@@ -141,7 +216,8 @@ export const m_clientOrderWichId = async (client_id: string) => {
                     'order_date', A.order_date,
                     'invoice_issue_date', A.invoice_issue_date,
                     'order_services', descriptions,
-                    'payments', paymentData
+                    'payments', paymentData,
+                    'client_info', clientInfo
                 )
             )
         FROM ${DB_TABLE_LIST.ORDERS} A
@@ -175,9 +251,27 @@ export const m_clientOrderWichId = async (client_id: string) => {
                         'paid_date', paid_date
                     )
                 ) AS paymentData
-            FROM payments
+            FROM ${DB_TABLE_LIST.PAYMENTS}
             GROUP BY fk_order_id 
         ) P ON A.order_id = P.fk_order_id
+        LEFT JOIN (
+            SELECT
+                client_id,
+                JSON_OBJECT(
+                    'client_id', client_id,
+                    'first_name', first_name,
+                    'last_name', last_name,
+                    'phone', phone,
+                    'email', email,
+                    'address', address,
+                    'suburb', suburb,
+                    'city', city,
+                    'state', state,
+                    'country', country,
+                    'postcode', postcode
+                ) AS clientInfo
+            FROM ${DB_TABLE_LIST.CLIENTS} 
+        ) C ON A.fk_client_id = C.client_id
         WHERE A.fk_client_id = ? AND A.archive = 0;
         `,
             [client_id]
