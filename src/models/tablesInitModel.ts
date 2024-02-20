@@ -73,18 +73,18 @@ export const createTables = async () => {
             order_id VARCHAR(11) NOT NULL PRIMARY KEY,
             archive BOOLEAN DEFAULT FALSE NOT NULL,
             fk_client_id VARCHAR(5) NOT NULL,
-            order_address  VARCHAR(255),
-            order_suburb VARCHAR(100) DEFAULT 'Adelaide',
-            order_city VARCHAR(20) DEFAULT 'Adelaide',
-            order_state VARCHAR(20) DEFAULT 'SA',
-            order_country VARCHAR(20) DEFAULT "Australia",
-            order_pc VARCHAR(10) DEFAULT '5000',
-            order_status VARCHAR(10) DEFAULT 'Pending',
-            order_total DECIMAL(10,2) UNSIGNED DEFAULT 0,
-            order_gst DECIMAL(9,2) UNSIGNED DEFAULT 0,
-            order_deposit DECIMAL(9,2) UNSIGNED DEFAULT 0,
-            order_paid DECIMAL(10,2) UNSIGNED DEFAULT 0,
-            order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            address  VARCHAR(255),
+            suburb VARCHAR(100) DEFAULT 'Adelaide',
+            city VARCHAR(20) DEFAULT 'Adelaide',
+            state VARCHAR(20) DEFAULT 'SA',
+            country VARCHAR(20) DEFAULT "Australia",
+            postcode VARCHAR(10) DEFAULT '5000',
+            status VARCHAR(10) DEFAULT 'Pending',
+            total DECIMAL(10,2) UNSIGNED DEFAULT 0,
+            gst DECIMAL(9,2) UNSIGNED DEFAULT 0,
+            deposit DECIMAL(9,2) UNSIGNED DEFAULT 0,
+            paid DECIMAL(10,2) UNSIGNED DEFAULT 0,
+            created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             quotation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             invoice_issue_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )`);
@@ -105,10 +105,16 @@ export const createTables = async () => {
             paid DECIMAL(10,2) UNSIGNED DEFAULT 0,
             paid_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )`);
-        await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.UID_CHECK} (
-            id SMALLINT AUTO_INCREMENT PRIMARY KEY,
-            uid_date VARCHAR(6) NOT NULL,
-            uid_random VARCHAR(3) NOT NULL
+        await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.WORK_LOG} (
+            wid VARCHAR(11) NOT NULL PRIMARY KEY,
+            fk_order_id VARCHAR(11) NOT NULL,
+            fk_uid VARCHAR(4) NOT NULL,
+            w_date DATE NOT NULL,
+            s_time TIME,
+            e_time TIME,
+            w_status VARCHAR(20) NOT NULL DEFAULT 'ongoing',
+            work_note VARCHAR(500),
+            confirm_status TINYINT(1) DEFAULT 0
         )`);
         //await connection.query();
         connection.release();

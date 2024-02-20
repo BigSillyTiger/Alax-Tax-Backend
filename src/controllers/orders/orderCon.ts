@@ -30,7 +30,7 @@ export const orderAll = async (req: Request, res: Response) => {
     console.log("server - order: get all orders");
     //const result = await m_orderGetAll();
     const result = await m_orderGetAllWithDetails();
-    console.log("-> all oreder from db: ", result);
+    //console.log("-> all oreder from db: ", result);
     if (result) {
         return res.status(200).json({
             status: RES_STATUS.SUCCESS,
@@ -51,14 +51,26 @@ export const orderWcid = async (req: Request, res: Response) => {
         "server - order: get order with client id: ",
         req.body.client_id
     );
-    const result = await m_clientOrderWichId(req.body.client_id);
-    if (result) {
-        return res.status(200).json({
-            status: RES_STATUS.SUCCESS,
-            msg: `successed retrieve client[${req.body.client_id}] orders`,
-            data: result,
-        });
-    } else {
+    try {
+        const result = await m_clientOrderWichId(req.body.client_id);
+        if (result) {
+            return res.status(200).json({
+                status: RES_STATUS.SUCCESS,
+                msg: `successed retrieve client[${req.body.client_id}] orders`,
+                data: result,
+            });
+        } else {
+            console.log(
+                "ERROR: server - orderWcid: get order with client id: ",
+                req.body
+            );
+            return res.status(400).json({
+                status: RES_STATUS.FAILED,
+                msg: `Failed: retrieve client[${req.body.client_id}] orders`,
+                data: null,
+            });
+        }
+    } catch (error) {
         console.log(
             "ERROR: server - orderWcid: get order with client id: ",
             req.body
@@ -97,7 +109,7 @@ export const orderAdd = async (req: Request, res: Response) => {
 };
 
 export const orderDel = async (req: Request, res: Response) => {
-    console.log("server - order: delete order: ", req.body.order_id);
+    console.log("server - order: delete order: ", req.body);
     const result = await m_orderArchive(req.body.order_id);
     if (result) {
         return res.status(200).json({
@@ -189,7 +201,7 @@ export const orderUpdatePayments = async (req: Request, res: Response) => {
         formPayment(req.body.fk_order_id, req.body.payments)
     );
     const updatePaidRes = await m_orderUpdateProperty(
-        "order_paid",
+        "paid",
         req.body.paid,
         req.body.fk_order_id
     );

@@ -5,16 +5,16 @@ import adminPool from "./adminPool";
 type Torder = {
     order_id?: string; // new order does not have order_id
     fk_client_id: string;
-    order_address: string;
-    order_suburb: string;
-    order_city: string;
-    order_state: string;
-    order_country: string;
-    order_pc: string;
-    order_status: string;
-    order_deposit: number;
-    order_gst: number;
-    order_total: number;
+    address: string;
+    suburb: string;
+    city: string;
+    state: string;
+    country: string;
+    postcode: string;
+    status: string;
+    deposit: number;
+    gst: number;
+    total: number;
 };
 
 type TorderDesc = {
@@ -43,7 +43,7 @@ export const m_orderGetAll = async () => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `SELECT ${DB_TABLE_LIST.ORDERS}.*, ${DB_TABLE_LIST.CLIENTS}.first_name, ${DB_TABLE_LIST.CLIENTS}.last_name, ${DB_TABLE_LIST.CLIENTS}.phone FROM ${DB_TABLE_LIST.ORDERS} INNER JOIN ${DB_TABLE_LIST.CLIENTS} ON ${DB_TABLE_LIST.ORDERS}.fk_client_id = ${DB_TABLE_LIST.CLIENTS}.client_id ORDER BY order_date DESC`
+            `SELECT ${DB_TABLE_LIST.ORDERS}.*, ${DB_TABLE_LIST.CLIENTS}.first_name, ${DB_TABLE_LIST.CLIENTS}.last_name, ${DB_TABLE_LIST.CLIENTS}.phone FROM ${DB_TABLE_LIST.ORDERS} INNER JOIN ${DB_TABLE_LIST.CLIENTS} ON ${DB_TABLE_LIST.ORDERS}.fk_client_id = ${DB_TABLE_LIST.CLIENTS}.client_id ORDER BY created_date DESC`
         );
         connection.release();
         return result[0];
@@ -60,18 +60,18 @@ export const m_orderGetAllWithDetails = async () => {
             `SELECT 
                 A.order_id, 
                 A.fk_client_id,
-                A.order_address,
-                A.order_suburb,
-                A.order_city,
-                A.order_state,
-                A.order_country,
-                A.order_pc,
-                A.order_status,
-                A.order_deposit,
-                A.order_gst,
-                A.order_total,
-                A.order_paid,
-                A.order_date,
+                A.address,
+                A.suburb,
+                A.city,
+                A.state,
+                A.country,
+                A.postcode,
+                A.status,
+                A.deposit,
+                A.gst,
+                A.total,
+                A.paid,
+                A.created_date,
                 A.invoice_issue_date,
                 (SELECT 
                     JSON_ARRAYAGG(
@@ -133,22 +133,22 @@ export const m_orderInsert = async (order: Torder) => {
         console.log("-> inser order: ", order);
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `INSERT INTO ${DB_TABLE_LIST.ORDERS} (order_id, fk_client_id, order_address, order_suburb, order_city, order_state, order_country, order_pc, order_status, order_deposit, order_gst, order_total ) VALUES ?`,
+            `INSERT INTO ${DB_TABLE_LIST.ORDERS} (order_id, fk_client_id, address, suburb, city, state, country, postcode, status, deposit, gst, total ) VALUES ?`,
             [
                 [
                     [
                         order.order_id,
                         order.fk_client_id,
-                        order.order_address,
-                        order.order_suburb,
-                        order.order_city,
-                        order.order_state,
-                        order.order_country,
-                        order.order_pc,
-                        order.order_status,
-                        order.order_deposit,
-                        order.order_gst,
-                        order.order_total,
+                        order.address,
+                        order.suburb,
+                        order.city,
+                        order.state,
+                        order.country,
+                        order.postcode,
+                        order.status,
+                        order.deposit,
+                        order.gst,
+                        order.total,
                     ],
                 ],
             ]
@@ -202,18 +202,18 @@ export const m_clientOrderWichId = async (client_id: string) => {
                 JSON_OBJECT(
                     'order_id', A.order_id, 
                     'fk_client_id', A.fk_client_id,  
-                    'order_address', A.order_address,
-                    'order_suburb', A.order_suburb,
-                    'order_city', A.order_city,
-                    'order_state', A.order_state,
-                    'order_country', A.order_country,
-                    'order_pc', A.order_pc,
-                    'order_status', A.order_status,
-                    'order_deposit', A.order_deposit,
-                    'order_gst', A.order_gst,
-                    'order_total', A.order_total,
-                    'order_paid', A.order_paid,
-                    'order_date', A.order_date,
+                    'address', A.address,
+                    'suburb', A.suburb,
+                    'city', A.city,
+                    'state', A.state,
+                    'country', A.country,
+                    'postcode', A.postcode,
+                    'status', A.status,
+                    'deposit', A.deposit,
+                    'gst', A.gst,
+                    'total', A.total,
+                    'paid', A.paid,
+                    'created_date', A.created_date,
                     'invoice_issue_date', A.invoice_issue_date,
                     'order_services', descriptions,
                     'payments', paymentData,
@@ -340,7 +340,7 @@ export const m_orderStatusUpdate = async (order_id: string, status: string) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `UPDATE ${DB_TABLE_LIST.ORDERS} SET order_status = ? WHERE order_id = ?`,
+            `UPDATE ${DB_TABLE_LIST.ORDERS} SET status = ? WHERE order_id = ?`,
             [status, order_id]
         );
         connection.release();
@@ -377,28 +377,28 @@ export const m_orderUpdate = async (order: Torder) => {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
             `UPDATE ${DB_TABLE_LIST.ORDERS} SET 
-                order_address = ?, 
-                order_suburb = ?, 
-                order_city = ?, 
-                order_state = ?, 
-                order_country = ?, 
-                order_pc = ?, 
-                order_status = ?, 
-                order_deposit = ?, 
-                order_gst = ?, 
-                order_total = ? 
+                address = ?, 
+                suburb = ?, 
+                city = ?, 
+                state = ?, 
+                country = ?, 
+                postcode = ?, 
+                status = ?, 
+                deposit = ?, 
+                gst = ?, 
+                total = ? 
             WHERE order_id = ?`,
             [
-                order.order_address,
-                order.order_suburb,
-                order.order_city,
-                order.order_state,
-                order.order_country,
-                order.order_pc,
-                order.order_status,
-                order.order_deposit,
-                order.order_gst,
-                order.order_total,
+                order.address,
+                order.suburb,
+                order.city,
+                order.state,
+                order.country,
+                order.postcode,
+                order.status,
+                order.deposit,
+                order.gst,
+                order.total,
                 order.order_id,
             ]
         );
@@ -468,18 +468,18 @@ export const m_findOrder = async (order_id: string) => {
                 JSON_OBJECT(
                     'order_id', A.order_id, 
                     'fk_client_id', A.fk_client_id,  
-                    'order_address', A.order_address,
-                    'order_suburb', A.order_suburb,
-                    'order_city', A.order_city,
-                    'order_state', A.order_state,
-                    'order_country', A.order_country,
-                    'order_pc', A.order_pc,
-                    'order_status', A.order_status,
-                    'order_deposit', A.order_deposit,
-                    'order_gst', A.order_gst,
-                    'order_total', A.order_total,
-                    'order_paid', A.order_paid,
-                    'order_date', A.order_date,
+                    'address', A.address,
+                    'suburb', A.suburb,
+                    'city', A.city,
+                    'state', A.state,
+                    'country', A.country,
+                    'postcode', A.postcode,
+                    'status', A.status,
+                    'deposit', A.deposit,
+                    'gst', A.gst,
+                    'total', A.total,
+                    'paid', A.paid,
+                    'created_date', A.created_date,
                     'order_services', descriptions,
                     'payments', paymentData
                 )
@@ -537,7 +537,7 @@ export const m_uidGetLastOrder = async () => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `SELECT order_id FROM ${DB_TABLE_LIST.ORDERS} ORDER BY order_date DESC LIMIT 1`
+            `SELECT order_id FROM ${DB_TABLE_LIST.ORDERS} ORDER BY created_date DESC LIMIT 1`
         );
         connection.release();
         return result[0];

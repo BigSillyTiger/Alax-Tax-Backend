@@ -158,7 +158,7 @@ export const clientSingleInstert = async (req: Request, res: Response) => {
 
 export const clientSingleDel = async (req: Request, res: Response) => {
     // Delete client
-    console.log("-> server - client: delete clientID: ", req.body.client_id);
+    console.log("-> server - client: delete clientID: ", req.body);
 
     //const result = await m_clientDelSingle(req.body.client_id);
     const result = await m_clientArchiveSingle(req.body.client_id);

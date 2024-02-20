@@ -27,7 +27,7 @@ const DB_TABLE_LIST = {
     // Assiste
     SERVICES: "services",
     UNITS: "units",
-    UID_CHECK: "uid_check",
+    WORK_LOG: "work_log",
 };
 
 enum RES_STATUS {
