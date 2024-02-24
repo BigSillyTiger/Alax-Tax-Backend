@@ -15,7 +15,7 @@ import {
 import { genClientUid } from "../../utils/utils";
 
 const phaseClientsData = async (items: any /* placeholder */) => {
-    const client_id = await genClientUid();
+    const cid = await genClientUid();
     return items.map((item: any) => {
         const {
             first_name,
@@ -30,7 +30,7 @@ const phaseClientsData = async (items: any /* placeholder */) => {
             postcode,
         } = item;
         return [
-            client_id,
+            cid,
             first_name,
             last_name,
             phone,
@@ -95,8 +95,8 @@ export const clientGetAll = async (req: Request, res: Response) => {
  * @returns
  */
 export const clientInfo = async (req: Request, res: Response) => {
-    console.log("-> server - client: info - ", req.body.client_id);
-    const client = await m_clientGetSingle(req.body.client_id);
+    console.log("-> server - client: info - ", req.body.cid);
+    const client = await m_clientGetSingle(req.body.cid);
     if (client) {
         return res.status(200).json({
             status: RES_STATUS.SUCCESS,
@@ -116,12 +116,12 @@ export const clientSingleInstert = async (req: Request, res: Response) => {
     console.log("-> server - client: single insert: ", req.body[0]);
 
     const phoneDup = await m_clientIsPropertyExist(
-        "0", // new client does not nedd to check client_id
+        "0", // new client does not nedd to check cid
         "phone",
         req.body[0].phone
     );
     const emailDup = await m_clientIsPropertyExist(
-        "0", // new client does not nedd to check client_id
+        "0", // new client does not nedd to check cid
         "email",
         req.body[0].email
     );
@@ -160,19 +160,19 @@ export const clientSingleDel = async (req: Request, res: Response) => {
     // Delete client
     console.log("-> server - client: delete clientID: ", req.body);
 
-    //const result = await m_clientDelSingle(req.body.client_id);
-    const result = await m_clientArchiveSingle(req.body.client_id);
+    //const result = await m_clientDelSingle(req.body.cid);
+    const result = await m_clientArchiveSingle(req.body.cid);
     // Return success
     if (result.affectedRows > 0) {
         return res.status(200).json({
             status: RES_STATUS.SUC_DEL, // delete success
-            msg: `Successed: delete client[id: ${req.body.client_id}]`,
+            msg: `Successed: delete client[id: ${req.body.cid}]`,
             data: "",
         });
     } else {
         return res.status(403).json({
             status: RES_STATUS.FAILED_DEL,
-            msg: `Failed: delete client[id: ${req.body.client_id}]`,
+            msg: `Failed: delete client[id: ${req.body.cid}]`,
             data: "",
         });
     }
@@ -181,20 +181,20 @@ export const clientSingleDel = async (req: Request, res: Response) => {
 export const clientSingleArchive = async (req: Request, res: Response) => {
     console.log("-> server - client: archive");
     const result = await m_clientUpdateProperty(
-        req.body.client_id,
+        req.body.cid,
         "archive",
         req.body.archive
     );
     if (result.affectedRows > 0) {
         return res.status(200).json({
             status: RES_STATUS.SUCCESS,
-            msg: `Successed: archieve client[id: ${req.body.client_id}]`,
+            msg: `Successed: archieve client[id: ${req.body.cid}]`,
             data: "",
         });
     } else {
         return res.status(403).json({
             status: RES_STATUS.FAILED,
-            msg: `Failed: archive client[id: ${req.body.client_id}]`,
+            msg: `Failed: archive client[id: ${req.body.cid}]`,
             data: "",
         });
     }
@@ -214,10 +214,10 @@ export const clientSingleUpdate = async (req: Request, res: Response) => {
         state,
         country,
         postcode,
-        client_id,
+        cid,
     } = req.body[0];
-    const phoneDup = await m_clientIsPropertyExist(client_id, "phone", phone);
-    const emailDup = await m_clientIsPropertyExist(client_id, "email", email);
+    const phoneDup = await m_clientIsPropertyExist(cid, "phone", phone);
+    const emailDup = await m_clientIsPropertyExist(cid, "email", email);
 
     if (!phoneDup && !emailDup) {
         console.log("-> update not duplicated");
@@ -232,19 +232,19 @@ export const clientSingleUpdate = async (req: Request, res: Response) => {
             state,
             country,
             postcode,
-            client_id
+            cid
         );
 
         if (result?.affectedRows > 0) {
             return res.status(200).json({
                 status: RES_STATUS.SUCCESS,
-                msg: `Successed: update client[id: ${client_id}]`,
+                msg: `Successed: update client[id: ${cid}]`,
                 data: result,
             });
         }
         return res.status(403).json({
             status: RES_STATUS.FAILED,
-            msg: `Failed: update client[id: ${client_id}]`,
+            msg: `Failed: update client[id: ${cid}]`,
             data: "",
         });
     } else {

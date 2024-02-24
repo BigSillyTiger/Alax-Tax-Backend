@@ -5,18 +5,18 @@ import clearDirectoryMW from "../../middleware/clearDirectory";
 import findLogoMW from "../../middleware/findLogo";
 const router = express.Router();
 
-router.get("/manage/uni_all", managerCtl.universAll);
-router.post("/manage/uni_del", managerCtl.uniDel);
-router.put("/manage/uni_edit", managerCtl.uniEdit);
-router.post("/manage/uni_add", managerCtl.uniAdd);
-router.get("/manage/company_get", managerCtl.getCompany);
-router.put("/manage/company_update", managerCtl.updateCompany);
+router.get("/setting/uni_all", managerCtl.universAll);
+router.post("/setting/uni_del", managerCtl.uniDel);
+router.put("/setting/uni_edit", managerCtl.uniEdit);
+router.post("/setting/uni_add", managerCtl.uniAdd);
+router.get("/setting/company_get", managerCtl.getCompany);
+router.put("/setting/company_update", managerCtl.updateCompany);
 router.put(
-    "/manage/logo_update",
+    "/setting/logo_update",
     clearDirectoryMW,
     uploadMW.single("logo"),
     managerCtl.updateLogo
 );
-router.get("/manage/logo", findLogoMW, managerCtl.getLogo);
+router.get("/setting/logo", findLogoMW, managerCtl.getLogo);
 
 export default router;

@@ -3,7 +3,7 @@ import logger from "../utils/logger";
 import adminPool from "./adminPool";
 
 type Torder = {
-    order_id?: string; // new order does not have order_id
+    oid?: string; // new order does not have oid
     fk_client_id: string;
     address: string;
     suburb: string;
@@ -43,7 +43,7 @@ export const m_orderGetAll = async () => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `SELECT ${DB_TABLE_LIST.ORDERS}.*, ${DB_TABLE_LIST.CLIENTS}.first_name, ${DB_TABLE_LIST.CLIENTS}.last_name, ${DB_TABLE_LIST.CLIENTS}.phone FROM ${DB_TABLE_LIST.ORDERS} INNER JOIN ${DB_TABLE_LIST.CLIENTS} ON ${DB_TABLE_LIST.ORDERS}.fk_client_id = ${DB_TABLE_LIST.CLIENTS}.client_id ORDER BY created_date DESC`
+            `SELECT ${DB_TABLE_LIST.ORDERS}.*, ${DB_TABLE_LIST.CLIENTS}.first_name, ${DB_TABLE_LIST.CLIENTS}.last_name, ${DB_TABLE_LIST.CLIENTS}.phone FROM ${DB_TABLE_LIST.ORDERS} INNER JOIN ${DB_TABLE_LIST.CLIENTS} ON ${DB_TABLE_LIST.ORDERS}.fk_client_id = ${DB_TABLE_LIST.CLIENTS}.cid ORDER BY created_date DESC`
         );
         connection.release();
         return result[0];
@@ -58,7 +58,7 @@ export const m_orderGetAllWithDetails = async () => {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
             `SELECT 
-                A.order_id, 
+                A.oid, 
                 A.fk_client_id,
                 A.address,
                 A.suburb,
@@ -89,7 +89,7 @@ export const m_orderGetAllWithDetails = async () => {
                         )
                     ) 
                 FROM ${DB_TABLE_LIST.ORDER_SERVICES} B 
-                WHERE B.fk_order_id = A.order_id) AS order_services,
+                WHERE B.fk_order_id = A.oid) AS order_services,
                 (SELECT 
                     JSON_ARRAYAGG(
                         JSON_OBJECT(
@@ -99,10 +99,10 @@ export const m_orderGetAllWithDetails = async () => {
                         )
                     ) 
                 FROM ${DB_TABLE_LIST.PAYMENTS} P 
-                WHERE P.fk_order_id = A.order_id) AS payments,
+                WHERE P.fk_order_id = A.oid) AS payments,
                 (SELECT 
                     JSON_OBJECT(
-                        'client_id', C.client_id,
+                        'cid', C.cid,
                         'first_name', C.first_name,
                         'last_name', C.last_name,
                         'phone', C.phone,
@@ -115,7 +115,7 @@ export const m_orderGetAllWithDetails = async () => {
                         'postcode', C.postcode
                     )
                 FROM ${DB_TABLE_LIST.CLIENTS} C 
-                WHERE C.client_id = A.fk_client_id) AS client_info
+                WHERE C.cid = A.fk_client_id) AS client_info
             FROM ${DB_TABLE_LIST.ORDERS} A
             WHERE A.archive = 0;
             `
@@ -133,11 +133,11 @@ export const m_orderInsert = async (order: Torder) => {
         console.log("-> inser order: ", order);
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `INSERT INTO ${DB_TABLE_LIST.ORDERS} (order_id, fk_client_id, address, suburb, city, state, country, postcode, status, deposit, gst, total ) VALUES ?`,
+            `INSERT INTO ${DB_TABLE_LIST.ORDERS} (oid, fk_client_id, address, suburb, city, state, country, postcode, status, deposit, gst, total ) VALUES ?`,
             [
                 [
                     [
-                        order.order_id,
+                        order.oid,
                         order.fk_client_id,
                         order.address,
                         order.suburb,
@@ -177,15 +177,15 @@ export const m_orderDescInsert = async (order_services: TorderDesc) => {
     }
 };
 
-export const m_clientOrders = async (client_id: string) => {
+export const m_clientOrders = async (cid: string) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
             `SELECT * FROM ${DB_TABLE_LIST.ORDERS} WHERE fk_client_id = ?`,
-            [client_id]
+            [cid]
         );
         connection.release();
-        //console.log(`-> id[${client_id}] orders: `, result[0]);
+        //console.log(`-> id[${cid}] orders: `, result[0]);
         return result[0];
     } catch (err) {
         console.log("err: get client orders: ", err);
@@ -193,14 +193,14 @@ export const m_clientOrders = async (client_id: string) => {
     }
 };
 
-export const m_clientOrderWichId = async (client_id: string) => {
+export const m_clientOrderWichId = async (cid: string) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
             `SELECT 
             JSON_ARRAYAGG(
                 JSON_OBJECT(
-                    'order_id', A.order_id, 
+                    'oid', A.oid, 
                     'fk_client_id', A.fk_client_id,  
                     'address', A.address,
                     'suburb', A.suburb,
@@ -240,7 +240,7 @@ export const m_clientOrderWichId = async (client_id: string) => {
                 ) AS descriptions
             FROM ${DB_TABLE_LIST.ORDER_SERVICES}
             GROUP BY fk_order_id
-        ) B ON A.order_id = B.fk_order_id
+        ) B ON A.oid = B.fk_order_id
         LEFT JOIN (
             SELECT 
                 fk_order_id,
@@ -253,12 +253,12 @@ export const m_clientOrderWichId = async (client_id: string) => {
                 ) AS paymentData
             FROM ${DB_TABLE_LIST.PAYMENTS}
             GROUP BY fk_order_id 
-        ) P ON A.order_id = P.fk_order_id
+        ) P ON A.oid = P.fk_order_id
         LEFT JOIN (
             SELECT
-                client_id,
+                cid,
                 JSON_OBJECT(
-                    'client_id', client_id,
+                    'cid', cid,
                     'first_name', first_name,
                     'last_name', last_name,
                     'phone', phone,
@@ -271,14 +271,14 @@ export const m_clientOrderWichId = async (client_id: string) => {
                     'postcode', postcode
                 ) AS clientInfo
             FROM ${DB_TABLE_LIST.CLIENTS} 
-        ) C ON A.fk_client_id = C.client_id
+        ) C ON A.fk_client_id = C.cid
         WHERE A.fk_client_id = ? AND A.archive = 0;
         `,
-            [client_id]
+            [cid]
         );
         connection.release();
         /* console.log(
-            `-> id[${client_id}] orders: `,
+            `-> id[${cid}] orders: `,
             Object.values(result[0][0])[0]
         ); */
         return Object.values(result[0][0])[0];
@@ -288,12 +288,12 @@ export const m_clientOrderWichId = async (client_id: string) => {
     }
 };
 
-export const m_orderDel = async (order_id: string) => {
+export const m_orderDel = async (oid: string) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `DELETE FROM ${DB_TABLE_LIST.ORDERS} WHERE order_id = ?`,
-            [order_id]
+            `DELETE FROM ${DB_TABLE_LIST.ORDERS} WHERE oid = ?`,
+            [oid]
         );
         connection.release();
         //console.log("-> delete order result: ", result);
@@ -304,12 +304,12 @@ export const m_orderDel = async (order_id: string) => {
     }
 };
 
-export const m_orderArchive = async (order_id: string) => {
+export const m_orderArchive = async (oid: string) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `UPDATE ${DB_TABLE_LIST.ORDERS} SET archive = ? WHERE order_id = ?`,
-            [1, order_id]
+            `UPDATE ${DB_TABLE_LIST.ORDERS} SET archive = ? WHERE oid = ?`,
+            [1, oid]
         );
         connection.release();
         //console.log("-> archive order result: ", result);
@@ -320,12 +320,12 @@ export const m_orderArchive = async (order_id: string) => {
     }
 };
 
-export const m_orderDescDel = async (order_id: string) => {
+export const m_orderDescDel = async (oid: string) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
             `DELETE FROM ${DB_TABLE_LIST.ORDER_SERVICES} WHERE fk_order_id = ?`,
-            [order_id]
+            [oid]
         );
         connection.release();
         //console.log("-> delete order_services result: ", result);
@@ -336,12 +336,12 @@ export const m_orderDescDel = async (order_id: string) => {
     }
 };
 
-export const m_orderStatusUpdate = async (order_id: string, status: string) => {
+export const m_orderStatusUpdate = async (oid: string, status: string) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `UPDATE ${DB_TABLE_LIST.ORDERS} SET status = ? WHERE order_id = ?`,
-            [status, order_id]
+            `UPDATE ${DB_TABLE_LIST.ORDERS} SET status = ? WHERE oid = ?`,
+            [status, oid]
         );
         connection.release();
         //console.log("-> update order status result: ", result[0]);
@@ -355,13 +355,13 @@ export const m_orderStatusUpdate = async (order_id: string, status: string) => {
 export const m_orderUpdateProperty = async (
     property: string,
     value: any,
-    order_id: string
+    oid: string
 ) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `UPDATE ${DB_TABLE_LIST.ORDERS} SET ${property} = ? WHERE order_id = ?`,
-            [value, order_id]
+            `UPDATE ${DB_TABLE_LIST.ORDERS} SET ${property} = ? WHERE oid = ?`,
+            [value, oid]
         );
         connection.release();
         //console.log(`-> update order[${property}] result: `, result[0]);
@@ -387,7 +387,7 @@ export const m_orderUpdate = async (order: Torder) => {
                 deposit = ?, 
                 gst = ?, 
                 total = ? 
-            WHERE order_id = ?`,
+            WHERE oid = ?`,
             [
                 order.address,
                 order.suburb,
@@ -399,7 +399,7 @@ export const m_orderUpdate = async (order: Torder) => {
                 order.deposit,
                 order.gst,
                 order.total,
-                order.order_id,
+                order.oid,
             ]
         );
         connection.release();
@@ -445,12 +445,12 @@ export const m_updatePayments = async (payments: Tpayment) => {
     }
 };
 
-export const m_findClientID = async (order_id: string) => {
+export const m_findClientID = async (oid: string) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `SELECT fk_client_id FROM orders WHERE order_id = ?`,
-            [order_id]
+            `SELECT fk_client_id FROM orders WHERE oid = ?`,
+            [oid]
         );
         connection.release();
         return result[0];
@@ -460,13 +460,13 @@ export const m_findClientID = async (order_id: string) => {
     }
 };
 
-export const m_findOrder = async (order_id: string) => {
+export const m_findOrder = async (oid: string) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
             `SELECT
                 JSON_OBJECT(
-                    'order_id', A.order_id, 
+                    'oid', A.oid, 
                     'fk_client_id', A.fk_client_id,  
                     'address', A.address,
                     'suburb', A.suburb,
@@ -503,7 +503,7 @@ export const m_findOrder = async (order_id: string) => {
                         ) AS descriptions
                     FROM order_services
                     GROUP BY fk_order_id
-                ) B ON A.order_id = B.fk_order_id
+                ) B ON A.oid = B.fk_order_id
                 LEFT JOIN (
                     SELECT 
                         fk_order_id,
@@ -516,14 +516,14 @@ export const m_findOrder = async (order_id: string) => {
                         ) AS paymentData
                     FROM payments
                     GROUP BY fk_order_id 
-                ) P ON A.order_id = P.fk_order_id
-                WHERE A.order_id = ? AND A.archive = 0;
+                ) P ON A.oid = P.fk_order_id
+                WHERE A.oid = ? AND A.archive = 0;
                 `,
-            [order_id]
+            [oid]
         );
         connection.release();
         /* console.log(
-        `-> id[${client_id}] orders: `,
+        `-> id[${cid}] orders: `,
         Object.values(result[0][0])[0]
     ); */
         return Object.values(result[0][0])[0];
@@ -537,7 +537,7 @@ export const m_uidGetLastOrder = async () => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `SELECT order_id FROM ${DB_TABLE_LIST.ORDERS} ORDER BY created_date DESC LIMIT 1`
+            `SELECT oid FROM ${DB_TABLE_LIST.ORDERS} ORDER BY created_date DESC LIMIT 1`
         );
         connection.release();
         return result[0];

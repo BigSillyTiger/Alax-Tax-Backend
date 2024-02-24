@@ -45,7 +45,7 @@ export const createTables = async () => {
         )`);
 
         await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.CLIENTS} (
-            client_id VARCHAR(5) NOT NULL PRIMARY KEY,
+            cid VARCHAR(5) NOT NULL PRIMARY KEY,
             archive BOOLEAN DEFAULT FALSE NOT NULL,
             first_name VARCHAR(255) NOT NULL,
             last_name VARCHAR(255) NOT NULL,
@@ -70,7 +70,7 @@ export const createTables = async () => {
             unit_name VARCHAR(20) NOT NULL UNIQUE
         )`);
         await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.ORDERS} (
-            order_id VARCHAR(11) NOT NULL PRIMARY KEY,
+            oid VARCHAR(11) NOT NULL PRIMARY KEY,
             archive BOOLEAN DEFAULT FALSE NOT NULL,
             fk_client_id VARCHAR(5) NOT NULL,
             address  VARCHAR(255),
@@ -100,7 +100,7 @@ export const createTables = async () => {
             netto DECIMAL(10,2) UNSIGNED NOT NULL
         )`);
         await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.PAYMENTS} (
-            pay_id INT AUTO_INCREMENT PRIMARY KEY,
+            pid INT AUTO_INCREMENT PRIMARY KEY,
             fk_order_id VARCHAR(11) NOT NULL,
             paid DECIMAL(10,2) UNSIGNED DEFAULT 0,
             paid_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP

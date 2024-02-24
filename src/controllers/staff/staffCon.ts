@@ -71,12 +71,12 @@ export const staffSingleInstert = async (req: Request, res: Response) => {
     console.log("-> server - staff: single insert: ", req.body);
 
     const phoneDup = await m_staffIsPropertyExist(
-        "0", // new client does not nedd to check client_id
+        "0", // new client does not nedd to check cid
         "phone",
         req.body[0].phone
     );
     const emailDup = await m_staffIsPropertyExist(
-        "0", // new client does not nedd to check client_id
+        "0", // new client does not nedd to check cid
         "email",
         req.body[0].email
     );

@@ -98,9 +98,10 @@ export const genClientUid = async () => {
     console.log("-> get last client uid: ", result);
     let newId = "";
     result.length
-        ? (newId = String(
-              parseInt(result[0].client_id.slice(1), 10) + 1
-          ).padStart(4, "0"))
+        ? (newId = String(parseInt(result[0].cid.slice(1), 10) + 1).padStart(
+              4,
+              "0"
+          ))
         : (newId = "0001");
     return `${uidPrefix.client}${newId}`;
 };
@@ -124,10 +125,10 @@ export const genOrderId = async () => {
     const date = genDate();
     let newId = "001";
     if (result.length) {
-        const dateCmp = date === result[0].order_id.slice(1, 7);
+        const dateCmp = date === result[0].oid.slice(1, 7);
         result.length && dateCmp
             ? (newId = String(
-                  parseInt(result[0].order_id.slice(-3), 10) + 1
+                  parseInt(result[0].oid.slice(-3), 10) + 1
               ).padStart(3, "0"))
             : (newId = "001");
     }

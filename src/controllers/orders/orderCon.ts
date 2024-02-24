@@ -47,16 +47,13 @@ export const orderAll = async (req: Request, res: Response) => {
 };
 
 export const orderWcid = async (req: Request, res: Response) => {
-    console.log(
-        "server - order: get order with client id: ",
-        req.body.client_id
-    );
+    console.log("server - order: get order with client id: ", req.body.cid);
     try {
-        const result = await m_clientOrderWichId(req.body.client_id);
+        const result = await m_clientOrderWichId(req.body.cid);
         if (result) {
             return res.status(200).json({
                 status: RES_STATUS.SUCCESS,
-                msg: `successed retrieve client[${req.body.client_id}] orders`,
+                msg: `successed retrieve client[${req.body.cid}] orders`,
                 data: result,
             });
         } else {
@@ -66,7 +63,7 @@ export const orderWcid = async (req: Request, res: Response) => {
             );
             return res.status(400).json({
                 status: RES_STATUS.FAILED,
-                msg: `Failed: retrieve client[${req.body.client_id}] orders`,
+                msg: `Failed: retrieve client[${req.body.cid}] orders`,
                 data: null,
             });
         }
@@ -77,7 +74,7 @@ export const orderWcid = async (req: Request, res: Response) => {
         );
         return res.status(400).json({
             status: RES_STATUS.FAILED,
-            msg: `Failed: retrieve client[${req.body.client_id}] orders`,
+            msg: `Failed: retrieve client[${req.body.cid}] orders`,
             data: null,
         });
     }
@@ -87,11 +84,11 @@ export const orderAdd = async (req: Request, res: Response) => {
     console.log("server - order: add order: ", req.body);
     const order = req.body.order;
     const order_services = req.body.order_services;
-    req.body.order.order_id = await genOrderId();
+    req.body.order.oid = await genOrderId();
     const orResult = await m_orderInsert(order);
     if (orResult.affectedRows) {
         const odResult = await m_orderDescInsert(
-            formOrderDesc(req.body.order.order_id, order_services)
+            formOrderDesc(req.body.order.oid, order_services)
         );
         if (odResult.affectedRows) {
             return res.status(200).json({
@@ -110,17 +107,17 @@ export const orderAdd = async (req: Request, res: Response) => {
 
 export const orderDel = async (req: Request, res: Response) => {
     console.log("server - order: delete order: ", req.body);
-    const result = await m_orderArchive(req.body.order_id);
+    const result = await m_orderArchive(req.body.oid);
     if (result) {
         return res.status(200).json({
             status: RES_STATUS.SUC_DEL,
-            msg: `successed delete order[${req.body.order_id}]`,
+            msg: `successed delete order[${req.body.oid}]`,
             data: result,
         });
     } else {
         return res.status(400).json({
             status: RES_STATUS.FAILED_DEL,
-            msg: `Failed: delete order[${req.body.order_id}]`,
+            msg: `Failed: delete order[${req.body.oid}]`,
             data: null,
         });
     }
@@ -133,15 +130,15 @@ export const orderUpdate = async (req: Request, res: Response) => {
     const result = await m_orderUpdate(order);
     if (result.affectedRows) {
         // delete previous order_services
-        const descDelRes = await m_orderDescDel(order.order_id);
+        const descDelRes = await m_orderDescDel(order.oid);
         if (descDelRes.affectedRows) {
             const insertDescRes = await m_orderDescInsert(
-                formOrderDesc(req.body.order.order_id, order_services)
+                formOrderDesc(req.body.order.oid, order_services)
             );
             if (insertDescRes.affectedRows) {
                 return res.status(200).json({
                     status: RES_STATUS.SUC_UPDATE,
-                    msg: `successed update order[${order.order_id}]`,
+                    msg: `successed update order[${order.oid}]`,
                     data: result,
                 });
             }
@@ -149,24 +146,24 @@ export const orderUpdate = async (req: Request, res: Response) => {
     }
     return res.status(400).json({
         status: RES_STATUS.FAILED,
-        msg: `Failed: update order[${order.order_id}]`,
+        msg: `Failed: update order[${order.oid}]`,
         data: null,
     });
 };
 
 export const clientOrders = async (req: Request, res: Response) => {
-    console.log("server - order: get client orders: ", req.body.client_id);
-    const result = await m_clientOrders(req.body.client_id);
+    console.log("server - order: get client orders: ", req.body.cid);
+    const result = await m_clientOrders(req.body.cid);
     if (result) {
         return res.status(200).json({
             status: RES_STATUS.SUCCESS,
-            msg: `successed retrieve client[${req.body.client_id}] all orders`,
+            msg: `successed retrieve client[${req.body.cid}] all orders`,
             data: result,
         });
     } else {
         return res.status(400).json({
             status: RES_STATUS.FAILED,
-            msg: `Failed: retrieve client[${req.body.client_id}] orders`,
+            msg: `Failed: retrieve client[${req.body.cid}] orders`,
             data: null,
         });
     }
@@ -174,20 +171,17 @@ export const clientOrders = async (req: Request, res: Response) => {
 
 export const orderChangeStatus = async (req: Request, res: Response) => {
     console.log("server - order: change order status: ", req.body);
-    const result = await m_orderStatusUpdate(
-        req.body.order_id,
-        req.body.status
-    );
+    const result = await m_orderStatusUpdate(req.body.oid, req.body.status);
     if (result.affectedRows) {
         return res.status(200).json({
             status: RES_STATUS.SUC_UPDATE_STATUS,
-            msg: `successed change order[${req.body.order_id}] status`,
+            msg: `successed change order[${req.body.oid}] status`,
             data: result,
         });
     } else {
         return res.status(400).json({
             status: RES_STATUS.FAILED,
-            msg: `Failed: change order[${req.body.order_id}]`,
+            msg: `Failed: change order[${req.body.oid}]`,
             data: null,
         });
     }
@@ -215,44 +209,44 @@ export const orderUpdatePayments = async (req: Request, res: Response) => {
     //}
     return res.status(400).json({
         status: RES_STATUS.FAILED,
-        msg: `Failed: update order[${req.body.order_id}] payments`,
+        msg: `Failed: update order[${req.body.oid}] payments`,
         data: null,
     });
 };
 
 export const findClient = async (req: Request, res: Response) => {
-    console.log("-> server - order: find client: ", req.body.order_id);
-    const clientID = await m_findClientID(req.body.order_id);
+    console.log("-> server - order: find client: ", req.body.oid);
+    const clientID = await m_findClientID(req.body.oid);
     if (clientID) {
         const client = await m_clientGetSingle(clientID);
         if (client) {
             return res.status(200).json({
                 status: RES_STATUS.SUCCESS,
-                msg: `successed find client[${req.body.order_id}]`,
+                msg: `successed find client[${req.body.oid}]`,
                 data: client,
             });
         }
     }
     return res.status(400).json({
         status: RES_STATUS.FAILED,
-        msg: `Failed: find client[${req.body.order_id}]`,
+        msg: `Failed: find client[${req.body.oid}]`,
         data: null,
     });
 };
 
 export const findOrder = async (req: Request, res: Response) => {
-    console.log("-> server - order: find order: ", req.body.order_id);
-    const order = await m_findOrder(req.body.order_id);
+    console.log("-> server - order: find order: ", req.body.oid);
+    const order = await m_findOrder(req.body.oid);
     if (order) {
         return res.status(200).json({
             status: RES_STATUS.SUCCESS,
-            msg: `successed find order[${req.body.order_id}]`,
+            msg: `successed find order[${req.body.oid}]`,
             data: order,
         });
     }
     return res.status(400).json({
         status: RES_STATUS.FAILED,
-        msg: `Failed: find order[${req.body.order_id}]`,
+        msg: `Failed: find order[${req.body.oid}]`,
         data: null,
     });
 };
@@ -262,18 +256,18 @@ export const updateInvoiceIssue = async (req: Request, res: Response) => {
     const order = await m_orderUpdateProperty(
         "invoice_issue_date",
         req.body.date,
-        req.body.order_id
+        req.body.oid
     );
     if (order.affectedRows) {
         return res.status(200).json({
             status: RES_STATUS.SUCCESS,
-            msg: `successed update invoice issue date[${req.body.order_id}]`,
+            msg: `successed update invoice issue date[${req.body.oid}]`,
             data: order,
         });
     }
     return res.status(400).json({
         status: RES_STATUS.FAILED,
-        msg: `Failed: update invoice issue date[${req.body.order_id}]`,
+        msg: `Failed: update invoice issue date[${req.body.oid}]`,
         data: null,
     });
 };
