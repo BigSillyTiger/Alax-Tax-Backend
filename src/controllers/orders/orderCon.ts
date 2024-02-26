@@ -19,6 +19,7 @@ import {
 } from "../../models/ordersModel";
 import { formOrderDesc, formPayment, genOrderId } from "../../utils/utils";
 import { m_clientGetSingle } from "../../models/clientsModel";
+import { m_getAllOrdersWithWorkLog } from "../../models/workLogModel";
 
 /**
  * @description return all orders from orders table with client first name and last name from clients table
@@ -29,7 +30,8 @@ import { m_clientGetSingle } from "../../models/clientsModel";
 export const orderAll = async (req: Request, res: Response) => {
     console.log("server - order: get all orders");
     //const result = await m_orderGetAll();
-    const result = await m_orderGetAllWithDetails();
+    //const result = await m_orderGetAllWithDetails();
+    const result = await m_getAllOrdersWithWorkLog();
     //console.log("-> all oreder from db: ", result);
     if (result) {
         return res.status(200).json({
@@ -189,20 +191,20 @@ export const orderChangeStatus = async (req: Request, res: Response) => {
 
 export const orderUpdatePayments = async (req: Request, res: Response) => {
     console.log("server - order: update payments: ", req.body);
-    const delResult = await m_deletePayment(req.body.fk_order_id);
+    const delResult = await m_deletePayment(req.body.fk_oid);
     //if (delResult.affectedRows) {
     const updatePayRes = await m_updatePayments(
-        formPayment(req.body.fk_order_id, req.body.payments)
+        formPayment(req.body.fk_oid, req.body.payments)
     );
     const updatePaidRes = await m_orderUpdateProperty(
         "paid",
         req.body.paid,
-        req.body.fk_order_id
+        req.body.fk_oid
     );
     if (updatePayRes.affectedRows && updatePaidRes.affectedRows) {
         return res.status(200).json({
             status: RES_STATUS.SUC_UPDATE_PAYMENTS,
-            msg: `successed update payments[${req.body.fk_order_id}] payments`,
+            msg: `successed update payments[${req.body.fk_oid}] payments`,
             data: "",
         });
     }
@@ -254,7 +256,7 @@ export const findOrder = async (req: Request, res: Response) => {
 export const updateInvoiceIssue = async (req: Request, res: Response) => {
     console.log("-> server - order: update invoice issue: ", req.body);
     const order = await m_orderUpdateProperty(
-        "invoice_issue_date",
+        "invoice_date",
         req.body.date,
         req.body.oid
     );

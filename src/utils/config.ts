@@ -27,7 +27,7 @@ const DB_TABLE_LIST = {
     // Assiste
     SERVICES: "services",
     UNITS: "units",
-    WORK_LOG: "work_log",
+    WORK_LOGS: "work_logs",
 };
 
 enum RES_STATUS {
@@ -56,7 +56,7 @@ const uidPrefix = {
     employee: "E",
     client: "C",
     order: "J",
-    workLog: "W",
+    workLog: "WL",
 };
 
 export {

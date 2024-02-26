@@ -72,8 +72,8 @@ export const createTables = async () => {
         await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.ORDERS} (
             oid VARCHAR(11) NOT NULL PRIMARY KEY,
             archive BOOLEAN DEFAULT FALSE NOT NULL,
-            fk_client_id VARCHAR(5) NOT NULL,
-            address  VARCHAR(255),
+            fk_cid VARCHAR(5) NOT NULL,
+            address VARCHAR(255),
             suburb VARCHAR(100) DEFAULT 'Adelaide',
             city VARCHAR(20) DEFAULT 'Adelaide',
             state VARCHAR(20) DEFAULT 'SA',
@@ -86,11 +86,11 @@ export const createTables = async () => {
             paid DECIMAL(10,2) UNSIGNED DEFAULT 0,
             created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             quotation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            invoice_issue_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            invoice_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )`);
         await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.ORDER_SERVICES} (
             id INT AUTO_INCREMENT PRIMARY KEY,
-            fk_order_id VARCHAR(11) NOT NULL,
+            fk_oid VARCHAR(11) NOT NULL,
             title VARCHAR(255) NOT NULL,
             description VARCHAR(1000),
             qty SMALLINT UNSIGNED NOT NULL DEFAULT 1,
@@ -101,20 +101,21 @@ export const createTables = async () => {
         )`);
         await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.PAYMENTS} (
             pid INT AUTO_INCREMENT PRIMARY KEY,
-            fk_order_id VARCHAR(11) NOT NULL,
+            fk_oid VARCHAR(11) NOT NULL,
             paid DECIMAL(10,2) UNSIGNED DEFAULT 0,
             paid_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )`);
-        await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.WORK_LOG} (
-            wid VARCHAR(11) NOT NULL PRIMARY KEY,
-            fk_order_id VARCHAR(11) NOT NULL,
+        await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.WORK_LOGS} (
+            wlid VARCHAR(11) NOT NULL PRIMARY KEY,
+            fk_oid VARCHAR(11) NOT NULL,
             fk_uid VARCHAR(4) NOT NULL,
-            w_date DATE NOT NULL,
+            wl_date DATE NOT NULL,
             s_time TIME,
             e_time TIME,
-            w_status VARCHAR(20) NOT NULL DEFAULT 'ongoing',
+            wl_status VARCHAR(20) NOT NULL DEFAULT 'ongoing',
             work_note VARCHAR(500),
-            confirm_status TINYINT(1) DEFAULT 0
+            confirm_status TINYINT(1) DEFAULT 0,
+            archive BOOLEAN DEFAULT FALSE NOT NULL
         )`);
         //await connection.query();
         connection.release();

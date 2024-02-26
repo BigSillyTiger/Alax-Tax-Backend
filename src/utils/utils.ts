@@ -3,6 +3,7 @@ import { uidPrefix } from "./config";
 import { m_uidGetLastStaff } from "../models/staffModel";
 import { m_uidGetLastClient } from "../models/clientsModel";
 import { m_uidGetLastOrder } from "../models/ordersModel";
+import { m_getLastWorkLog } from "../models/workLogModel";
 
 export const formOrderDesc = (id: number, items: any) => {
     return items.map((item: any, index: number) => {
@@ -32,9 +33,9 @@ export const formOrderDesc = (id: number, items: any) => {
     });
 };
 
-export const formPayment = (fk_order_id: string, items: any) => {
+export const formPayment = (fk_oid: string, items: any) => {
     return items.map((item: any) => {
-        return [fk_order_id, item.paid, item.paid_date];
+        return [fk_oid, item.paid, item.paid_date];
     });
 };
 
@@ -133,4 +134,22 @@ export const genOrderId = async () => {
             : (newId = "001");
     }
     return `${uidPrefix.order}${date}${newId}`;
+};
+
+/**
+ * @description generate work log id
+ */
+export const genWorkLogId = async () => {
+    const result = await m_getLastWorkLog();
+    const date = genDate();
+    let newId = "001";
+    if (result.length) {
+        const dateCmp = date === result[0].wid.slice(1, 7);
+        result.length && dateCmp
+            ? (newId = String(
+                  parseInt(result[0].wid.slice(-3), 10) + 1
+              ).padStart(3, "0"))
+            : (newId = "001");
+    }
+    return `${uidPrefix.workLog}${date}${newId}`;
 };

@@ -4,7 +4,7 @@ import adminPool from "./adminPool";
 
 type Torder = {
     oid?: string; // new order does not have oid
-    fk_client_id: string;
+    fk_cid: string;
     address: string;
     suburb: string;
     city: string;
@@ -18,7 +18,7 @@ type Torder = {
 };
 
 type TorderDesc = {
-    fk_order_id: string;
+    fk_oid: string;
     tital: string;
     taxable: boolean;
     description: string;
@@ -30,7 +30,7 @@ type TorderDesc = {
 }[];
 
 type Tpayment = {
-    fk_order_id: string;
+    fk_oid: string;
     paid: number;
     paid_date: string;
 };
@@ -43,7 +43,7 @@ export const m_orderGetAll = async () => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `SELECT ${DB_TABLE_LIST.ORDERS}.*, ${DB_TABLE_LIST.CLIENTS}.first_name, ${DB_TABLE_LIST.CLIENTS}.last_name, ${DB_TABLE_LIST.CLIENTS}.phone FROM ${DB_TABLE_LIST.ORDERS} INNER JOIN ${DB_TABLE_LIST.CLIENTS} ON ${DB_TABLE_LIST.ORDERS}.fk_client_id = ${DB_TABLE_LIST.CLIENTS}.cid ORDER BY created_date DESC`
+            `SELECT ${DB_TABLE_LIST.ORDERS}.*, ${DB_TABLE_LIST.CLIENTS}.first_name, ${DB_TABLE_LIST.CLIENTS}.last_name, ${DB_TABLE_LIST.CLIENTS}.phone FROM ${DB_TABLE_LIST.ORDERS} INNER JOIN ${DB_TABLE_LIST.CLIENTS} ON ${DB_TABLE_LIST.ORDERS}.fk_cid = ${DB_TABLE_LIST.CLIENTS}.cid ORDER BY created_date DESC`
         );
         connection.release();
         return result[0];
@@ -59,7 +59,7 @@ export const m_orderGetAllWithDetails = async () => {
         const result: any = await connection.query(
             `SELECT 
                 A.oid, 
-                A.fk_client_id,
+                A.fk_cid,
                 A.address,
                 A.suburb,
                 A.city,
@@ -72,12 +72,12 @@ export const m_orderGetAllWithDetails = async () => {
                 A.total,
                 A.paid,
                 A.created_date,
-                A.invoice_issue_date,
+                A.invoice_date,
                 (SELECT 
                     JSON_ARRAYAGG(
                         JSON_OBJECT(
                             'ranking', B.ranking,
-                            'fk_order_id', B.fk_order_id,
+                            'fk_oid', B.fk_oid,
                             'title', B.title,
                             'description', B.description,
                             'qty', B.qty,
@@ -89,17 +89,17 @@ export const m_orderGetAllWithDetails = async () => {
                         )
                     ) 
                 FROM ${DB_TABLE_LIST.ORDER_SERVICES} B 
-                WHERE B.fk_order_id = A.oid) AS order_services,
+                WHERE B.fk_oid = A.oid) AS order_services,
                 (SELECT 
                     JSON_ARRAYAGG(
                         JSON_OBJECT(
-                            'fk_order_id', P.fk_order_id,
+                            'fk_oid', P.fk_oid,
                             'paid', P.paid,
                             'paid_date', P.paid_date
                         )
                     ) 
                 FROM ${DB_TABLE_LIST.PAYMENTS} P 
-                WHERE P.fk_order_id = A.oid) AS payments,
+                WHERE P.fk_oid = A.oid) AS payments,
                 (SELECT 
                     JSON_OBJECT(
                         'cid', C.cid,
@@ -115,7 +115,7 @@ export const m_orderGetAllWithDetails = async () => {
                         'postcode', C.postcode
                     )
                 FROM ${DB_TABLE_LIST.CLIENTS} C 
-                WHERE C.cid = A.fk_client_id) AS client_info
+                WHERE C.cid = A.fk_cid) AS client_info
             FROM ${DB_TABLE_LIST.ORDERS} A
             WHERE A.archive = 0;
             `
@@ -133,12 +133,12 @@ export const m_orderInsert = async (order: Torder) => {
         console.log("-> inser order: ", order);
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `INSERT INTO ${DB_TABLE_LIST.ORDERS} (oid, fk_client_id, address, suburb, city, state, country, postcode, status, deposit, gst, total ) VALUES ?`,
+            `INSERT INTO ${DB_TABLE_LIST.ORDERS} (oid, fk_cid, address, suburb, city, state, country, postcode, status, deposit, gst, total ) VALUES ?`,
             [
                 [
                     [
                         order.oid,
-                        order.fk_client_id,
+                        order.fk_cid,
                         order.address,
                         order.suburb,
                         order.city,
@@ -166,7 +166,7 @@ export const m_orderDescInsert = async (order_services: TorderDesc) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `INSERT INTO ${DB_TABLE_LIST.ORDER_SERVICES} (fk_order_id, ranking, title, description, qty, taxable, unit, unit_price, gst, netto) VALUES ?`,
+            `INSERT INTO ${DB_TABLE_LIST.ORDER_SERVICES} (fk_oid, ranking, title, description, qty, taxable, unit, unit_price, gst, netto) VALUES ?`,
             [order_services]
         );
         connection.release();
@@ -181,7 +181,7 @@ export const m_clientOrders = async (cid: string) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `SELECT * FROM ${DB_TABLE_LIST.ORDERS} WHERE fk_client_id = ?`,
+            `SELECT * FROM ${DB_TABLE_LIST.ORDERS} WHERE fk_cid = ?`,
             [cid]
         );
         connection.release();
@@ -197,11 +197,11 @@ export const m_clientOrderWichId = async (cid: string) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `SELECT 
-            JSON_ARRAYAGG(
+            `
+            SELECT JSON_ARRAYAGG(
                 JSON_OBJECT(
                     'oid', A.oid, 
-                    'fk_client_id', A.fk_client_id,  
+                    'fk_cid', A.fk_cid,  
                     'address', A.address,
                     'suburb', A.suburb,
                     'city', A.city,
@@ -214,66 +214,66 @@ export const m_clientOrderWichId = async (cid: string) => {
                     'total', A.total,
                     'paid', A.paid,
                     'created_date', A.created_date,
-                    'invoice_issue_date', A.invoice_issue_date,
+                    'invoice_date', A.invoice_date,
                     'order_services', descriptions,
                     'payments', paymentData,
                     'client_info', clientInfo
                 )
             )
-        FROM ${DB_TABLE_LIST.ORDERS} A
-        JOIN (
-            SELECT 
-                fk_order_id,
-                JSON_ARRAYAGG(
+            FROM ${DB_TABLE_LIST.ORDERS} A
+            JOIN (
+                SELECT 
+                    fk_oid,
+                    JSON_ARRAYAGG(
+                        JSON_OBJECT(
+                            'ranking', ranking,
+                            'fk_oid', fk_oid,
+                            'title', title,
+                            'description', description,
+                            'qty', qty,
+                            'unit', unit,
+                            'taxable', taxable,
+                            'unit_price', unit_price,
+                            'gst', gst,
+                            'netto', netto
+                        )
+                    ) AS descriptions
+                FROM ${DB_TABLE_LIST.ORDER_SERVICES}
+                GROUP BY fk_oid
+            ) B ON A.oid = B.fk_oid
+            LEFT JOIN (
+                SELECT 
+                    fk_oid,
+                    JSON_ARRAYAGG(
+                        JSON_OBJECT(
+                            'fk_oid', fk_oid,
+                            'paid', paid,
+                            'paid_date', paid_date
+                        )
+                    ) AS paymentData
+                FROM ${DB_TABLE_LIST.PAYMENTS}
+                GROUP BY fk_oid 
+            ) P ON A.oid = P.fk_oid
+            LEFT JOIN (
+                SELECT
+                    cid,
                     JSON_OBJECT(
-                        'ranking', ranking,
-                        'fk_order_id', fk_order_id,
-                        'title', title,
-                        'description', description,
-                        'qty', qty,
-                        'unit', unit,
-                        'taxable', taxable,
-                        'unit_price', unit_price,
-                        'gst', gst,
-                        'netto', netto
-                    )
-                ) AS descriptions
-            FROM ${DB_TABLE_LIST.ORDER_SERVICES}
-            GROUP BY fk_order_id
-        ) B ON A.oid = B.fk_order_id
-        LEFT JOIN (
-            SELECT 
-                fk_order_id,
-                JSON_ARRAYAGG(
-                    JSON_OBJECT(
-                        'fk_order_id', fk_order_id,
-                        'paid', paid,
-                        'paid_date', paid_date
-                    )
-                ) AS paymentData
-            FROM ${DB_TABLE_LIST.PAYMENTS}
-            GROUP BY fk_order_id 
-        ) P ON A.oid = P.fk_order_id
-        LEFT JOIN (
-            SELECT
-                cid,
-                JSON_OBJECT(
-                    'cid', cid,
-                    'first_name', first_name,
-                    'last_name', last_name,
-                    'phone', phone,
-                    'email', email,
-                    'address', address,
-                    'suburb', suburb,
-                    'city', city,
-                    'state', state,
-                    'country', country,
-                    'postcode', postcode
-                ) AS clientInfo
-            FROM ${DB_TABLE_LIST.CLIENTS} 
-        ) C ON A.fk_client_id = C.cid
-        WHERE A.fk_client_id = ? AND A.archive = 0;
-        `,
+                        'cid', cid,
+                        'first_name', first_name,
+                        'last_name', last_name,
+                        'phone', phone,
+                        'email', email,
+                        'address', address,
+                        'suburb', suburb,
+                        'city', city,
+                        'state', state,
+                        'country', country,
+                        'postcode', postcode
+                    ) AS clientInfo
+                FROM ${DB_TABLE_LIST.CLIENTS} 
+            ) C ON A.fk_cid = C.cid
+            WHERE A.fk_cid = ? AND A.archive = 0;
+            `,
             [cid]
         );
         connection.release();
@@ -324,7 +324,7 @@ export const m_orderDescDel = async (oid: string) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `DELETE FROM ${DB_TABLE_LIST.ORDER_SERVICES} WHERE fk_order_id = ?`,
+            `DELETE FROM ${DB_TABLE_LIST.ORDER_SERVICES} WHERE fk_oid = ?`,
             [oid]
         );
         connection.release();
@@ -411,13 +411,13 @@ export const m_orderUpdate = async (order: Torder) => {
     }
 };
 
-export const m_deletePayment = async (fk_order_id: string) => {
+export const m_deletePayment = async (fk_oid: string) => {
     try {
-        //console.log("-> delete payment: ", fk_order_id);
+        //console.log("-> delete payment: ", fk_oid);
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `DELETE FROM ${DB_TABLE_LIST.PAYMENTS} WHERE fk_order_id = ?`,
-            [fk_order_id]
+            `DELETE FROM ${DB_TABLE_LIST.PAYMENTS} WHERE fk_oid = ?`,
+            [fk_oid]
         );
         connection.release();
         //console.log("-> delete payment result: ", result[0]);
@@ -433,7 +433,7 @@ export const m_updatePayments = async (payments: Tpayment) => {
         //console.log("-> before insert payments: ", payments);
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `INSERT INTO ${DB_TABLE_LIST.PAYMENTS} (fk_order_id, paid, paid_date) VALUES ?`,
+            `INSERT INTO ${DB_TABLE_LIST.PAYMENTS} (fk_oid, paid, paid_date) VALUES ?`,
             [payments]
         );
         connection.release();
@@ -449,7 +449,7 @@ export const m_findClientID = async (oid: string) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `SELECT fk_client_id FROM orders WHERE oid = ?`,
+            `SELECT fk_cid FROM orders WHERE oid = ?`,
             [oid]
         );
         connection.release();
@@ -467,7 +467,7 @@ export const m_findOrder = async (oid: string) => {
             `SELECT
                 JSON_OBJECT(
                     'oid', A.oid, 
-                    'fk_client_id', A.fk_client_id,  
+                    'fk_cid', A.fk_cid,  
                     'address', A.address,
                     'suburb', A.suburb,
                     'city', A.city,
@@ -486,11 +486,11 @@ export const m_findOrder = async (oid: string) => {
                 FROM orders A
                 JOIN (
                     SELECT 
-                        fk_order_id,
+                        fk_oid,
                         JSON_ARRAYAGG(
                             JSON_OBJECT(
                                 'ranking', ranking,
-                                'fk_order_id', fk_order_id,
+                                'fk_oid', fk_oid,
                                 'title', title,
                                 'description', description,
                                 'qty', qty,
@@ -502,21 +502,21 @@ export const m_findOrder = async (oid: string) => {
                             )
                         ) AS descriptions
                     FROM order_services
-                    GROUP BY fk_order_id
-                ) B ON A.oid = B.fk_order_id
+                    GROUP BY fk_oid
+                ) B ON A.oid = B.fk_oid
                 LEFT JOIN (
                     SELECT 
-                        fk_order_id,
+                        fk_oid,
                         JSON_ARRAYAGG(
                             JSON_OBJECT(
-                                'fk_order_id', fk_order_id,
+                                'fk_oid', fk_oid,
                                 'paid', paid,
                                 'paid_date', paid_date
                             )
                         ) AS paymentData
                     FROM payments
-                    GROUP BY fk_order_id 
-                ) P ON A.oid = P.fk_order_id
+                    GROUP BY fk_oid 
+                ) P ON A.oid = P.fk_oid
                 WHERE A.oid = ? AND A.archive = 0;
                 `,
             [oid]
