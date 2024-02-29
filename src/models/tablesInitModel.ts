@@ -112,8 +112,9 @@ export const createTables = async () => {
             wl_date DATE NOT NULL,
             s_time TIME,
             e_time TIME,
+            b_time TIME,
             wl_status VARCHAR(20) NOT NULL DEFAULT 'ongoing',
-            work_note VARCHAR(500),
+            wl_note VARCHAR(500),
             confirm_status TINYINT(1) DEFAULT 0,
             archive BOOLEAN DEFAULT FALSE NOT NULL
         )`);

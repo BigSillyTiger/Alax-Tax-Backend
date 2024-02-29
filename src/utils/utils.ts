@@ -153,3 +153,12 @@ export const genWorkLogId = async () => {
     }
     return `${uidPrefix.workLog}${date}${newId}`;
 };
+
+export const genOrderWithWorkLogs = (orders: any, workLogs: any) => {
+    return orders.map((order: any) => {
+        const workLogsOfOrder = workLogs.filter(
+            (log: any) => log.fk_oid === order.oid
+        );
+        return { ...order, work_logs: workLogsOfOrder };
+    });
+};

@@ -21,20 +21,24 @@ import { encodePW, genStaffUid, replaceStaffPW } from "../../utils/utils";
  */
 export const staffAllInfo = async (req: Request, res: Response) => {
     logger.infoLog("server - staff: get all staff info");
-    const result = await m_staffGetAll();
+    try {
+        const result = await m_staffGetAll();
 
-    if (result) {
-        return res.status(200).json({
-            status: RES_STATUS.SUCCESS,
-            msg: "success: get all staff info",
-            data: replaceStaffPW(result),
+        if (result) {
+            return res.status(200).json({
+                status: RES_STATUS.SUCCESS,
+                msg: "success: get all staff info",
+                data: replaceStaffPW(result),
+            });
+        }
+        throw new Error("error: get all staff info");
+    } catch (error) {
+        return res.status(500).json({
+            status: RES_STATUS.FAILED,
+            msg: "fail: get all staff info",
+            data: null,
         });
     }
-    return res.status(500).json({
-        status: RES_STATUS.FAILED,
-        msg: "fail: get all staff info",
-        data: null,
-    });
 };
 
 /**
@@ -45,19 +49,23 @@ export const staffAllInfo = async (req: Request, res: Response) => {
  */
 export const staffSingleInfo = async (req: Request, res: Response) => {
     logger.infoLog("server - staff: get single staff info");
-    const result = await m_staffGetSingle(req.body.uid);
-    if (result) {
-        return res.status(200).json({
-            status: RES_STATUS.SUCCESS,
-            msg: "success: get single staff info",
-            data: { ...result, password: "" },
+    try {
+        const result = await m_staffGetSingle(req.body.uid);
+        if (result) {
+            return res.status(200).json({
+                status: RES_STATUS.SUCCESS,
+                msg: "success: get single staff info",
+                data: { ...result, password: "" },
+            });
+        }
+        throw new Error("error: get single staff info");
+    } catch (error) {
+        return res.status(500).json({
+            status: RES_STATUS.FAILED,
+            msg: "fail: get single staff info",
+            data: null,
         });
     }
-    return res.status(500).json({
-        status: RES_STATUS.FAILED,
-        msg: "fail: get single staff info",
-        data: null,
-    });
 };
 
 /**

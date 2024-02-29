@@ -17,9 +17,17 @@ import {
     m_findOrder,
     m_orderGetAllWithDetails,
 } from "../../models/ordersModel";
-import { formOrderDesc, formPayment, genOrderId } from "../../utils/utils";
+import {
+    formOrderDesc,
+    formPayment,
+    genOrderId,
+    genOrderWithWorkLogs,
+} from "../../utils/utils";
 import { m_clientGetSingle } from "../../models/clientsModel";
-import { m_getAllOrdersWithWorkLog } from "../../models/workLogModel";
+import {
+    m_wlGetAllOrdersWithWL,
+    m_wlGetALLWithLogStructure,
+} from "../../models/workLogModel";
 
 /**
  * @description return all orders from orders table with client first name and last name from clients table
@@ -29,11 +37,16 @@ import { m_getAllOrdersWithWorkLog } from "../../models/workLogModel";
  */
 export const orderAll = async (req: Request, res: Response) => {
     console.log("server - order: get all orders");
-    //const result = await m_orderGetAll();
+    //const orderResult = await m_orderGetAll();
     //const result = await m_orderGetAllWithDetails();
-    const result = await m_getAllOrdersWithWorkLog();
+    const ordersResult = await m_wlGetAllOrdersWithWL();
+    const workLogsResult = await m_wlGetALLWithLogStructure();
     //console.log("-> all oreder from db: ", result);
-    if (result) {
+    //console.log("--> all work logs: ", result);
+    const result = genOrderWithWorkLogs(ordersResult, workLogsResult);
+    console.log("--> all work logs: ", result);
+
+    if (result.length) {
         return res.status(200).json({
             status: RES_STATUS.SUCCESS,
             msg: "successed retrieve all orders",

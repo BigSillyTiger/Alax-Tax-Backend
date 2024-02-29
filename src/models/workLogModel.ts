@@ -15,7 +15,11 @@ export const m_getLastWorkLog = async () => {
     }
 };
 
-export const m_getAllOrdersWithWorkLog = async () => {
+/**
+ * @description this sql has issues, need to fix
+ * @returns
+ */
+export const m_wlGetAllOrdersWithWL = async () => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
@@ -50,7 +54,15 @@ export const m_getAllOrdersWithWorkLog = async () => {
                     JSON_OBJECT(
                         'cid', c.cid,
                         'first_name', c.first_name,
-                        'last_name', c.last_name
+                        'last_name', c.last_name,
+                        'phone', c.phone,
+                        'email', c.email,
+                        'address', c.address,
+                        'suburb', c.suburb,
+                        'city', c.city,
+                        'state', c.state,
+                        'country', c.country,
+                        'postcode', c.postcode
                     ) AS clientInfo
                 FROM ${DB_TABLE_LIST.CLIENTS} c
             ) C ON O.fk_cid = C.cid
@@ -92,9 +104,9 @@ export const m_getAllOrdersWithWorkLog = async () => {
                     O.oid AS fk_oid,
                     JSON_ARRAYAGG(
                         JSON_OBJECT(
-                            'fk_oid', COALESCE(logs.fk_oid, O.oid),
+                            'fk_oid', logs.fk_oid,
                             'wl_date', logs.wl_date,
-                            'logs', logs.logs_array
+                            'assigned_work', logs.logs_array
                         )
                     ) AS workLogs
                 FROM ${DB_TABLE_LIST.ORDERS} O
@@ -109,6 +121,7 @@ export const m_getAllOrdersWithWorkLog = async () => {
                                 'wl_date', wl.wl_date,
                                 'e_time', wl.e_time,
                                 's_time', wl.s_time,
+                                'b_time', wl.b_time,
                                 'wl_note', wl.wl_note,
                                 'wl_status', wl.wl_status,
                                 'confirm_status', wl.confirm_status,
@@ -121,7 +134,7 @@ export const m_getAllOrdersWithWorkLog = async () => {
                         ) AS logs_array
                     FROM ${DB_TABLE_LIST.WORK_LOGS} wl
                     JOIN staff s ON wl.fk_uid = s.uid
-                    GROUP BY wl.fk_oid, wl.wl_date, s.first_name
+                    GROUP BY wl.fk_oid, wl.wl_date
                 ) AS logs ON logs.fk_oid = O.oid
                 GROUP BY O.oid
             ) W ON O.oid = W.fk_oid;
@@ -131,6 +144,54 @@ export const m_getAllOrdersWithWorkLog = async () => {
         return Object.values(result[0][0])[0];
     } catch (err) {
         console.log("err: get all orders with work log: ", err);
+        return null;
+    }
+};
+
+export const m_wlGetALLWithLogStructure = async () => {
+    try {
+        const connection = await adminPool.getConnection();
+        const result: any = await connection.query(`
+            SELECT 
+                JSON_ARRAYAGG(
+                    JSON_OBJECT(
+                    'logs', logs,
+                    'fk_oid', fk_oid,
+                    'wl_date', wl_date
+                )
+            ) AS result
+            FROM (
+                SELECT 
+                    fk_oid,
+                    wl_date,
+                    JSON_ARRAYAGG(
+                        JSON_OBJECT(
+                            'wlid', wl.wlid,
+                            'fk_uid', wl.fk_uid,
+                            'wl_date', wl.wl_date,
+                            'e_time', wl.e_time,
+                            's_time', wl.s_time,
+                            'wl_note', wl.wl_note,
+                            'wl_status', wl.wl_status,
+                            'confirm_status', wl.confirm_status,
+                            'first_name', s.first_name,
+                            'last_name', s.last_name,
+                            'phone', s.phone,
+                            'email', s.email,
+                            'role', s.role
+                        )
+                    ) AS logs
+                FROM ${DB_TABLE_LIST.WORK_LOGS} wl
+                JOIN staff s ON wl.fk_uid = s.uid
+                GROUP BY 
+                    fk_oid, wl_date
+            ) AS subquery
+            ;`);
+        connection.release();
+        //console.log("---> wlGetALLWithLogStructure: ", result[0][0].result);
+        return result[0][0].result;
+    } catch (error) {
+        console.log("err: wlGetALLWithLogStructure: ", error);
         return null;
     }
 };

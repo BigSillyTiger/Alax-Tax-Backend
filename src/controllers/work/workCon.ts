@@ -23,7 +23,7 @@ SELECT JSON_ARRAYAGG(
         'order_services', all_services,
         'payments', paymentData,
         'client_info', clientInfo,
-        'work_logs', workLogs
+        'work_logs', COALESCE(workLogs, JSON_ARRAY())
     )
 )
 FROM orders O
@@ -75,7 +75,7 @@ LEFT JOIN (
         O.oid AS fk_oid,
         JSON_ARRAYAGG(
             JSON_OBJECT(
-                'fk_oid', COALESCE(logs.fk_oid, O.oid),
+                'fk_oid', logs.fk_oid,
                 'wl_date', logs.wl_date,
                 'logs', logs.logs_array
             )
@@ -104,7 +104,8 @@ LEFT JOIN (
             ) AS logs_array
         FROM work_logs wl
         JOIN staff s ON wl.fk_uid = s.uid
-        GROUP BY wl.fk_oid, wl.wl_date, s.first_name
+        WHERE wl.wl_date != null
+        GROUP BY wl.fk_oid, wl.wl_date
     ) AS logs ON logs.fk_oid = O.oid
     GROUP BY O.oid
 ) W ON O.oid = W.fk_oid;
@@ -126,79 +127,10 @@ const result2 = [
         deposit: 0.0,
         payments: null,
         postcode: "5033",
-        work_logs: [
-            {
-                logs: [
-                    {
-                        wlid: "wl250224002",
-                        e_time: null,
-                        fk_uid: "E002",
-                        s_time: null,
-                        wl_date: "2024-02-28",
-                        wl_note: null,
-                        wl_status: "ongoing",
-                        first_name: "Are44",
-                        confirm_status: 0,
-                    },
-                ],
-                fk_oid: "J250224001",
-                wl_date: "2024-02-28",
-            },
-            {
-                logs: [
-                    {
-                        wlid: "wl250224001",
-                        e_time: null,
-                        fk_uid: "E001",
-                        s_time: null,
-                        wl_date: "2024-02-28",
-                        wl_note: null,
-                        wl_status: "ongoing",
-                        first_name: "Areos",
-                        confirm_status: 0,
-                    },
-                ],
-                fk_oid: "J250224001",
-                wl_date: "2024-02-28",
-            },
-            {
-                logs: [
-                    {
-                        wlid: "wl260224002",
-                        e_time: null,
-                        fk_uid: "E002",
-                        s_time: null,
-                        wl_date: "2024-02-29",
-                        wl_note: null,
-                        wl_status: "ongoing",
-                        first_name: "Are44",
-                        confirm_status: 0,
-                    },
-                ],
-                fk_oid: "J250224001",
-                wl_date: "2024-02-29",
-            },
-            {
-                logs: [
-                    {
-                        wlid: "wl260224001",
-                        e_time: null,
-                        fk_uid: "E001",
-                        s_time: null,
-                        wl_date: "2024-02-29",
-                        wl_note: null,
-                        wl_status: "ongoing",
-                        first_name: "Areos",
-                        confirm_status: 0,
-                    },
-                ],
-                fk_oid: "J250224001",
-                wl_date: "2024-02-29",
-            },
-        ],
+        work_logs: [{ logs: null, fk_oid: null, wl_date: null }],
         client_info: { cid: "C0001", last_name: "Chen", first_name: "Areos" },
-        created_date: "2024-02-25 12:40:27.000000",
-        invoice_date: "2024-02-25 12:40:27.000000",
+        created_date: "2024-02-25 12:10:27.000000",
+        invoice_date: "2024-02-25 12:10:27.000000",
         order_services: [
             {
                 gst: 3.2,
@@ -241,10 +173,10 @@ const result2 = [
         deposit: 0.0,
         payments: null,
         postcode: "5033",
-        work_logs: [{ logs: null, fk_oid: "J250224002", wl_date: null }],
+        work_logs: [{ logs: null, fk_oid: null, wl_date: null }],
         client_info: { cid: "C0001", last_name: "Chen", first_name: "Areos" },
-        created_date: "2024-02-25 12:40:32.000000",
-        invoice_date: "2024-02-25 12:40:32.000000",
+        created_date: "2024-02-25 12:10:32.000000",
+        invoice_date: "2024-02-25 12:10:32.000000",
         order_services: [
             {
                 gst: 7.8,
@@ -277,14 +209,14 @@ const result2 = [
             {
                 paid: 100.0,
                 fk_oid: "J250224003",
-                paid_date: "2024-02-25 00:00:00.000000",
+                paid_date: "2024-02-24 23:30:00.000000",
             },
         ],
         postcode: "5033",
-        work_logs: [{ logs: null, fk_oid: "J250224003", wl_date: null }],
+        work_logs: [{ logs: null, fk_oid: null, wl_date: null }],
         client_info: { cid: "C0001", last_name: "Chen", first_name: "Areos" },
-        created_date: "2024-02-25 12:40:41.000000",
-        invoice_date: "2024-02-25 12:40:41.000000",
+        created_date: "2024-02-25 12:10:41.000000",
+        invoice_date: "2024-02-25 12:10:41.000000",
         order_services: [
             {
                 gst: 44.4,
@@ -327,10 +259,10 @@ const result2 = [
         deposit: 0.0,
         payments: null,
         postcode: "5033",
-        work_logs: [{ logs: null, fk_oid: "J250224004", wl_date: null }],
+        work_logs: [{ logs: null, fk_oid: null, wl_date: null }],
         client_info: { cid: "C0004", last_name: "Chen", first_name: "Ar44" },
-        created_date: "2024-02-25 13:13:23.000000",
-        invoice_date: "2024-02-25 13:13:23.000000",
+        created_date: "2024-02-25 12:43:23.000000",
+        invoice_date: "2024-02-25 12:43:23.000000",
         order_services: [
             {
                 gst: 13.3,
@@ -369,5 +301,117 @@ const result2 = [
                 description: "",
             },
         ],
+    },
+];
+
+const query3 = `
+SELECT 
+JSON_ARRAYAGG(
+    JSON_OBJECT(
+        'logs', logs,
+        'fk_oid', fk_oid,
+        'wl_date', wl_date
+    )
+)
+FROM (
+SELECT 
+    fk_oid,
+    wl_date,
+    JSON_ARRAYAGG(
+        JSON_OBJECT(
+            'wlid', wl.wlid,
+            'fk_uid', wl.fk_uid,
+            'wl_date', wl.wl_date,
+            'e_time', wl.e_time,
+            's_time', wl.s_time,
+            'wl_note', wl.wl_note,
+            'wl_status', wl.wl_status,
+            'confirm_status', wl.confirm_status,
+            'first_name', s.first_name,
+            'last_name', s.last_name,
+            'phone', s.phone,
+            'email', s.email,
+            'role', s.role
+        )
+    ) AS logs
+FROM work_logs wl
+JOIN staff s ON wl.fk_uid = s.uid
+GROUP BY 
+    fk_oid, wl_date
+) AS subquery;
+`;
+
+const rr = [
+    {
+        logs: [
+            {
+                role: "employee",
+                wlid: "wl250224001",
+                email: "333@gmail.com",
+                phone: "+61478697668",
+                e_time: null,
+                fk_uid: "E001",
+                s_time: null,
+                wl_date: "2024-02-28",
+                wl_note: null,
+                last_name: "Chen",
+                wl_status: "ongoing",
+                first_name: "Areos",
+                confirm_status: 0,
+            },
+            {
+                role: "employee",
+                wlid: "wl250224002",
+                email: "are444@gmail.com",
+                phone: "+6147862424558",
+                e_time: null,
+                fk_uid: "E002",
+                s_time: null,
+                wl_date: "2024-02-28",
+                wl_note: null,
+                last_name: "Chen",
+                wl_status: "ongoing",
+                first_name: "Are44",
+                confirm_status: 0,
+            },
+        ],
+        fk_oid: "J250224001",
+        wl_date: "2024-02-28",
+    },
+    {
+        logs: [
+            {
+                role: "employee",
+                wlid: "wl260224001",
+                email: "333@gmail.com",
+                phone: "+61478697668",
+                e_time: null,
+                fk_uid: "E001",
+                s_time: null,
+                wl_date: "2024-02-29",
+                wl_note: null,
+                last_name: "Chen",
+                wl_status: "ongoing",
+                first_name: "Areos",
+                confirm_status: 0,
+            },
+            {
+                role: "employee",
+                wlid: "wl260224002",
+                email: "are444@gmail.com",
+                phone: "+6147862424558",
+                e_time: null,
+                fk_uid: "E002",
+                s_time: null,
+                wl_date: "2024-02-29",
+                wl_note: null,
+                last_name: "Chen",
+                wl_status: "ongoing",
+                first_name: "Are44",
+                confirm_status: 0,
+            },
+        ],
+        fk_oid: "J250224001",
+        wl_date: "2024-02-29",
     },
 ];
