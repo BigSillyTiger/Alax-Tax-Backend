@@ -1,39 +1,7 @@
 import { DB_TABLE_LIST } from "../utils/config";
 import logger from "../utils/logger";
 import adminPool from "./adminPool";
-
-type Torder = {
-    oid?: string; // new order does not have oid
-    fk_cid: string;
-    address: string;
-    suburb: string;
-    city: string;
-    state: string;
-    country: string;
-    postcode: string;
-    status: string;
-    deposit: number;
-    gst: number;
-    total: number;
-};
-
-type TorderDesc = {
-    fk_oid: string;
-    tital: string;
-    taxable: boolean;
-    description: string;
-    qty: number;
-    unit: string;
-    unit_price: number;
-    gst: number;
-    netto: number;
-}[];
-
-type Tpayment = {
-    fk_oid: string;
-    paid: number;
-    paid_date: string;
-};
+import type { Tpayment, Torder, TorderDesc } from "../utils/global";
 
 /**
  *

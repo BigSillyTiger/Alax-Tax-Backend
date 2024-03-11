@@ -11,6 +11,7 @@ import {
 } from "../../models/settingModel";
 import dotenv from "dotenv";
 import { encodePW, genOrderId } from "../../utils/utils";
+import { TRequestWithUser } from "../../utils/global";
 
 dotenv.config();
 
@@ -101,13 +102,6 @@ export const adminLogin = async (req: Request, res: Response) => {
         msg: "ERROR: login error",
         data: null,
     });
-};
-
-type TRequestWithUser = Request & {
-    user?: {
-        userId: string;
-        username: string;
-    };
 };
 
 export const authCheck = async (req: TRequestWithUser, res: Response) => {

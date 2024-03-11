@@ -1,7 +1,7 @@
 import { DB_TABLE_LIST, uidPrefix } from "../utils/config";
 import logger from "../utils/logger";
 import adminPool from "./adminPool";
-import { TstaffData } from "../utils/utils";
+import { TstaffData } from "../utils/global";
 
 /**
  * @description retrieve all staff info which is not archived

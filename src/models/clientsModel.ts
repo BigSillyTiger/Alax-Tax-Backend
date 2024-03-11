@@ -1,20 +1,7 @@
 import { DB_TABLE_LIST } from "../utils/config";
 import logger from "../utils/logger";
 import adminPool from "./adminPool";
-
-type TclientData = {
-    cid: string;
-    first_name: string;
-    last_name: string;
-    phone: string;
-    email: string;
-    address: string;
-    suburb: string;
-    city: string;
-    state: string;
-    country: string;
-    postcode: string;
-}[];
+import type { TclientData } from "../utils/global";
 
 export const m_clientInsert = async (client: TclientData) => {
     try {

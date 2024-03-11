@@ -155,7 +155,7 @@ export const m_wlGetALLWithLogStructure = async () => {
             SELECT 
                 JSON_ARRAYAGG(
                     JSON_OBJECT(
-                    'logs', logs,
+                    'assigned_work', logs,
                     'fk_oid', fk_oid,
                     'wl_date', wl_date
                 )
@@ -194,4 +194,9 @@ export const m_wlGetALLWithLogStructure = async () => {
         console.log("err: wlGetALLWithLogStructure: ", error);
         return null;
     }
+};
+
+export const m_wlUpdateAssignments = async (data: any) => {
+    try {
+    } catch (error) {}
 };

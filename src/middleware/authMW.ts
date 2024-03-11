@@ -3,15 +3,9 @@ import { verify } from "jsonwebtoken";
 import dotenv from "dotenv";
 import logger from "../utils/logger";
 import { RES_STATUS } from "../utils/config";
+import { TRequestWithUser } from "../utils/global";
 
 dotenv.config();
-
-type TRequestWithUser = Request & {
-    user?: {
-        userId: string | null;
-        username: string;
-    };
-};
 
 const authenticateJWT = (
     req: TRequestWithUser,

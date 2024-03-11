@@ -1,19 +1,7 @@
 import logger from "../utils/logger";
 import adminPool from "./adminPool";
 import { DB_TABLE_LIST } from "../utils/config";
-
-type Tcompany = {
-    id: number;
-    name: string;
-    address: string;
-    phone: string;
-    email: string;
-    bld: string;
-    abn: string;
-    bsb: string;
-    acc: string;
-    logoName: string;
-};
+import type { Tcompany } from "../utils/global";
 
 /**
  *

@@ -4,6 +4,7 @@ import { m_uidGetLastStaff } from "../models/staffModel";
 import { m_uidGetLastClient } from "../models/clientsModel";
 import { m_uidGetLastOrder } from "../models/ordersModel";
 import { m_getLastWorkLog } from "../models/workLogModel";
+import type { TstaffData } from "../utils/global";
 
 export const formOrderDesc = (id: number, items: any) => {
     return items.map((item: any, index: number) => {
@@ -42,28 +43,6 @@ export const formPayment = (fk_oid: string, items: any) => {
 export const encodePW = async (password: string) => {
     const newPW = await bcrypt.hash(password, 10);
     return newPW;
-};
-
-export type TstaffData = {
-    uid: string;
-    first_name: string;
-    last_name: string;
-    phone: string;
-    email: string;
-    password: string;
-    address: string;
-    role: "manager" | "employee";
-    suburb: string;
-    city: string;
-    state: string;
-    country: string;
-    postcode: string;
-    dashboard: 0 | 1 | 2;
-    clients: 0 | 1 | 2;
-    orders: 0 | 1 | 2;
-    calendar: 0 | 1 | 2;
-    staff: 0 | 1 | 2;
-    setting: 0 | 1 | 2;
 };
 
 export const replaceStaffPW = (data: TstaffData[]) => {
