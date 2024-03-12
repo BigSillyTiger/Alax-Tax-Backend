@@ -340,6 +340,59 @@ export const m_orderUpdateProperty = async (
     }
 };
 
+export const m_orderUpdateWithDesc = async (
+    order: Torder,
+    oid: string,
+    order_services: TorderDesc
+) => {
+    try {
+        const connection = await adminPool.getConnection();
+        await connection.query("START TRANSACTION;");
+        await connection.query(
+            `UPDATE ${DB_TABLE_LIST.ORDERS} SET 
+                address = ?, 
+                suburb = ?, 
+                city = ?, 
+                state = ?, 
+                country = ?, 
+                postcode = ?, 
+                status = ?, 
+                deposit = ?, 
+                gst = ?, 
+                total = ? 
+            WHERE oid = ?`,
+            [
+                order.address,
+                order.suburb,
+                order.city,
+                order.state,
+                order.country,
+                order.postcode,
+                order.status,
+                order.deposit,
+                order.gst,
+                order.total,
+                order.oid,
+            ]
+        );
+        await connection.query(
+            `DELETE FROM ${DB_TABLE_LIST.ORDER_SERVICES} WHERE fk_oid = ?`,
+            [oid]
+        );
+        await connection.query(
+            `INSERT INTO ${DB_TABLE_LIST.ORDER_SERVICES} (fk_oid, ranking, title, description, qty, taxable, unit, unit_price, gst, netto) VALUES ?`,
+            [order_services]
+        );
+        await connection.query("COMMIT;");
+        connection.release();
+        console.log("-> success update order with desc");
+        return true;
+    } catch (error) {
+        console.log("-> failed update order with desc: ", error);
+        return false;
+    }
+};
+
 export const m_orderUpdate = async (order: Torder) => {
     try {
         const connection = await adminPool.getConnection();

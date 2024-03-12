@@ -2,20 +2,18 @@ import type { Request, Response } from "express";
 import { RES_STATUS } from "../../utils/config";
 import {
     m_orderDescInsert,
-    m_orderGetAll,
     m_orderInsert,
     m_clientOrders,
     m_clientOrderWichId,
     m_orderArchive,
     m_orderStatusUpdate,
-    m_orderUpdate,
-    m_orderDescDel,
     m_deletePayment,
     m_updatePayments,
     m_orderUpdateProperty,
     m_findClientID,
     m_findOrder,
     m_orderGetAllWithDetails,
+    m_orderUpdateWithDesc,
 } from "../../models/ordersModel";
 import {
     formOrderDesc,
@@ -24,10 +22,9 @@ import {
     genOrderWithWorkLogs,
 } from "../../utils/utils";
 import { m_clientGetSingle } from "../../models/clientsModel";
-import {
-    m_wlGetALLWithLogStructure,
-} from "../../models/workLogModel";
+import { m_wlGetALLWithLogStructure } from "../../models/workLogModel";
 import { Torder } from "@/utils/global";
+import { error } from "console";
 
 /**
  * @description return all orders from orders table with client first name and last name from clients table
@@ -143,28 +140,26 @@ export const orderUpdate = async (req: Request, res: Response) => {
     console.log("server - order: update order: ", req.body);
     const order = req.body.order;
     const order_services = req.body.order_services;
-    const result = await m_orderUpdate(order);
-    if (result.affectedRows) {
-        // delete previous order_services
-        const descDelRes = await m_orderDescDel(order.oid);
-        if (descDelRes.affectedRows) {
-            const insertDescRes = await m_orderDescInsert(
-                formOrderDesc(req.body.order.oid, order_services)
-            );
-            if (insertDescRes.affectedRows) {
-                return res.status(200).json({
-                    status: RES_STATUS.SUC_UPDATE,
-                    msg: `successed update order[${order.oid}]`,
-                    data: result,
-                });
-            }
-        }
+    try {
+        const result = await m_orderUpdateWithDesc(
+            order,
+            order.oid,
+            formOrderDesc(req.body.order.oid, order_services)
+        );
+        if (result) {
+            return res.status(200).json({
+                status: RES_STATUS.SUCCESS,
+                msg: `successed update order[${order.oid}]`,
+                data: result,
+            });
+        } else throw error;
+    } catch (error) {
+        return res.status(400).json({
+            status: RES_STATUS.FAILED,
+            msg: `Failed: update order[${order.oid}]`,
+            data: null,
+        });
     }
-    return res.status(400).json({
-        status: RES_STATUS.FAILED,
-        msg: `Failed: update order[${order.oid}]`,
-        data: null,
-    });
 };
 
 export const clientOrders = async (req: Request, res: Response) => {
