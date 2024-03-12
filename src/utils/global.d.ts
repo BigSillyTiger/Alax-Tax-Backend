@@ -102,7 +102,7 @@ export type ToriWorkLog = {
     wl_status: string;
     wl_note: string;
     confirm_status: boolean;
-    archived: boolean;
+    archive: boolean;
 };
 
 export type TassignedWork = {
@@ -231,19 +231,11 @@ export type ToriWorkLog = {
     wl_status: string;
     wl_note: string;
     confirm_status: boolean;
-    archived: boolean;
+    archive: boolean;
 };
 
-export type TassignedWork = {
-    wlid: string;
-    fk_uid: string;
-    wl_date: string;
-    s_time: string;
-    e_time: string;
-    b_time: string;
-    wl_note: string;
-    wl_status: string;
-    confirm_status: boolean;
+export type TassignedWork = ToriWorkLog & {
+    // extra data from staff table
     first_name: string;
     last_name: string;
     phone: string;

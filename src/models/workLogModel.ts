@@ -1,3 +1,4 @@
+import { ToriWorkLog } from "@/utils/global";
 import { DB_TABLE_LIST, uidPrefix } from "../utils/config";
 import adminPool from "./adminPool";
 
@@ -118,6 +119,7 @@ export const m_wlGetAllOrdersWithWL = async () => {
                             JSON_OBJECT(
                                 'wlid', wl.wlid,
                                 'fk_uid', wl.fk_uid,
+                                'fk_oid', wl.fk_oid,
                                 'wl_date', wl.wl_date,
                                 'e_time', wl.e_time,
                                 's_time', wl.s_time,
@@ -125,6 +127,7 @@ export const m_wlGetAllOrdersWithWL = async () => {
                                 'wl_note', wl.wl_note,
                                 'wl_status', wl.wl_status,
                                 'confirm_status', wl.confirm_status,
+                                'archive', wl.archive,
                                 'first_name', s.first_name,
                                 'last_name', s.last_name,
                                 'phone', s.phone,
@@ -168,12 +171,15 @@ export const m_wlGetALLWithLogStructure = async () => {
                         JSON_OBJECT(
                             'wlid', wl.wlid,
                             'fk_uid', wl.fk_uid,
+                            'fk_oid', wl.fk_oid,
                             'wl_date', wl.wl_date,
                             'e_time', wl.e_time,
                             's_time', wl.s_time,
+                            'b_time', wl.b_time,
                             'wl_note', wl.wl_note,
                             'wl_status', wl.wl_status,
                             'confirm_status', wl.confirm_status,
+                            'archive', wl.archive,
                             'first_name', s.first_name,
                             'last_name', s.last_name,
                             'phone', s.phone,
@@ -196,7 +202,50 @@ export const m_wlGetALLWithLogStructure = async () => {
     }
 };
 
-export const m_wlUpdateAssignments = async (data: any) => {
+/**
+ * @description delete previous work log with
+ * @param oid
+ */
+export const m_wlDelWorkLog = async (oid: string) => {
     try {
     } catch (error) {}
+};
+
+export const m_wlUpdateAssignments = async (oid: string, data: any[]) => {
+    try {
+        const connection = await adminPool.getConnection();
+        await connection.query("START TRANSACTION;");
+        await connection.query(
+            `DELETE FROM ${DB_TABLE_LIST.WORK_LOGS} WHERE fk_oid = ?;`,
+            [oid]
+        );
+        await connection.query(
+            `
+            INSERT INTO ${DB_TABLE_LIST.WORK_LOGS} (wlid, fk_oid, fk_uid, wl_date, s_time, e_time, b_time, wl_status, wl_note, confirm_status, archive) VALUES ?;
+        `,
+            [data]
+        );
+        await connection.query("COMMIT;");
+        console.log("-> finished transaction - update worklog");
+        connection.release();
+        return true;
+    } catch (error) {
+        console.log("-> failed transaction - update worklog");
+        console.log("-> error occurs: ", error);
+        return false;
+    }
+};
+
+export const m_wlGetAllWLID = async () => {
+    try {
+        const connection = await adminPool.getConnection();
+        const result: any = await connection.query(
+            `SELECT wlid FROM ${DB_TABLE_LIST.WORK_LOGS};`
+        );
+        connection.release();
+        return result[0];
+    } catch (error) {
+        console.log("err: get all wlid: ", error);
+        return null;
+    }
 };

@@ -3,8 +3,8 @@ import { uidPrefix } from "./config";
 import { m_uidGetLastStaff } from "../models/staffModel";
 import { m_uidGetLastClient } from "../models/clientsModel";
 import { m_uidGetLastOrder } from "../models/ordersModel";
-import { m_getLastWorkLog } from "../models/workLogModel";
-import type { TstaffData } from "../utils/global";
+import { m_getLastWorkLog, m_wlGetAllWLID } from "../models/workLogModel";
+import type { Torder, TstaffData, ToriWorkLog } from "../utils/global";
 
 export const formOrderDesc = (id: number, items: any) => {
     return items.map((item: any, index: number) => {
@@ -30,6 +30,37 @@ export const formOrderDesc = (id: number, items: any) => {
             unit_price,
             gst,
             netto,
+        ];
+    });
+};
+
+export const formWorkLog = (items: ToriWorkLog[]) => {
+    return items.map((item) => {
+        const {
+            wlid,
+            fk_oid,
+            fk_uid,
+            wl_date,
+            s_time,
+            e_time,
+            b_time,
+            wl_status,
+            wl_note,
+            confirm_status,
+            archive,
+        } = item;
+        return [
+            wlid,
+            fk_oid,
+            fk_uid,
+            wl_date,
+            s_time,
+            e_time,
+            b_time,
+            wl_status,
+            wl_note,
+            confirm_status,
+            archive,
         ];
     });
 };
@@ -90,11 +121,10 @@ export const genClientUid = async () => {
  * @description generate date of 6 digits with format of ddmmyy
  */
 const genDate = () => {
-    const date = new Date();
-    const day = date.getDate().toString().padStart(2, "0");
-    const month = (date.getMonth() + 1).toString().padStart(2, "0");
-    const year = date.getFullYear().toString().slice(2);
-    return day + month + year;
+    const today = new Date();
+    return `${String(today.getDate()).padStart(2, "0")}${String(
+        today.getMonth() + 1
+    ).padStart(2, "0")}${today.getFullYear().toString().slice(-2)}`;
 };
 
 /**
@@ -115,29 +145,53 @@ export const genOrderId = async () => {
     return `${uidPrefix.order}${date}${newId}`;
 };
 
-/**
- * @description generate work log id
- */
-export const genWorkLogId = async () => {
-    const result = await m_getLastWorkLog();
-    const date = genDate();
-    let newId = "001";
-    if (result.length) {
-        const dateCmp = date === result[0].wid.slice(1, 7);
-        result.length && dateCmp
-            ? (newId = String(
-                  parseInt(result[0].wid.slice(-3), 10) + 1
-              ).padStart(3, "0"))
-            : (newId = "001");
-    }
-    return `${uidPrefix.workLog}${date}${newId}`;
-};
-
-export const genOrderWithWorkLogs = (orders: any, workLogs: any) => {
+export const genOrderWithWorkLogs = (
+    orders: Torder[],
+    workLogs: ToriWorkLog[]
+) => {
     return orders.map((order: any) => {
         const workLogsOfOrder = workLogs.filter(
             (log: any) => log.fk_oid === order.oid
         );
         return { ...order, work_logs: workLogsOfOrder };
     });
+};
+
+/**
+ * @description generate new work log id based on the last work log id
+ *  and the current date
+ * @param oriWorkLogs
+ * @returns
+ */
+export const genWorkLogsWithNewWLID = async (oriWorkLogs: ToriWorkLog[]) => {
+    const ddmmyy = genDate();
+    // Filter out items with non-empty wlid
+    const itemsWithEmptyWlid = oriWorkLogs.filter((item) => !item.wlid);
+    // Generate unique wlid values
+    let counter = 1;
+    // Record used wlid values
+    const usedWlids = new Set(
+        oriWorkLogs.map((item) => item.wlid).filter((wlid) => wlid)
+    );
+
+    const existingWLIDs = await m_wlGetAllWLID().then(
+        (value) => new Set(value.map((item: { wlid: string }) => item.wlid))
+    );
+
+    const updatedArray = [...oriWorkLogs];
+    for (const item of itemsWithEmptyWlid) {
+        let wlid;
+        do {
+            wlid = `${uidPrefix.workLog}${ddmmyy}${String(counter).padStart(
+                3,
+                "0"
+            )}`;
+            counter++;
+        } while (existingWLIDs.has(wlid));
+        existingWLIDs.add(wlid);
+
+        const index = updatedArray.indexOf(item);
+        updatedArray[index] = { ...item, wlid };
+    }
+    return updatedArray;
 };

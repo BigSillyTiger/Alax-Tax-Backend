@@ -1,24 +1,30 @@
 import { m_wlUpdateAssignments } from "../../models/workLogModel";
 import type { Request, Response } from "express";
 import type { TworkLog, ToriWorkLog } from "../../utils/global";
+import { formWorkLog, genWorkLogsWithNewWLID } from "../../utils/utils";
 
 export const workAdd = async (req: Request, res: Response) => {};
 
 export const workUpdate = async (req: Request, res: Response) => {
-    console.log("server - work assignment update: ", req.body);
-    const newWorkLogs = req.body.workLogs.flatMap((wl: TworkLog) =>
+    console.log("server - work assignment update ");
+    const tempWorkLogs = req.body.workLogs.flatMap((wl: TworkLog) =>
         wl.assigned_work.map(
             ({ first_name, last_name, phone, email, role, ...rest }) => rest
         )
     ) as ToriWorkLog[];
-    console.log("-> newWorkLogs: ", newWorkLogs);
+    const newWorkLogs = await genWorkLogsWithNewWLID(tempWorkLogs).then(
+        (value) => formWorkLog(value)
+    );
+    //const newWorkLogs = genWorkLogsWithNewWLID(tempWorkLogs);
     try {
-        //const result = await m_wlUpdateAssignments(req.body);
-        if (1) {
+        const oid = req.body.workLogs[0].fk_oid;
+        //const result = true;
+        const result = await m_wlUpdateAssignments(oid, newWorkLogs);
+        if (result) {
             return res.status(200).json({
                 status: "success",
                 msg: "Success:  work assignment update",
-                data: "",
+                data: result,
             });
         }
     } catch (err) {

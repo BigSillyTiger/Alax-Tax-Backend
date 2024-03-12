@@ -25,9 +25,9 @@ import {
 } from "../../utils/utils";
 import { m_clientGetSingle } from "../../models/clientsModel";
 import {
-    m_wlGetAllOrdersWithWL,
     m_wlGetALLWithLogStructure,
 } from "../../models/workLogModel";
+import { Torder } from "@/utils/global";
 
 /**
  * @description return all orders from orders table with client first name and last name from clients table
@@ -38,13 +38,14 @@ import {
 export const orderAll = async (req: Request, res: Response) => {
     console.log("server - order: get all orders");
     //const orderResult = await m_orderGetAll();
-    //const result = await m_orderGetAllWithDetails();
-    const ordersResult = await m_wlGetAllOrdersWithWL();
+    const ordersResult = await m_orderGetAllWithDetails();
+    //const ordersResult = await m_wlGetAllOrdersWithWL();
     const workLogsResult = await m_wlGetALLWithLogStructure();
-    //console.log("-> all oreder from db: ", result);
+    const result = genOrderWithWorkLogs(
+        ordersResult as Torder[],
+        workLogsResult
+    );
     //console.log("--> all work logs: ", result);
-    const result = genOrderWithWorkLogs(ordersResult, workLogsResult);
-    console.log("--> all work logs: ", result);
 
     if (result.length) {
         return res.status(200).json({
