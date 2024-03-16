@@ -10,11 +10,11 @@ import type { Tpayment, Torder, TorderDesc } from "../utils/global";
 export const m_orderGetAll = async () => {
     try {
         const connection = await adminPool.getConnection();
-        const result: any = await connection.query(
+        const [rows] = await connection.query(
             `SELECT ${DB_TABLE_LIST.ORDERS}.*, ${DB_TABLE_LIST.CLIENTS}.first_name, ${DB_TABLE_LIST.CLIENTS}.last_name, ${DB_TABLE_LIST.CLIENTS}.phone FROM ${DB_TABLE_LIST.ORDERS} INNER JOIN ${DB_TABLE_LIST.CLIENTS} ON ${DB_TABLE_LIST.ORDERS}.fk_cid = ${DB_TABLE_LIST.CLIENTS}.cid ORDER BY created_date DESC`
         );
         connection.release();
-        return result[0];
+        return rows;
     } catch (err) {
         console.log("err: get all orders: ", err);
         return null;

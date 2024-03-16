@@ -1,3 +1,4 @@
+import { RowDataPacket } from "mysql2";
 import { ToriWorkLog } from "@/utils/global";
 import { DB_TABLE_LIST, uidPrefix } from "../utils/config";
 import adminPool from "./adminPool";
@@ -5,11 +6,11 @@ import adminPool from "./adminPool";
 export const m_getLastWorkLog = async () => {
     try {
         const connection = await adminPool.getConnection();
-        const result: any = await connection.query(
+        const [rows] = await connection.query(
             `SELECT * FROM ${DB_TABLE_LIST.WORK_LOGS} ORDER BY id DESC LIMIT 1`
         );
         connection.release();
-        return result[0];
+        return rows;
     } catch (err) {
         console.log("err: get last work log: ", err);
         return null;
@@ -18,6 +19,7 @@ export const m_getLastWorkLog = async () => {
 
 /**
  * @description this sql has issues, need to fix
+ * @description not used api
  * @returns
  */
 export const m_wlGetAllOrdersWithWL = async () => {
@@ -154,7 +156,7 @@ export const m_wlGetAllOrdersWithWL = async () => {
 export const m_wlGetALLWithLogStructure = async () => {
     try {
         const connection = await adminPool.getConnection();
-        const result: any = await connection.query(`
+        const res: any = await connection.query(`
             SELECT 
                 JSON_ARRAYAGG(
                     JSON_OBJECT(
@@ -194,8 +196,13 @@ export const m_wlGetALLWithLogStructure = async () => {
             ) AS subquery
             ;`);
         connection.release();
+        const [[{ result }]] = res;
+        //const [rows] = res;
+        //const [firstRow] = rows;
+        //const { result } = firstRow;
         //console.log("---> wlGetALLWithLogStructure: ", result[0][0].result);
-        return result[0][0].result;
+        //return res[0][0].result;
+        return result;
     } catch (error) {
         console.log("err: wlGetALLWithLogStructure: ", error);
         return null;
@@ -236,16 +243,40 @@ export const m_wlUpdateAssignments = async (oid: string, data: any[]) => {
     }
 };
 
-export const m_wlGetAllWLID = async () => {
+export const m_wlGetAllWLID = async (): Promise<RowDataPacket[] | null> => {
     try {
         const connection = await adminPool.getConnection();
-        const result: any = await connection.query(
+        const [rows] = await connection.query(
             `SELECT wlid FROM ${DB_TABLE_LIST.WORK_LOGS};`
         );
         connection.release();
-        return result[0];
+        return rows as RowDataPacket[];
     } catch (error) {
         console.log("err: get all wlid: ", error);
+        return null;
+    }
+};
+
+export const m_wlGetAll = async (
+    archive = 0
+): Promise<RowDataPacket[] | null> => {
+    try {
+        const connection = await adminPool.getConnection();
+        const [rows] = await connection.query(
+            `SELECT 
+                wl.*,
+                s.first_name, s.last_name, s.email, s.phone,
+                o.address, o.suburb, o.city, o.state, o.country, o.postcode
+            FROM ${DB_TABLE_LIST.WORK_LOGS} wl 
+            INNER JOIN staff s ON wl.fk_uid = s.uid
+            INNER JOIN orders o ON wl.fk_oid = o.oid
+            WHERE wl.archive = ${archive};`
+        );
+        connection.release();
+        //console.log("-> test rows: ", rows);
+        return rows as RowDataPacket[];
+    } catch (error) {
+        console.log("err: get all work logs: ", error);
         return null;
     }
 };

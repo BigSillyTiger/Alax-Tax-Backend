@@ -23,8 +23,7 @@ import {
 } from "../../utils/utils";
 import { m_clientGetSingle } from "../../models/clientsModel";
 import { m_wlGetALLWithLogStructure } from "../../models/workLogModel";
-import { Torder } from "@/utils/global";
-import { error } from "console";
+import { Torder } from "../../utils/global";
 
 /**
  * @description return all orders from orders table with client first name and last name from clients table
@@ -152,7 +151,13 @@ export const orderUpdate = async (req: Request, res: Response) => {
                 msg: `successed update order[${order.oid}]`,
                 data: result,
             });
-        } else throw error;
+        } else {
+            return res.status(400).json({
+                status: RES_STATUS.FAILED,
+                msg: `Failed: update order[${order.oid}]`,
+                data: null,
+            });
+        }
     } catch (error) {
         return res.status(400).json({
             status: RES_STATUS.FAILED,

@@ -174,9 +174,10 @@ export const genWorkLogsWithNewWLID = async (oriWorkLogs: ToriWorkLog[]) => {
         oriWorkLogs.map((item) => item.wlid).filter((wlid) => wlid)
     );
 
-    const existingWLIDs = await m_wlGetAllWLID().then(
-        (value) => new Set(value.map((item: { wlid: string }) => item.wlid))
-    );
+    const existingWLIDs = await m_wlGetAllWLID().then((value) => {
+        if (!value) return new Set();
+        return new Set(value.map((item) => item.wlid));
+    });
 
     const updatedArray = [...oriWorkLogs];
     for (const item of itemsWithEmptyWlid) {

@@ -117,7 +117,7 @@ export const m_levelCheck = async (uid: string) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `SELECT uid, first_name, last_name, role, access, dashboard, clients, orders, calendar, staff, setting FROM ${DB_TABLE_LIST.STAFF} WHERE uid = '${uid}'`
+            `SELECT uid, first_name, last_name, role, access, dashboard, clients, orders, worklogs, calendar, staff, setting FROM ${DB_TABLE_LIST.STAFF} WHERE uid = '${uid}'`
         );
         connection.release();
         return result[0][0];
