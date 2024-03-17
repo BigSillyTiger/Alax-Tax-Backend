@@ -18,6 +18,7 @@ const {
     MYSQL_PASSWORD: PW,
     MYSQL_DB: DB,
     MYSQL_PORT: PORT,
+    PORT: LPORT,
 } = process.env;
 
 const pool = mysql.createPool({
@@ -189,7 +190,7 @@ export const updateLogo = async (req: Request, res: Response) => {
         return res.status(200).json({
             status: RES_STATUS.SUC_UPDATE_LOGO,
             msg: "successed: updating logo",
-            data: `http://${serverAddr}:${HOST}/logo/${logo.filename}`,
+            data: `http://${serverAddr}:${LPORT}/logo/${logo.filename}`,
         });
     }
 };
@@ -200,6 +201,6 @@ export const getLogo = async (req: Request, res: Response) => {
     return res.status(200).json({
         status: RES_STATUS.SUCCESS,
         msg: "successed: get logo",
-        data: `http://${serverAddr}:${HOST}/logo/${req.body.logoFile[0]}`,
+        data: `http://${serverAddr}:${LPORT}/logo/${req.body.logoFile[0]}`,
     });
 };
