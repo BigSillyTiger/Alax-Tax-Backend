@@ -1,4 +1,8 @@
-import { m_wlGetAll, m_wlUpdateAssignments } from "../../models/workLogModel";
+import {
+    m_wlGetAll,
+    m_wlUpdateAssignments,
+    m_wlSingleUpdateHours,
+} from "../../models/workLogModel";
 import type { Request, Response } from "express";
 import type { TworkLog, ToriWorkLog } from "../../utils/global";
 import { formWorkLog, genWorkLogsWithNewWLID } from "../../utils/utils";
@@ -54,6 +58,31 @@ export const wlUpdate = async (req: Request, res: Response) => {
         return res.status(400).json({
             status: RES_STATUS.FAILED_UPDATE_WORKLOG,
             msg: "Failed: work assignment update",
+            data: null,
+        });
+    }
+};
+
+export const wlSingleUpdateHours = async (req: Request, res: Response) => {
+    console.log("server - work log: single update");
+    try {
+        console.log("-> work log time info: ", req.body);
+        const result = await m_wlSingleUpdateHours(req.body);
+        console.log("-> update result: ", result);
+        if (result?.affectedRows) {
+            return res.status(200).json({
+                status: RES_STATUS.SUC_UPDATE_WORKLOG,
+                msg: "Success:  work log: single update",
+                data: result,
+            });
+        } else {
+            throw new Error("Failed: work log: single update");
+        }
+    } catch (error) {
+        console.log("err: work log: single update: ", error);
+        return res.status(400).json({
+            status: RES_STATUS.FAILED_UPDATE_WORKLOG,
+            msg: "Failed: work log: single update",
             data: null,
         });
     }

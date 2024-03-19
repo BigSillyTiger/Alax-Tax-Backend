@@ -1,6 +1,5 @@
-import { RowDataPacket } from "mysql2";
-import { ToriWorkLog } from "@/utils/global";
-import { DB_TABLE_LIST, uidPrefix } from "../utils/config";
+import type { ResultSetHeader, RowDataPacket } from "mysql2";
+import { DB_TABLE_LIST } from "../utils/config";
 import adminPool from "./adminPool";
 
 export const m_getLastWorkLog = async () => {
@@ -277,6 +276,34 @@ export const m_wlGetAll = async (
         return rows as RowDataPacket[];
     } catch (error) {
         console.log("err: get all work logs: ", error);
+        return null;
+    }
+};
+
+export const m_wlSingleUpdateHours = async ({
+    wlid,
+    s_time,
+    e_time,
+    b_time,
+}: {
+    wlid: string;
+    s_time: string;
+    e_time: string;
+    b_time: string;
+}) => {
+    try {
+        const connection = await adminPool.getConnection();
+        const [rows] = await connection.query(
+            `
+            UPDATE ${DB_TABLE_LIST.WORK_LOGS} 
+            SET s_time = ?, e_time = ?, b_time = ?
+            WHERE wlid = ?;`,
+            [s_time, e_time, b_time, wlid]
+        );
+        connection.release();
+        return rows as ResultSetHeader;
+    } catch (error) {
+        console.log("err: single update work log hours: ", error);
         return null;
     }
 };
