@@ -90,7 +90,6 @@ export const genStaffUid = async (
     prefix: (typeof uidPrefix)[keyof typeof uidPrefix]
 ) => {
     const result = await m_uidGetLastStaff(prefix);
-    console.log("-> get last staff uid: ", result);
     let newId = "";
     result.length
         ? (newId = String(parseInt(result[0].uid.slice(1), 10) + 1).padStart(
@@ -195,4 +194,66 @@ export const genWorkLogsWithNewWLID = async (oriWorkLogs: ToriWorkLog[]) => {
         updatedArray[index] = { ...item, wlid };
     }
     return updatedArray;
+};
+
+/**
+ * @description manage new work log id based on the work log id
+ */
+const breakTimers = new Map();
+
+export const genHHMM = (h: number, m: number) => {
+    const hours = String(h).padStart(2, "0");
+    const minutes = String(m).padStart(2, "0");
+    return `${hours}:${minutes}`;
+};
+
+export const startBreakTimer = (wlid: string) => {
+    try {
+        const now = new Date();
+        breakTimers.set(wlid, now);
+        return genHHMM(now.getHours(), now.getMinutes());
+    } catch (error) {
+        console.log("-> error: start break timer: ", error);
+        return false;
+    }
+};
+
+export const stopBreakTimer = (wlid: string) => {
+    if (!breakTimers.has(wlid)) {
+        console.log(`Break timer not started for work ID: ${wlid}`);
+        return "00:00";
+    }
+
+    const breakStartTime = breakTimers.get(wlid);
+    const breakEndTime = new Date();
+    const breakDuration = breakEndTime.getTime() - breakStartTime.getTime(); // Break duration in milliseconds
+
+    // Convert milliseconds to hours and minutes
+    const breakHours = Math.floor(breakDuration / (1000 * 60 * 60));
+    const breakMinutes = Math.floor(
+        (breakDuration % (1000 * 60 * 60)) / (1000 * 60)
+    );
+
+    // Here you can update the work log in your database with the break duration
+    // UpdateWorkLog(workId, breakHours, breakMinutes);
+
+    // Remove the break timer from the map
+    breakTimers.delete(wlid);
+    return `${breakHours}:${breakMinutes}`;
+};
+
+export const calBreakTime = (time1: string, time2: string) => {
+    const [hours1, minutes1] = time1.split(":").map(Number);
+    const [hours2, minutes2] = time2.split(":").map(Number);
+
+    let totalHours = hours1 + hours2;
+    let totalMinutes = minutes1 + minutes2;
+
+    // Handle overflow of minutes
+    if (totalMinutes >= 60) {
+        totalHours += Math.floor(totalMinutes / 60);
+        totalMinutes %= 60;
+    }
+
+    return genHHMM(totalHours, totalMinutes);
 };

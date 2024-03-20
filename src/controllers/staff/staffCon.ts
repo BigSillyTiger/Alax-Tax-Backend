@@ -93,9 +93,7 @@ export const staffSingleInstert = async (req: Request, res: Response) => {
     if (!emailDup && !phoneDup) {
         const newPW = await encodePW(req.body[0].password);
         const newUid = await genStaffUid(
-            req.body[0].role === "employee"
-                ? uidPrefix.employee
-                : uidPrefix.manager
+            uidPrefix[req.body[0].role as "employee" | "manager" | "labor"]
         );
         const result = await m_staffInsert({
             ...req.body[0],

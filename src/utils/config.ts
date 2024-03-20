@@ -58,6 +58,7 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 const uidPrefix = {
     manager: "M",
     employee: "E",
+    labor: "L",
     client: "C",
     order: "J",
     workLog: "WL",

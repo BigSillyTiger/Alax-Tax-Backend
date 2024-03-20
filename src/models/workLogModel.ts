@@ -282,6 +282,31 @@ export const m_wlGetAll = async (
     }
 };
 
+export const m_wlGetToday = async (
+    today: string,
+    archive = 0
+): Promise<RowDataPacket[] | null> => {
+    try {
+        const connection = await adminPool.getConnection();
+        const [rows] = await connection.query(
+            `SELECT 
+                wl.*,
+                s.first_name, s.last_name, s.email, s.phone,
+                o.address, o.suburb, o.city, o.state, o.country, o.postcode
+            FROM ${DB_TABLE_LIST.WORK_LOGS} wl 
+            INNER JOIN staff s ON wl.fk_uid = s.uid
+            INNER JOIN orders o ON wl.fk_oid = o.oid
+            WHERE wl.wl_date = ? AND wl.archive = ?;`,
+            [today, archive]
+        );
+        connection.release();
+        return rows as RowDataPacket[];
+    } catch (error) {
+        console.log("err: get today work logs: ", error);
+        return null;
+    }
+};
+
 export const m_wlSingleUpdateHours = async ({
     wlid,
     s_time,
@@ -321,6 +346,67 @@ export const m_wlSingleArchive = async (wlid: string) => {
         return rows as ResultSetHeader;
     } catch (error) {
         console.log("err: single archive work log: ", error);
+        return null;
+    }
+};
+
+export const m_wlGetBTimeWID = async (wlid: string) => {
+    try {
+        const connection = await adminPool.getConnection();
+        const [rows] = await connection.query(
+            `SELECT b_time FROM ${DB_TABLE_LIST.WORK_LOGS} WHERE wlid = ?;`,
+            [wlid]
+        );
+        connection.release();
+        return rows as RowDataPacket[];
+    } catch (error) {
+        console.log("err: get b_time with wlid: ", error);
+        return ["00:00"];
+    }
+};
+
+export const m_wlUpdateBTime = async (wlid: string, b_time: string) => {
+    try {
+        const connection = await adminPool.getConnection();
+        const [rows] = await connection.query(
+            `UPDATE ${DB_TABLE_LIST.WORK_LOGS} SET b_time = ? WHERE wlid = ?;`,
+            [b_time, wlid]
+        );
+        connection.release();
+        return rows as ResultSetHeader;
+    } catch (error) {
+        console.log("err: update b_time with wlid: ", error);
+        return null;
+    }
+};
+
+export const m_wlStartWork = async (time: string, wlid: string) => {
+    try {
+        console.log("-> m_wlStartWork api: ", time, wlid);
+        const connection = await adminPool.getConnection();
+        const [rows] = await connection.query(
+            `UPDATE ${DB_TABLE_LIST.WORK_LOGS} SET s_time = ?, wl_status = ? WHERE wlid = ?;`,
+            [time, "ongoing", wlid]
+        );
+        connection.release();
+        return rows as ResultSetHeader;
+    } catch (error) {
+        console.log("err: start work: ", error);
+        return null;
+    }
+};
+
+export const m_wlResetWorkTime = async (wlid: string) => {
+    try {
+        const connection = await adminPool.getConnection();
+        const [rows] = await connection.query(
+            `UPDATE ${DB_TABLE_LIST.WORK_LOGS} SET s_time = ?, e_time = ?, b_time = ?, wl_status = ? WHERE wlid = ?;`,
+            ["00:00", "00:00", "00:00", "pending", wlid]
+        );
+        connection.release();
+        return rows as ResultSetHeader;
+    } catch (error) {
+        console.log("err: reset work time: ", error);
         return null;
     }
 };
