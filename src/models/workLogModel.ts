@@ -138,6 +138,7 @@ export const m_wlGetAllOrdersWithWL = async () => {
                         ) AS logs_array
                     FROM ${DB_TABLE_LIST.WORK_LOGS} wl
                     JOIN staff s ON wl.fk_uid = s.uid
+                    WHERE wl.archive = 0
                     GROUP BY wl.fk_oid, wl.wl_date
                 ) AS logs ON logs.fk_oid = O.oid
                 GROUP BY O.oid
@@ -190,6 +191,7 @@ export const m_wlGetALLWithLogStructure = async () => {
                     ) AS logs
                 FROM ${DB_TABLE_LIST.WORK_LOGS} wl
                 JOIN staff s ON wl.fk_uid = s.uid
+                WHERE wl.archive = 0
                 GROUP BY 
                     fk_oid, wl_date
             ) AS subquery
@@ -304,6 +306,21 @@ export const m_wlSingleUpdateHours = async ({
         return rows as ResultSetHeader;
     } catch (error) {
         console.log("err: single update work log hours: ", error);
+        return null;
+    }
+};
+
+export const m_wlSingleArchive = async (wlid: string) => {
+    try {
+        const connection = await adminPool.getConnection();
+        const [rows] = await connection.query(
+            `UPDATE ${DB_TABLE_LIST.WORK_LOGS} SET archive = 1 WHERE wlid = ?;`,
+            [wlid]
+        );
+        connection.release();
+        return rows as ResultSetHeader;
+    } catch (error) {
+        console.log("err: single archive work log: ", error);
         return null;
     }
 };

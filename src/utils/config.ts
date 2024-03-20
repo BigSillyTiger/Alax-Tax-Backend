@@ -40,6 +40,7 @@ enum RES_STATUS {
     SUC_UPDATE_LOGO = 206,
     SUC_ADD_NEW_SU = 207,
     SUC_UPDATE_WORKLOG = 208,
+    SUC_DELETE_WORKLOG = 209,
     //
     FAILED = 400,
     FAILED_DUP = 401,
@@ -49,6 +50,7 @@ enum RES_STATUS {
     FAILED_DEL = 405,
     FAILED_ADD_NEW_SU = 406,
     FAILED_UPDATE_WORKLOG = 407,
+    FAILED_DELETE_WORKLOG = 408,
 }
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));

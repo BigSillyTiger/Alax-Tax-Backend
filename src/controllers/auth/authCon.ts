@@ -97,7 +97,7 @@ export const adminLogin = async (req: Request, res: Response) => {
                 });
         }
     }
-    return res.status(404).json({
+    return res.status(403).json({
         status: RES_STATUS.FAILED,
         msg: "ERROR: login error",
         data: null,

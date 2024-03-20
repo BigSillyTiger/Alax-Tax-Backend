@@ -2,6 +2,7 @@ import {
     m_wlGetAll,
     m_wlUpdateAssignments,
     m_wlSingleUpdateHours,
+    m_wlSingleArchive,
 } from "../../models/workLogModel";
 import type { Request, Response } from "express";
 import type { TworkLog, ToriWorkLog } from "../../utils/global";
@@ -83,6 +84,30 @@ export const wlSingleUpdateHours = async (req: Request, res: Response) => {
         return res.status(400).json({
             status: RES_STATUS.FAILED_UPDATE_WORKLOG,
             msg: "Failed: work log: single update",
+            data: null,
+        });
+    }
+};
+
+export const wlSingleDel = async (req: Request, res: Response) => {
+    console.log("server - work log: single delete");
+    try {
+        const result = await m_wlSingleArchive(req.body.wlid);
+        console.log("-> delete result: ", result);
+        if (result?.affectedRows) {
+            return res.status(200).json({
+                status: RES_STATUS.SUC_DELETE_WORKLOG,
+                msg: "Success:  work log: single delete",
+                data: result,
+            });
+        } else {
+            throw new Error("Failed: work log: single delete");
+        }
+    } catch (error) {
+        console.log("err: work log: single delete: ", error);
+        return res.status(400).json({
+            status: RES_STATUS.FAILED_DELETE_WORKLOG,
+            msg: "Failed: work log: single delete",
             data: null,
         });
     }
