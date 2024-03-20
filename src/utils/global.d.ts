@@ -99,6 +99,7 @@ export type ToriWorkLog = {
     s_time: string;
     e_time: string;
     b_time: string;
+    b_hour: string;
     wl_status: string;
     wl_note: string;
     confirm_status: boolean;
@@ -112,6 +113,7 @@ export type TassignedWork = {
     s_time: string;
     e_time: string;
     b_time: string;
+    b_hour: string;
     wl_note: string;
     wl_status: string;
     confirm_status: boolean;
@@ -228,6 +230,7 @@ export type ToriWorkLog = {
     s_time: string;
     e_time: string;
     b_time: string;
+    b_hour: string;
     wl_status: string;
     wl_note: string;
     confirm_status: boolean;

@@ -125,6 +125,7 @@ export const m_wlGetAllOrdersWithWL = async () => {
                                 'e_time', wl.e_time,
                                 's_time', wl.s_time,
                                 'b_time', wl.b_time,
+                                'b_hour', wl.b_hour,
                                 'wl_note', wl.wl_note,
                                 'wl_status', wl.wl_status,
                                 'confirm_status', wl.confirm_status,
@@ -178,6 +179,7 @@ export const m_wlGetALLWithLogStructure = async () => {
                             'e_time', wl.e_time,
                             's_time', wl.s_time,
                             'b_time', wl.b_time,
+                            'b_hour', wl.b_hour,
                             'wl_note', wl.wl_note,
                             'wl_status', wl.wl_status,
                             'confirm_status', wl.confirm_status,
@@ -229,7 +231,7 @@ export const m_wlUpdateAssignments = async (oid: string, data: any[]) => {
         );
         await connection.query(
             `
-            INSERT INTO ${DB_TABLE_LIST.WORK_LOGS} (wlid, fk_oid, fk_uid, wl_date, s_time, e_time, b_time, wl_status, wl_note, confirm_status, archive) VALUES ?;
+            INSERT INTO ${DB_TABLE_LIST.WORK_LOGS} (wlid, fk_oid, fk_uid, wl_date, s_time, e_time, b_time, b_hour, wl_status, wl_note, confirm_status, archive) VALUES ?;
         `,
             [data]
         );
@@ -311,21 +313,21 @@ export const m_wlSingleUpdateHours = async ({
     wlid,
     s_time,
     e_time,
-    b_time,
+    b_hour,
 }: {
     wlid: string;
     s_time: string;
     e_time: string;
-    b_time: string;
+    b_hour: string;
 }) => {
     try {
         const connection = await adminPool.getConnection();
         const [rows] = await connection.query(
             `
             UPDATE ${DB_TABLE_LIST.WORK_LOGS} 
-            SET s_time = ?, e_time = ?, b_time = ?
+            SET s_time = ?, e_time = ?, b_hour = ?
             WHERE wlid = ?;`,
-            [s_time, e_time, b_time, wlid]
+            [s_time, e_time, b_hour, wlid]
         );
         connection.release();
         return rows as ResultSetHeader;
@@ -354,28 +356,28 @@ export const m_wlGetBTimeWID = async (wlid: string) => {
     try {
         const connection = await adminPool.getConnection();
         const [rows] = await connection.query(
-            `SELECT b_time FROM ${DB_TABLE_LIST.WORK_LOGS} WHERE wlid = ?;`,
+            `SELECT b_hour FROM ${DB_TABLE_LIST.WORK_LOGS} WHERE wlid = ?;`,
             [wlid]
         );
         connection.release();
         return rows as RowDataPacket[];
     } catch (error) {
-        console.log("err: get b_time with wlid: ", error);
+        console.log("err: get b_hour with wlid: ", error);
         return ["00:00"];
     }
 };
 
-export const m_wlUpdateBTime = async (wlid: string, b_time: string) => {
+export const m_wlUpdateBTime = async (wlid: string, b_hour: string) => {
     try {
         const connection = await adminPool.getConnection();
         const [rows] = await connection.query(
-            `UPDATE ${DB_TABLE_LIST.WORK_LOGS} SET b_time = ? WHERE wlid = ?;`,
-            [b_time, wlid]
+            `UPDATE ${DB_TABLE_LIST.WORK_LOGS} SET b_hour = ? WHERE wlid = ?;`,
+            [b_hour, wlid]
         );
         connection.release();
         return rows as ResultSetHeader;
     } catch (error) {
-        console.log("err: update b_time with wlid: ", error);
+        console.log("err: update b_hour with wlid: ", error);
         return null;
     }
 };

@@ -55,7 +55,6 @@ export const wlUpdate = async (req: Request, res: Response) => {
         const newWorkLogs = await genWorkLogsWithNewWLID(tempWorkLogs).then(
             (value) => formWorkLog(value)
         );
-        //const newWorkLogs = genWorkLogsWithNewWLID(tempWorkLogs);
         const oid = req.body.workLogs[0].fk_oid;
         //const result = true;
         const result = await m_wlUpdateAssignments(oid, newWorkLogs);
