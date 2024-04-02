@@ -1,6 +1,14 @@
-const SERVER_NAME: string = "AlaxTax";
+import {
+    WL_PAUSE_TIMER,
+    WL_RESET_TIMER,
+    WL_RESUME_TIMER,
+    WL_START_TIMER,
+    WL_STOP_TIMER,
+} from "./reqList";
 
-const ALAX_DB_CONFIG = {
+export const SERVER_NAME: string = "AlaxTax";
+
+export const ALAX_DB_CONFIG = {
     //connectionLimit: 5,
     host: "localhost",
     user: "root",
@@ -8,29 +16,32 @@ const ALAX_DB_CONFIG = {
     database: "alax_tax_db",
 };
 
-const URL_LIST = {
+export const URL_LIST = {
     test: "/test",
 };
 
-const DB_TABLE_LIST = {
+export const DB_TABLE_LIST = {
     // admin
     STAFF: "staff",
-    MANAGERS: "managers",
     COMPANY: "company",
     // Job
-    CLIENTS: "clients",
-    ORDERS: "orders",
-    ORDER_SERVICES: "order_services",
-    QUOTATIONS: "quotations",
-    INVOICES: "invoices",
-    PAYMENTS: "payments",
+    CLIENT: "client",
+    ORDER_LIST: "order_list",
+    ORDER_SERVICE: "order_service",
+    QUOTATION: "quotation",
+    INVOICE: "invoice",
+    PAYMENT: "payment",
     // Assiste
-    SERVICES: "services",
-    UNITS: "units",
-    WORK_LOGS: "work_logs",
+    SERVICE: "service",
+    UNIT: "unit",
+    WORK_LOG: "work_log",
+    // payslip
+    PAYSLIP: "payslip",
+    BONUS: "bonus",
+    DEDUCTION: "deduction",
 };
 
-enum RES_STATUS {
+export enum RES_STATUS {
     SUCCESS = 200,
     SUC_DEL = 201,
     SUC_UPDATE = 202,
@@ -53,23 +64,24 @@ enum RES_STATUS {
     FAILED_DELETE_WORKLOG = 408,
 }
 
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+export const sleep = (ms: number) =>
+    new Promise((resolve) => setTimeout(resolve, ms));
 
-const uidPrefix = {
+export const uidPrefix = {
     manager: "M",
     employee: "E",
     labor: "L",
     client: "C",
     order: "J",
     workLog: "WL",
+    payslip: "PS",
 };
 
-export {
-    SERVER_NAME,
-    URL_LIST,
-    DB_TABLE_LIST,
-    sleep,
-    RES_STATUS,
-    ALAX_DB_CONFIG,
-    uidPrefix,
+export const allowedWLTimerURLs = {
+    ongoing: [WL_RESET_TIMER, WL_PAUSE_TIMER, WL_STOP_TIMER],
+    resting: [WL_RESUME_TIMER, WL_STOP_TIMER],
+    pending: [WL_START_TIMER],
+    confirmed: [WL_RESET_TIMER],
+    unconfirmed: [WL_RESET_TIMER],
+    canceled: [],
 };

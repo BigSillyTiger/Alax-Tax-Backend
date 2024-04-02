@@ -1,4 +1,4 @@
-import logger from "../utils/logger";
+import logger from "../libs/logger";
 import adminPool from "./adminPool";
 import { DB_TABLE_LIST } from "../utils/config";
 import type { Tcompany } from "../utils/global";

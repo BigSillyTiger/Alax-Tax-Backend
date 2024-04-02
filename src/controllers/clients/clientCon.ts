@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import { RES_STATUS } from "../../utils/config";
-import logger from "../../utils/logger";
+import logger from "../../libs/logger";
 
 import {
     m_clientGetAll,
@@ -12,7 +12,7 @@ import {
     m_clientUpdate,
     m_clientArchiveSingle,
 } from "../../models/clientsModel";
-import { genClientUid } from "../../utils/utils";
+import { genClientUid } from "../../libs/id";
 
 const phaseClientsData = async (items: any /* placeholder */) => {
     const cid = await genClientUid();

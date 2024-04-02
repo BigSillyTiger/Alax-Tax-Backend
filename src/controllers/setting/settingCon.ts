@@ -35,10 +35,10 @@ export const universAll = async (req: Request, res: Response) => {
     try {
         const connection = await pool.getConnection();
         const sResult: any = await connection.query(
-            `SELECT * FROM ${DB_TABLE_LIST.SERVICES}`
+            `SELECT * FROM ${DB_TABLE_LIST.SERVICE}`
         );
         const uResult: any = await connection.query(`
-            SELECT * FROM ${DB_TABLE_LIST.UNITS}`);
+            SELECT * FROM ${DB_TABLE_LIST.UNIT}`);
 
         connection.release();
         return res.status(200).json({
@@ -62,12 +62,12 @@ export const uniAdd = async (req: Request, res: Response) => {
         const connection = await pool.getConnection();
         if (req.body.service) {
             const result: any = await connection.query(
-                `INSERT INTO ${DB_TABLE_LIST.SERVICES} (service, unit, unit_price) VALUES (?,?,?)`,
+                `INSERT INTO ${DB_TABLE_LIST.SERVICE} (service, unit, unit_price) VALUES (?,?,?)`,
                 [req.body.service, req.body.unit, req.body.unit_price]
             );
         } else {
             const result = await connection.query(
-                `INSERT INTO ${DB_TABLE_LIST.UNITS} (unit_name) VALUES (?)`,
+                `INSERT INTO ${DB_TABLE_LIST.UNIT} (unit_name) VALUES (?)`,
                 [req.body.unit_name]
             );
         }
@@ -92,8 +92,8 @@ export const uniDel = async (req: Request, res: Response) => {
         const connection = await pool.getConnection();
         const table =
             req.body.type === "service"
-                ? DB_TABLE_LIST.SERVICES
-                : DB_TABLE_LIST.UNITS;
+                ? DB_TABLE_LIST.SERVICE
+                : DB_TABLE_LIST.UNIT;
         const result: any = await connection.query(
             `DELETE FROM ${table} WHERE id = ?`,
             [req.body.id]
@@ -119,7 +119,7 @@ export const uniEdit = async (req: Request, res: Response) => {
         const connection = await pool.getConnection();
         if (req.body.service) {
             const result: any = await connection.query(
-                `UPDATE ${DB_TABLE_LIST.SERVICES} SET service = ?, unit = ?, unit_price = ? WHERE id = ?`,
+                `UPDATE ${DB_TABLE_LIST.SERVICE} SET service = ?, unit = ?, unit_price = ? WHERE id = ?`,
                 [
                     req.body.service,
                     req.body.unit,
@@ -129,7 +129,7 @@ export const uniEdit = async (req: Request, res: Response) => {
             );
         } else {
             const result: any = await connection.query(
-                `UPDATE ${DB_TABLE_LIST.UNITS} SET unit_name = ? WHERE id = ?`,
+                `UPDATE ${DB_TABLE_LIST.UNIT} SET unit_name = ? WHERE id = ?`,
                 [req.body.unit_name, req.body.id]
             );
         }

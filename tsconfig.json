@@ -33,7 +33,8 @@
         "paths": {
             "@/*": ["src/*"],
             "*": ["src/types/*.d.ts"]
-        }
+        },
+        "sourceMap": true
     },
     "include": ["src/**/*", "vite.config.ts", "src/utils/global.d.ts"],
     "exclude": ["node_modules"]

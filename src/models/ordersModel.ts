@@ -1,7 +1,8 @@
 import { DB_TABLE_LIST } from "../utils/config";
-import logger from "../utils/logger";
+import logger from "../libs/logger";
 import adminPool from "./adminPool";
 import type { Tpayment, Torder, TorderDesc } from "../utils/global";
+import { RowDataPacket } from "mysql2";
 
 /**
  *
@@ -11,7 +12,7 @@ export const m_orderGetAll = async () => {
     try {
         const connection = await adminPool.getConnection();
         const [rows] = await connection.query(
-            `SELECT ${DB_TABLE_LIST.ORDERS}.*, ${DB_TABLE_LIST.CLIENTS}.first_name, ${DB_TABLE_LIST.CLIENTS}.last_name, ${DB_TABLE_LIST.CLIENTS}.phone FROM ${DB_TABLE_LIST.ORDERS} INNER JOIN ${DB_TABLE_LIST.CLIENTS} ON ${DB_TABLE_LIST.ORDERS}.fk_cid = ${DB_TABLE_LIST.CLIENTS}.cid ORDER BY created_date DESC`
+            `SELECT ${DB_TABLE_LIST.ORDER_LIST}.*, ${DB_TABLE_LIST.CLIENT}.first_name, ${DB_TABLE_LIST.CLIENT}.last_name, ${DB_TABLE_LIST.CLIENT}.phone FROM ${DB_TABLE_LIST.ORDER_LIST} INNER JOIN ${DB_TABLE_LIST.CLIENT} ON ${DB_TABLE_LIST.ORDER_LIST}.fk_cid = ${DB_TABLE_LIST.CLIENT}.cid ORDER BY created_date DESC`
         );
         connection.release();
         return rows;
@@ -56,7 +57,7 @@ export const m_orderGetAllWithDetails = async () => {
                             'netto', B.netto
                         )
                     ) 
-                FROM ${DB_TABLE_LIST.ORDER_SERVICES} B 
+                FROM ${DB_TABLE_LIST.ORDER_SERVICE} B 
                 WHERE B.fk_oid = A.oid) AS order_services,
                 (SELECT 
                     JSON_ARRAYAGG(
@@ -66,7 +67,7 @@ export const m_orderGetAllWithDetails = async () => {
                             'paid_date', P.paid_date
                         )
                     ) 
-                FROM ${DB_TABLE_LIST.PAYMENTS} P 
+                FROM ${DB_TABLE_LIST.PAYMENT} P 
                 WHERE P.fk_oid = A.oid) AS payments,
                 (SELECT 
                     JSON_OBJECT(
@@ -82,9 +83,9 @@ export const m_orderGetAllWithDetails = async () => {
                         'country', C.country,
                         'postcode', C.postcode
                     )
-                FROM ${DB_TABLE_LIST.CLIENTS} C 
+                FROM ${DB_TABLE_LIST.CLIENT} C 
                 WHERE C.cid = A.fk_cid) AS client_info
-            FROM ${DB_TABLE_LIST.ORDERS} A
+            FROM ${DB_TABLE_LIST.ORDER_LIST} A
             WHERE A.archive = 0;
             `
         );
@@ -101,7 +102,7 @@ export const m_orderInsert = async (order: Torder) => {
         console.log("-> inser order: ", order);
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `INSERT INTO ${DB_TABLE_LIST.ORDERS} (oid, fk_cid, address, suburb, city, state, country, postcode, status, deposit, gst, total ) VALUES ?`,
+            `INSERT INTO ${DB_TABLE_LIST.ORDER_LIST} (oid, fk_cid, address, suburb, city, state, country, postcode, status, deposit, gst, total ) VALUES ?`,
             [
                 [
                     [
@@ -134,7 +135,7 @@ export const m_orderDescInsert = async (order_services: TorderDesc) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `INSERT INTO ${DB_TABLE_LIST.ORDER_SERVICES} (fk_oid, ranking, title, description, qty, taxable, unit, unit_price, gst, netto) VALUES ?`,
+            `INSERT INTO ${DB_TABLE_LIST.ORDER_SERVICE} (fk_oid, ranking, title, description, qty, taxable, unit, unit_price, gst, netto) VALUES ?`,
             [order_services]
         );
         connection.release();
@@ -149,7 +150,7 @@ export const m_clientOrders = async (cid: string) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `SELECT * FROM ${DB_TABLE_LIST.ORDERS} WHERE fk_cid = ?`,
+            `SELECT * FROM ${DB_TABLE_LIST.ORDER_LIST} WHERE fk_cid = ?`,
             [cid]
         );
         connection.release();
@@ -188,7 +189,7 @@ export const m_clientOrderWichId = async (cid: string) => {
                     'client_info', clientInfo
                 )
             )
-            FROM ${DB_TABLE_LIST.ORDERS} A
+            FROM ${DB_TABLE_LIST.ORDER_LIST} A
             JOIN (
                 SELECT 
                     fk_oid,
@@ -206,7 +207,7 @@ export const m_clientOrderWichId = async (cid: string) => {
                             'netto', netto
                         )
                     ) AS descriptions
-                FROM ${DB_TABLE_LIST.ORDER_SERVICES}
+                FROM ${DB_TABLE_LIST.ORDER_SERVICE}
                 GROUP BY fk_oid
             ) B ON A.oid = B.fk_oid
             LEFT JOIN (
@@ -219,7 +220,7 @@ export const m_clientOrderWichId = async (cid: string) => {
                             'paid_date', paid_date
                         )
                     ) AS paymentData
-                FROM ${DB_TABLE_LIST.PAYMENTS}
+                FROM ${DB_TABLE_LIST.PAYMENT}
                 GROUP BY fk_oid 
             ) P ON A.oid = P.fk_oid
             LEFT JOIN (
@@ -238,7 +239,7 @@ export const m_clientOrderWichId = async (cid: string) => {
                         'country', country,
                         'postcode', postcode
                     ) AS clientInfo
-                FROM ${DB_TABLE_LIST.CLIENTS} 
+                FROM ${DB_TABLE_LIST.CLIENT} 
             ) C ON A.fk_cid = C.cid
             WHERE A.fk_cid = ? AND A.archive = 0;
             `,
@@ -260,7 +261,7 @@ export const m_orderDel = async (oid: string) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `DELETE FROM ${DB_TABLE_LIST.ORDERS} WHERE oid = ?`,
+            `DELETE FROM ${DB_TABLE_LIST.ORDER_LIST} WHERE oid = ?`,
             [oid]
         );
         connection.release();
@@ -276,7 +277,7 @@ export const m_orderArchive = async (oid: string) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `UPDATE ${DB_TABLE_LIST.ORDERS} SET archive = ? WHERE oid = ?`,
+            `UPDATE ${DB_TABLE_LIST.ORDER_LIST} SET archive = ? WHERE oid = ?`,
             [1, oid]
         );
         connection.release();
@@ -292,7 +293,7 @@ export const m_orderDescDel = async (oid: string) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `DELETE FROM ${DB_TABLE_LIST.ORDER_SERVICES} WHERE fk_oid = ?`,
+            `DELETE FROM ${DB_TABLE_LIST.ORDER_SERVICE} WHERE fk_oid = ?`,
             [oid]
         );
         connection.release();
@@ -308,7 +309,7 @@ export const m_orderStatusUpdate = async (oid: string, status: string) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `UPDATE ${DB_TABLE_LIST.ORDERS} SET status = ? WHERE oid = ?`,
+            `UPDATE ${DB_TABLE_LIST.ORDER_LIST} SET status = ? WHERE oid = ?`,
             [status, oid]
         );
         connection.release();
@@ -328,7 +329,7 @@ export const m_orderUpdateProperty = async (
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `UPDATE ${DB_TABLE_LIST.ORDERS} SET ${property} = ? WHERE oid = ?`,
+            `UPDATE ${DB_TABLE_LIST.ORDER_LIST} SET ${property} = ? WHERE oid = ?`,
             [value, oid]
         );
         connection.release();
@@ -349,7 +350,7 @@ export const m_orderUpdateWithDesc = async (
         const connection = await adminPool.getConnection();
         await connection.query("START TRANSACTION;");
         await connection.query(
-            `UPDATE ${DB_TABLE_LIST.ORDERS} SET 
+            `UPDATE ${DB_TABLE_LIST.ORDER_LIST} SET 
                 address = ?, 
                 suburb = ?, 
                 city = ?, 
@@ -376,11 +377,11 @@ export const m_orderUpdateWithDesc = async (
             ]
         );
         await connection.query(
-            `DELETE FROM ${DB_TABLE_LIST.ORDER_SERVICES} WHERE fk_oid = ?`,
+            `DELETE FROM ${DB_TABLE_LIST.ORDER_SERVICE} WHERE fk_oid = ?`,
             [oid]
         );
         await connection.query(
-            `INSERT INTO ${DB_TABLE_LIST.ORDER_SERVICES} (fk_oid, ranking, title, description, qty, taxable, unit, unit_price, gst, netto) VALUES ?`,
+            `INSERT INTO ${DB_TABLE_LIST.ORDER_SERVICE} (fk_oid, ranking, title, description, qty, taxable, unit, unit_price, gst, netto) VALUES ?`,
             [order_services]
         );
         await connection.query("COMMIT;");
@@ -397,7 +398,7 @@ export const m_orderUpdate = async (order: Torder) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `UPDATE ${DB_TABLE_LIST.ORDERS} SET 
+            `UPDATE ${DB_TABLE_LIST.ORDER_LIST} SET 
                 address = ?, 
                 suburb = ?, 
                 city = ?, 
@@ -437,7 +438,7 @@ export const m_deletePayment = async (fk_oid: string) => {
         //console.log("-> delete payment: ", fk_oid);
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `DELETE FROM ${DB_TABLE_LIST.PAYMENTS} WHERE fk_oid = ?`,
+            `DELETE FROM ${DB_TABLE_LIST.PAYMENT} WHERE fk_oid = ?`,
             [fk_oid]
         );
         connection.release();
@@ -454,7 +455,7 @@ export const m_updatePayments = async (payments: Tpayment) => {
         //console.log("-> before insert payments: ", payments);
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `INSERT INTO ${DB_TABLE_LIST.PAYMENTS} (fk_oid, paid, paid_date) VALUES ?`,
+            `INSERT INTO ${DB_TABLE_LIST.PAYMENT} (fk_oid, paid, paid_date) VALUES ?`,
             [payments]
         );
         connection.release();
@@ -554,14 +555,14 @@ export const m_findOrder = async (oid: string) => {
     }
 };
 
-export const m_uidGetLastOrder = async () => {
+export const m_ordersLastOID = async () => {
     try {
         const connection = await adminPool.getConnection();
-        const result: any = await connection.query(
-            `SELECT oid FROM ${DB_TABLE_LIST.ORDERS} ORDER BY created_date DESC LIMIT 1`
+        const [result] = await connection.query(
+            `SELECT oid FROM ${DB_TABLE_LIST.ORDER_LIST} ORDER BY created_date DESC LIMIT 1`
         );
         connection.release();
-        return result[0];
+        return result as RowDataPacket[];
     } catch (error) {
         console.log("err: get last uid: ", error);
         return null;

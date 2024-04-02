@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import { RES_STATUS, uidPrefix } from "../../utils/config";
-import logger from "../../utils/logger";
+import logger from "../../libs/logger";
 import {
     m_staffGetAll,
     m_staffGetSingle,
@@ -11,7 +11,8 @@ import {
     m_staffUpdate,
     m_staffIsPropertyExist,
 } from "../../models/staffModel";
-import { encodePW, genStaffUid, replaceStaffPW } from "../../utils/utils";
+import { encodePW, replaceStaffPW } from "../../libs/utils";
+import { genStaffUid } from "../../libs/id";
 
 /**
  * @description retrieve list of all staff with info
@@ -28,7 +29,7 @@ export const staffAllInfo = async (req: Request, res: Response) => {
             return res.status(200).json({
                 status: RES_STATUS.SUCCESS,
                 msg: "success: get all staff info",
-                data: replaceStaffPW(result),
+                data: replaceStaffPW(result, ""),
             });
         }
         throw new Error("error: get all staff info");

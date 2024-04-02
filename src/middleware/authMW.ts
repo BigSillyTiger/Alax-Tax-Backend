@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { verify } from "jsonwebtoken";
 import dotenv from "dotenv";
-import logger from "../utils/logger";
+import logger from "../libs/logger";
 import { RES_STATUS } from "../utils/config";
 import { TRequestWithUser } from "../utils/global";
 

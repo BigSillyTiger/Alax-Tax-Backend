@@ -1,13 +1,14 @@
 import { DB_TABLE_LIST } from "../utils/config";
-import logger from "../utils/logger";
+import logger from "../libs/logger";
 import adminPool from "./adminPool";
 import type { TclientData } from "../utils/global";
+import { RowDataPacket } from "mysql2";
 
 export const m_clientInsert = async (client: TclientData) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `INSERT INTO ${DB_TABLE_LIST.CLIENTS} (cid, first_name, last_name, phone, email, address, suburb, city, state, country, postcode) VALUES ?`,
+            `INSERT INTO ${DB_TABLE_LIST.CLIENT} (cid, first_name, last_name, phone, email, address, suburb, city, state, country, postcode) VALUES ?`,
             [client]
         );
         connection.release();
@@ -22,7 +23,7 @@ export const m_clientGetAll = async () => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `SELECT * FROM ${DB_TABLE_LIST.CLIENTS} WHERE archive = 0 ORDER BY created_date DESC`
+            `SELECT * FROM ${DB_TABLE_LIST.CLIENT} WHERE archive = 0 ORDER BY created_date DESC`
         );
         connection.release();
         return result[0];
@@ -36,7 +37,7 @@ export const m_clientGetSingle = async (cid: string) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `SELECT * FROM ${DB_TABLE_LIST.CLIENTS} WHERE cid = ? AND archive = 0`,
+            `SELECT * FROM ${DB_TABLE_LIST.CLIENT} WHERE cid = ? AND archive = 0`,
             [cid]
         );
         connection.release();
@@ -55,7 +56,7 @@ export const m_clientIsPropertyExist = async (
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `SELECT ${property} FROM ${DB_TABLE_LIST.CLIENTS} WHERE ${property} = ? AND cid != ?`,
+            `SELECT ${property} FROM ${DB_TABLE_LIST.CLIENT} WHERE ${property} = ? AND cid != ?`,
             [data, cid]
         );
         connection.release();
@@ -70,7 +71,7 @@ export const m_clientDelSingle = async (cid: string) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `DELETE FROM ${DB_TABLE_LIST.CLIENTS} WHERE cid = ?`,
+            `DELETE FROM ${DB_TABLE_LIST.CLIENT} WHERE cid = ?`,
             [cid]
         );
         connection.release();
@@ -85,7 +86,7 @@ export const m_clientArchiveSingle = async (cid: string) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `UPDATE ${DB_TABLE_LIST.CLIENTS} SET archive = ? WHERE cid = ?`,
+            `UPDATE ${DB_TABLE_LIST.CLIENT} SET archive = ? WHERE cid = ?`,
             [1, cid]
         );
         connection.release();
@@ -105,7 +106,7 @@ export const m_clientUpdateProperty = async (
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `UPDATE ${DB_TABLE_LIST.CLIENTS} SET ${property} = ? WHERE cid = ?`,
+            `UPDATE ${DB_TABLE_LIST.CLIENT} SET ${property} = ? WHERE cid = ?`,
             [data, cid]
         );
         connection.release();
@@ -132,7 +133,7 @@ export const m_clientUpdate = async (
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `UPDATE ${DB_TABLE_LIST.CLIENTS} SET first_name = ?, last_name = ?, phone = ?, email = ?, address = ?, suburb = ?, city = ?, state = ?, country = ?, postcode = ? WHERE cid = ?`,
+            `UPDATE ${DB_TABLE_LIST.CLIENT} SET first_name = ?, last_name = ?, phone = ?, email = ?, address = ?, suburb = ?, city = ?, state = ?, country = ?, postcode = ? WHERE cid = ?`,
             [
                 first_name,
                 last_name,
@@ -155,14 +156,14 @@ export const m_clientUpdate = async (
     }
 };
 
-export const m_uidGetLastClient = async () => {
+export const m_clientsLastCID = async () => {
     try {
         const connection = await adminPool.getConnection();
-        const result: any = await connection.query(
-            `SELECT cid FROM ${DB_TABLE_LIST.CLIENTS} ORDER BY cid DESC LIMIT 1`
+        const [result] = await connection.query(
+            `SELECT cid FROM ${DB_TABLE_LIST.CLIENT} ORDER BY cid DESC LIMIT 1`
         );
         connection.release();
-        return result[0];
+        return result as RowDataPacket[];
     } catch (err) {
         console.log("err: get last client uid: ", err);
         return null;

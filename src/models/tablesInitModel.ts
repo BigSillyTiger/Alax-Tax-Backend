@@ -1,12 +1,11 @@
 import { DB_TABLE_LIST } from "../utils/config";
-import logger from "../utils/logger";
+import logger from "../libs/logger";
 import adminPool from "./adminPool";
 
 export const createTables = async () => {
-    console.log("-> test 1");
     try {
         const connection = await adminPool.getConnection();
-        console.log("-> test 2");
+
         await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.STAFF} (
         uid VARCHAR(4) NOT NULL PRIMARY KEY,
         first_name VARCHAR(255) NOT NULL,
@@ -29,6 +28,7 @@ export const createTables = async () => {
         staff TINYINT NOT NULL DEFAULT 0,		
         setting TINYINT NOT NULL DEFAULT 0,
         access TINYINT NOT NULL DEFAULT 1,
+        hr TINYINT NOT NULL DEFAULT 25,
         created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )`);
 
@@ -44,7 +44,7 @@ export const createTables = async () => {
             acc  VARCHAR(25) NOT NULL
         )`);
 
-        await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.CLIENTS} (
+        await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.CLIENT} (
             cid VARCHAR(5) NOT NULL PRIMARY KEY,
             archive BOOLEAN DEFAULT FALSE NOT NULL,
             first_name VARCHAR(255) NOT NULL,
@@ -59,17 +59,17 @@ export const createTables = async () => {
             postcode VARCHAR(10) DEFAULT '5000',
             created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )`);
-        await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.SERVICES} (
+        await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.SERVICE} (
             id INT AUTO_INCREMENT PRIMARY KEY,
             service VARCHAR(255) NOT NULL UNIQUE,
             unit VARCHAR(20),
             unit_price DECIMAL(8,2) UNSIGNED DEFAULT 0
         )`);
-        await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.UNITS} (
+        await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.UNIT} (
             id INT AUTO_INCREMENT PRIMARY KEY,
             unit_name VARCHAR(20) NOT NULL UNIQUE
         )`);
-        await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.ORDERS} (
+        await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.ORDER_LIST} (
             oid VARCHAR(11) NOT NULL PRIMARY KEY,
             archive BOOLEAN DEFAULT FALSE NOT NULL,
             fk_cid VARCHAR(5) NOT NULL,
@@ -88,7 +88,7 @@ export const createTables = async () => {
             quotation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             invoice_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )`);
-        await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.ORDER_SERVICES} (
+        await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.ORDER_SERVICE} (
             id INT AUTO_INCREMENT PRIMARY KEY,
             fk_oid VARCHAR(11) NOT NULL,
             title VARCHAR(255) NOT NULL,
@@ -99,25 +99,51 @@ export const createTables = async () => {
             gst DECIMAL(9,2) UNSIGNED NOT NULL,
             netto DECIMAL(10,2) UNSIGNED NOT NULL
         )`);
-        await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.PAYMENTS} (
+        await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.PAYMENT} (
             pid INT AUTO_INCREMENT PRIMARY KEY,
             fk_oid VARCHAR(11) NOT NULL,
             paid DECIMAL(10,2) UNSIGNED DEFAULT 0,
             paid_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )`);
-        await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.WORK_LOGS} (
+        await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.WORK_LOG} (
             wlid VARCHAR(11) NOT NULL PRIMARY KEY,
             fk_oid VARCHAR(11) NOT NULL,
             fk_uid VARCHAR(4) NOT NULL,
+            fk_psid VARCHAR(11),
             wl_date DATE NOT NULL,
             s_time TIME,
             e_time TIME,
             b_time TIME,
-            b_hour TIME,
+            b_hour VARCHAR(8) default '00:00:00',
             wl_status VARCHAR(20) NOT NULL DEFAULT 'pending',
             wl_note VARCHAR(500),
             confirm_status TINYINT(1) DEFAULT 0,
             archive BOOLEAN DEFAULT FALSE NOT NULL
+        )`);
+        await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.PAYSLIP} (
+            psid VARCHAR(11) NOT NULL PRIMARY KEY,
+            fk_uid VARCHAR(4) NOT NULL,
+            ps_status VARCHAR(20) NOT NULL DEFAULT 'pending',
+            ps_note VARCHAR(500),
+            hr DECIMAL(5,2) UNSIGNED DEFAULT 0,
+            archive BOOLEAN NOT NULL DEFAULT FALSE,
+            s_period DATE NOT NULL,
+            e_period DATE NOT NULL,
+            created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )`);
+        await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.BONUS} (
+            bid VARCHAR(11) NOT NULL PRIMARY KEY,
+            fk_psid VARCHAR(11) NOT NULL,
+            fk_uid VARCHAR(4) NOT NULL,
+            note VARCHAR(500),
+            amount DECIMAL(10,2) UNSIGNED DEFAULT 0
+        )`);
+        await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.DEDUCTION} (
+            did VARCHAR(11) NOT NULL PRIMARY KEY,
+            fk_psid VARCHAR(11) NOT NULL,
+            fk_uid VARCHAR(4) NOT NULL,
+            note VARCHAR(500),
+            amount DECIMAL(10,2) UNSIGNED DEFAULT 0
         )`);
         //await connection.query();
         connection.release();

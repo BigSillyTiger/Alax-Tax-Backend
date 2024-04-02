@@ -4,21 +4,19 @@ import {
     m_wlSingleUpdateHours,
     m_wlSingleArchive,
     m_wlGetToday,
-    m_wlGetBTimeWID,
-    m_wlUpdateBTime,
-    m_wlStartWork,
+    m_wlGetBHourWID,
+    m_wlResume,
+    m_wlPause,
+    m_wlUpdateSTime,
     m_wlResetWorkTime,
+    m_wlGetBTimeWID,
+    m_wlUpdateEtime,
 } from "../../models/workLogModel";
 import type { Request, Response } from "express";
 import type { TworkLog, ToriWorkLog } from "../../utils/global";
-import {
-    calBreakTime,
-    formWorkLog,
-    genHHMM,
-    genWorkLogsWithNewWLID,
-    startBreakTimer,
-    stopBreakTimer,
-} from "../../utils/utils";
+import { calBreakTime, genAUDate, genHHMM, genYYYYHHMM } from "../../libs/time";
+import { genWorkLogsWithNewWLID } from "../../libs/id";
+import { formWorkLog } from "../../libs/format";
 import { RES_STATUS } from "../../utils/config";
 
 export const wlAll = async (req: Request, res: Response) => {
@@ -125,11 +123,10 @@ export const wlSingleDel = async (req: Request, res: Response) => {
 };
 
 export const wlGetToday = async (req: Request, res: Response) => {
-    const today = new Date().toISOString().split("T")[0];
+    const today = genYYYYHHMM(genAUDate());
     console.log(`server - work log: get today's[${today}] work logs`);
     try {
         const worklogsResult = await m_wlGetToday(today);
-        //console.log("-> today result: ", worklogsResult);
         if (worklogsResult && worklogsResult.length) {
             return res.status(200).json({
                 status: RES_STATUS.SUCCESS,
@@ -153,16 +150,14 @@ export const wlGetToday = async (req: Request, res: Response) => {
     }
 };
 
-export const wlStartWork = async (req: Request, res: Response) => {
+export const wlStartWorkTime = async (req: Request, res: Response) => {
     console.log("server - work log: start work, wlid: ", req.body.wlid);
     try {
-        const time = new Date();
-        const s_time = genHHMM(time.getHours(), time.getMinutes());
-
-        const result = await m_wlStartWork(s_time, req.body.wlid);
+        const s_time = genHHMM(genAUDate()) as string;
+        const result = await m_wlUpdateSTime(req.body.wlid, s_time);
         if (result && result.affectedRows) {
             return res.status(200).json({
-                status: RES_STATUS.SUCCESS,
+                status: RES_STATUS.SUC_UPDATE_WORKLOG,
                 msg: `Success:  worklog[${req.body.wlid}] start work`,
                 data: result,
             });
@@ -185,7 +180,7 @@ export const wlResetWorkTime = async (req: Request, res: Response) => {
         const result = await m_wlResetWorkTime(req.body.wlid);
         if (result && result.affectedRows) {
             return res.status(200).json({
-                status: RES_STATUS.SUCCESS,
+                status: RES_STATUS.SUC_UPDATE_WORKLOG,
                 msg: `Success:  worklog[${req.body.wlid}] reset work time`,
                 data: result,
             });
@@ -207,55 +202,94 @@ export const wlResetWorkTime = async (req: Request, res: Response) => {
     }
 };
 
-export const wlBreakStart = async (req: Request, res: Response) => {
-    console.log("server - work log: break start, wlid: ", req.body.wlid);
+export const wlPauseWorkTime = async (req: Request, res: Response) => {
+    console.log("server - work log: pause work time, wlid: ", req.body.wlid);
     try {
-        const result = startBreakTimer(req.body.wlid);
-        if (result) {
+        const timeStr = genHHMM(genAUDate()) as string;
+        const result = await m_wlPause(req.body.wlid, timeStr);
+        if (result && result.affectedRows) {
             return res.status(200).json({
-                status: RES_STATUS.SUCCESS,
-                msg: `Success:  worklog[${req.body.wlid}] break start`,
-                data: result,
+                status: RES_STATUS.SUC_UPDATE_WORKLOG,
+                msg: `Success:  worklog[${req.body.wlid}] pause work time`,
+                data: timeStr,
             });
         } else {
-            throw new Error("Failed: work log: break start");
+            throw new Error("Failed: work log: pause work time");
         }
     } catch (error) {
-        console.log("err: work log[", req.body.wlid, "] break start: ", error);
+        console.log(
+            "err: work log[",
+            req.body.wlid,
+            "] pause work time: ",
+            error
+        );
         return res.status(400).json({
             status: RES_STATUS.FAILED_UPDATE_WORKLOG,
-            msg: "Failed: work log: break start",
+            msg: "Failed: work log: pause work time",
             data: null,
         });
     }
 };
 
-export const wlBreakEnd = async (req: Request, res: Response) => {
-    console.log("server - work log: break end, wlid: ", req.body.wlid);
+export const wlResumeWorkTime = async (req: Request, res: Response) => {
+    console.log("server - work log: resume work time, wlid: ", req.body.wlid);
     try {
-        const breakTime = stopBreakTimer(req.body.wlid);
-        const currentBreakTime = await m_wlGetBTimeWID(req.body.wlid);
-        console.log("-> break time: ", breakTime, currentBreakTime);
+        const bTime2 = genHHMM(genAUDate()) as string;
+        const time = await m_wlGetBTimeWID(req.body.wlid);
+        console.log("-> bTime2: ", bTime2);
+        const bTime1 = time ? time[0].b_time : "00:00";
+        const bTime = calBreakTime(bTime1, bTime2);
+        console.log("-> cal break time: ", bTime);
 
-        const newBreakTime = calBreakTime(
-            breakTime,
-            currentBreakTime[0] as string
-        );
-        const result = await m_wlUpdateBTime(req.body.wlid, newBreakTime);
-        if (result?.affectedRows) {
+        const result = await m_wlResume(req.body.wlid, bTime as string);
+        if (result && result.affectedRows) {
             return res.status(200).json({
                 status: RES_STATUS.SUC_UPDATE_WORKLOG,
-                msg: `Success:  worklog[${req.body.wlid}] break end`,
-                data: null,
+                msg: `Success:  worklog[${req.body.wlid}] resume work time`,
+                data: 0,
             });
         } else {
-            throw new Error("Failed: work log: break end");
+            throw new Error("Failed: work log: resume work time");
         }
     } catch (error) {
-        console.log("err: work log[", req.body.wlid, "] break end: ", error);
+        console.log(
+            "err: work log[",
+            req.body.wlid,
+            "] resume work time: ",
+            error
+        );
         return res.status(400).json({
             status: RES_STATUS.FAILED_UPDATE_WORKLOG,
-            msg: "Failed: work log: break end",
+            msg: "Failed: work log: resume work time",
+            data: null,
+        });
+    }
+};
+
+export const wlStopWorkTime = async (req: Request, res: Response) => {
+    console.log("server - work log: stop work time, wlid: ", req.body.wlid);
+    try {
+        const e_time = genHHMM(genAUDate()) as string;
+        const result = await m_wlUpdateEtime(req.body.wlid, e_time);
+        if (result && result.affectedRows) {
+            return res.status(200).json({
+                status: RES_STATUS.SUC_UPDATE_WORKLOG,
+                msg: `Success:  worklog[${req.body.wlid}] stop work time`,
+                data: result,
+            });
+        } else {
+            throw new Error("Failed: work log: stop work time");
+        }
+    } catch (error) {
+        console.log(
+            "err: work log[",
+            req.body.wlid,
+            "] stop work time: ",
+            error
+        );
+        return res.status(400).json({
+            status: RES_STATUS.FAILED_UPDATE_WORKLOG,
+            msg: "Failed: work log: stop work time",
             data: null,
         });
     }

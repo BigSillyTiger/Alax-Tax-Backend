@@ -1,4 +1,4 @@
-import { SERVER_NAME } from "./config";
+import { SERVER_NAME } from "../utils/config";
 
 const pinoLogger = require("pino")({
     transport: {

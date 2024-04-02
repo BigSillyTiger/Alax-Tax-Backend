@@ -3,20 +3,30 @@ import * as managerCtl from "./settingCon";
 import uploadMW from "../../middleware/uploader";
 import clearDirectoryMW from "../../middleware/clearDirectory";
 import findLogoMW from "../../middleware/findLogo";
+import {
+    SETTING_GET_COMPANY,
+    SETTING_LOGO,
+    SETTING_LOGO_UPDATE,
+    SETTING_UNI_ADD,
+    SETTING_UNI_ALL,
+    SETTING_UNI_DEL,
+    SETTING_UNI_EDIT,
+    SETTING_UPDATE_COMPANY,
+} from "../../utils/reqList";
 const router = express.Router();
 
-router.get("/setting/uni_all", managerCtl.universAll);
-router.post("/setting/uni_del", managerCtl.uniDel);
-router.put("/setting/uni_edit", managerCtl.uniEdit);
-router.post("/setting/uni_add", managerCtl.uniAdd);
-router.get("/setting/company_get", managerCtl.getCompany);
-router.put("/setting/company_update", managerCtl.updateCompany);
+router.get(SETTING_UNI_ALL, managerCtl.universAll);
+router.post(SETTING_UNI_DEL, managerCtl.uniDel);
+router.put(SETTING_UNI_EDIT, managerCtl.uniEdit);
+router.post(SETTING_UNI_ADD, managerCtl.uniAdd);
+router.get(SETTING_GET_COMPANY, managerCtl.getCompany);
+router.put(SETTING_UPDATE_COMPANY, managerCtl.updateCompany);
 router.put(
-    "/setting/logo_update",
+    SETTING_LOGO_UPDATE,
     clearDirectoryMW,
     uploadMW.single("logo"),
     managerCtl.updateLogo
 );
-router.get("/setting/logo", findLogoMW, managerCtl.getLogo);
+router.get(SETTING_LOGO, findLogoMW, managerCtl.getLogo);
 
 export default router;

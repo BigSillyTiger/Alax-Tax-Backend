@@ -1,13 +1,20 @@
 import express from "express";
 import * as authCtl from "./authCon";
 import { authenticateJWT } from "../../middleware/authMW";
+import {
+    ACCESS_CHECK,
+    ADMIN_CHECK,
+    LOGIN,
+    LOGOUT,
+    REGISTER_NEW,
+} from "../../utils/reqList";
 
 const router = express.Router();
 
-router.post("/register_new", authCtl.registerNewUser);
-router.post("/adminLogin", authCtl.adminLogin);
-router.get("/adminLogout", authCtl.adminLogout);
-router.get("/adminCheck", authenticateJWT, authCtl.authCheck);
-router.post("/accessCheck", authenticateJWT, authCtl.accessCheck);
+router.post(REGISTER_NEW, authCtl.registerNewUser);
+router.post(LOGIN, authCtl.adminLogin);
+router.get(LOGOUT, authCtl.adminLogout);
+router.get(ADMIN_CHECK, authenticateJWT, authCtl.authCheck);
+router.post(ACCESS_CHECK, authenticateJWT, authCtl.accessCheck);
 
 export default router;

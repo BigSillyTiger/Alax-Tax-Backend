@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import logger from "../../utils/logger";
+import logger from "../../libs/logger";
 import { RES_STATUS } from "../../utils/config";
 import { Request, Response } from "express";
 import {
@@ -10,7 +10,7 @@ import {
     m_searchMbyEmail,
 } from "../../models/settingModel";
 import dotenv from "dotenv";
-import { encodePW, genOrderId } from "../../utils/utils";
+import { encodePW } from "../../libs/utils";
 import { TRequestWithUser } from "../../utils/global";
 
 dotenv.config();

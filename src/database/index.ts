@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import mysql from "mysql2/promise";
 import { ALAX_DB_CONFIG } from "../utils/config";
-import logger from "../utils/logger";
+import logger from "../libs/logger";
 
 const sqlFilePath = path.join(__dirname, "", "Alax_Tax_Database.sql");
 const sql = fs.readFileSync(sqlFilePath, "utf8");

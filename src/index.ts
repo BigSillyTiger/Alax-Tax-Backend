@@ -10,7 +10,7 @@ import cookieParser from "cookie-parser";
 import expressPinoLogger from "express-pino-logger";
 import cors from "cors";
 
-import logger from "./utils/logger";
+import logger from "./libs/logger";
 import dbRouter from "./controllers/database/dbRoute";
 import authRouter from "./controllers/auth/authRoute";
 import clientRouter from "./controllers/clients/clientRoute";
@@ -18,6 +18,7 @@ import settingRouter from "./controllers/setting/settingRoute";
 import orderRouter from "./controllers/orders/orderRoute";
 import staffRouter from "./controllers/staff/staffRoute";
 import workRouter from "./controllers/work/workRoute";
+import payslipRouter from "./controllers/payslips/payslipsRoute";
 import dotenv from "dotenv";
 
 //dotenv.config({ path: "../../.env" });
@@ -43,6 +44,7 @@ app.use(orderRouter);
 app.use(settingRouter);
 app.use(staffRouter);
 app.use(workRouter);
+app.use(payslipRouter);
 app.use(express.static("./public"));
 
 app.listen(process.env.PORT || 5005, () => {

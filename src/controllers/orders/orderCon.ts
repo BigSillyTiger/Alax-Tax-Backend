@@ -15,12 +15,8 @@ import {
     m_orderGetAllWithDetails,
     m_orderUpdateWithDesc,
 } from "../../models/ordersModel";
-import {
-    formOrderDesc,
-    formPayment,
-    genOrderId,
-    genOrderWithWorkLogs,
-} from "../../utils/utils";
+import { formOrderDesc, formPayment } from "../../libs/format";
+import { genOrderId, genOrderWithWorkLogs } from "../../libs/id";
 import { m_clientGetSingle } from "../../models/clientsModel";
 import { m_wlGetALLWithLogStructure } from "../../models/workLogModel";
 import { Torder } from "../../utils/global";

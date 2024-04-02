@@ -1,5 +1,5 @@
 import { DB_TABLE_LIST, uidPrefix } from "../utils/config";
-import logger from "../utils/logger";
+import logger from "../libs/logger";
 import adminPool from "./adminPool";
 import { TstaffData } from "../utils/global";
 
