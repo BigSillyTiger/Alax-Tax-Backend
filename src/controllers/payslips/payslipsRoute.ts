@@ -9,9 +9,10 @@ import {
     PAYSLIP_SINGLE_UPDATE,
     PAYSLIP_ALL_W_UID,
 } from "../../utils/reqList";
+import { accessCheck } from "../../middleware/accessCheck";
 
 const router = express.Router();
 
-router.post(PAYSLIP_SINGLE_INSERT, payslipsCtl.psSingleInsert);
+router.post(PAYSLIP_SINGLE_INSERT, accessCheck, payslipsCtl.psSingleInsert);
 
 export default router;

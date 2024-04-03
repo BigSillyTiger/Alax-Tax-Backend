@@ -89,6 +89,7 @@ export type TstaffData = {
     calendar: TpageAccess;
     staff: TpageAccess;
     setting: TpageAccess;
+    hr: number;
 };
 
 export type ToriWorkLog = {
@@ -251,3 +252,33 @@ export type TworkLog = {
     wl_date: string;
     assigned_work: TassignedWork[];
 };
+
+export type Tbonus = {
+    fk_psid: string;
+    fk_uid: string;
+    amount: number;
+    note: string;
+};
+
+export type Tdedction = {
+    fk_psid: string;
+    fk_uid: string;
+    amount: number;
+    note: string;
+};
+
+export type Tpayslip = {
+    psid: string;
+    fk_uid: string;
+    status: string;
+    note: string;
+    hr: number;
+    s_date: string;
+    e_date: string;
+    archive: boolean;
+    created_date: string;
+};
+
+export type TnewPayslip = Partical<Tpayslip>;
+export type TnewBonus = Partical<Tbonus>;
+export type TnewDeduction = Partical<Tdeduction>;

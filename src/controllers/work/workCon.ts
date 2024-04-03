@@ -15,8 +15,8 @@ import {
 import type { Request, Response } from "express";
 import type { TworkLog, ToriWorkLog } from "../../utils/global";
 import { calBreakTime, genAUDate, genHHMM, genYYYYHHMM } from "../../libs/time";
-import { genWorkLogsWithNewWLID } from "../../libs/id";
-import { formWorkLog } from "../../libs/format";
+import { genWorkLogsWithNewWLID } from "../../libs/format";
+import { formatWorkLog } from "../../libs/format";
 import { RES_STATUS } from "../../utils/config";
 
 export const wlAll = async (req: Request, res: Response) => {
@@ -51,7 +51,7 @@ export const wlUpdate = async (req: Request, res: Response) => {
                 )
             ) as ToriWorkLog[];
         const newWorkLogs = await genWorkLogsWithNewWLID(tempWorkLogs).then(
-            (value) => formWorkLog(value)
+            (value) => formatWorkLog(value)
         );
         const oid = req.body.workLogs[0].fk_oid;
         //const result = true;
@@ -62,6 +62,8 @@ export const wlUpdate = async (req: Request, res: Response) => {
                 msg: "Success:  work assignment update",
                 data: result,
             });
+        } else {
+            throw new Error();
         }
     } catch (error) {
         console.log("err: work assignment update: ", error);

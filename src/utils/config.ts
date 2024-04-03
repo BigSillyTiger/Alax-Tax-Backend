@@ -68,13 +68,15 @@ export const sleep = (ms: number) =>
     new Promise((resolve) => setTimeout(resolve, ms));
 
 export const uidPrefix = {
-    manager: "M",
+    bonus: "B",
+    client: "C",
+    deduction: "D",
     employee: "E",
     labor: "L",
-    client: "C",
+    manager: "M",
     order: "J",
-    workLog: "WL",
     payslip: "PS",
+    workLog: "WL",
 };
 
 export const allowedWLTimerURLs = {

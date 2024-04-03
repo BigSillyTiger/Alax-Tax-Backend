@@ -2,6 +2,7 @@ import { DB_TABLE_LIST, uidPrefix } from "../utils/config";
 import logger from "../libs/logger";
 import adminPool from "./adminPool";
 import { TstaffData } from "../utils/global";
+import { RowDataPacket } from "mysql2";
 
 /**
  * @description retrieve all staff info which is not archived
@@ -45,7 +46,7 @@ export const m_staffInsert = async (staff: TstaffData) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `INSERT INTO ${DB_TABLE_LIST.STAFF} (uid, first_name, last_name, phone, email, password, address, role, suburb, city, state, country, postcode, dashboard, clients, orders, calendar, staff, setting) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+            `INSERT INTO ${DB_TABLE_LIST.STAFF} (uid, first_name, last_name, phone, email, password, address, role, suburb, city, state, country, postcode, dashboard, clients, orders, calendar, staff, setting, hr) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
             [
                 staff.uid,
                 staff.first_name,
@@ -66,6 +67,7 @@ export const m_staffInsert = async (staff: TstaffData) => {
                 staff.calendar,
                 staff.staff,
                 staff.setting,
+                staff.hr,
             ]
         );
         connection.release();
@@ -152,7 +154,7 @@ export const m_staffUpdate = async (staff: any) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `UPDATE ${DB_TABLE_LIST.STAFF} SET first_name = ?, last_name = ?, phone = ?, email = ?, address = ?, role = ?, suburb = ?, city = ?, state = ?, country = ?, postcode = ?, dashboard = ?, clients = ?, orders = ?, calendar = ?, staff = ?, setting = ? WHERE uid = ?`,
+            `UPDATE ${DB_TABLE_LIST.STAFF} SET first_name = ?, last_name = ?, phone = ?, email = ?, address = ?, role = ?, suburb = ?, city = ?, state = ?, country = ?, postcode = ?, dashboard = ?, clients = ?, orders = ?, calendar = ?, staff = ?, setting = ?, hr = ? WHERE uid = ?`,
             [
                 staff.first_name,
                 staff.last_name,
@@ -171,6 +173,7 @@ export const m_staffUpdate = async (staff: any) => {
                 staff.calendar,
                 staff.staff,
                 staff.setting,
+                staff.hr,
                 staff.uid,
             ]
         );
@@ -213,11 +216,11 @@ export const m_uidGetLastStaff = async (
 ) => {
     try {
         const connection = await adminPool.getConnection();
-        const result: any = await connection.query(
+        const [result] = await connection.query(
             `SELECT uid FROM ${DB_TABLE_LIST.STAFF} WHERE uid LIKE '${prefix}%' AND archive = 0 ORDER BY uid DESC LIMIT 1`
         );
         connection.release();
-        return result[0];
+        return result as RowDataPacket[];
     } catch (err) {
         logger.errLog(err);
         return null;

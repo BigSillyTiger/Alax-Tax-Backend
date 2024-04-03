@@ -2,7 +2,7 @@ import { DB_TABLE_LIST } from "../utils/config";
 import logger from "../libs/logger";
 import adminPool from "./adminPool";
 import type { Tpayment, Torder, TorderDesc } from "../utils/global";
-import { RowDataPacket } from "mysql2";
+import { ResultSetHeader, RowDataPacket } from "mysql2";
 
 /**
  *
@@ -134,12 +134,12 @@ export const m_orderInsert = async (order: Torder) => {
 export const m_orderDescInsert = async (order_services: TorderDesc) => {
     try {
         const connection = await adminPool.getConnection();
-        const result: any = await connection.query(
+        const [result] = await connection.query(
             `INSERT INTO ${DB_TABLE_LIST.ORDER_SERVICE} (fk_oid, ranking, title, description, qty, taxable, unit, unit_price, gst, netto) VALUES ?`,
             [order_services]
         );
         connection.release();
-        return result[0];
+        return result as ResultSetHeader;
     } catch (err) {
         console.log("err: insert order_services: ", err);
         return null;
@@ -149,13 +149,13 @@ export const m_orderDescInsert = async (order_services: TorderDesc) => {
 export const m_clientOrders = async (cid: string) => {
     try {
         const connection = await adminPool.getConnection();
-        const result: any = await connection.query(
+        const [result] = await connection.query(
             `SELECT * FROM ${DB_TABLE_LIST.ORDER_LIST} WHERE fk_cid = ?`,
             [cid]
         );
         connection.release();
         //console.log(`-> id[${cid}] orders: `, result[0]);
-        return result[0];
+        return result as RowDataPacket[];
     } catch (err) {
         console.log("err: get client orders: ", err);
         return null;
@@ -470,12 +470,12 @@ export const m_updatePayments = async (payments: Tpayment) => {
 export const m_findClientID = async (oid: string) => {
     try {
         const connection = await adminPool.getConnection();
-        const result: any = await connection.query(
+        const [result] = await connection.query(
             `SELECT fk_cid FROM orders WHERE oid = ?`,
             [oid]
         );
         connection.release();
-        return result[0];
+        return result as RowDataPacket[];
     } catch (error) {
         console.log("err: find client: ", error);
         return null;

@@ -15,8 +15,9 @@ import {
     m_orderGetAllWithDetails,
     m_orderUpdateWithDesc,
 } from "../../models/ordersModel";
-import { formOrderDesc, formPayment } from "../../libs/format";
-import { genOrderId, genOrderWithWorkLogs } from "../../libs/id";
+import { formatOrderDesc, formatPayment } from "../../libs/format";
+import { genOID } from "../../libs/id";
+import { genOrderWithWorkLogs } from "../../libs/format";
 import { m_clientGetSingle } from "../../models/clientsModel";
 import { m_wlGetALLWithLogStructure } from "../../models/workLogModel";
 import { Torder } from "../../utils/global";
@@ -92,18 +93,20 @@ export const orderAdd = async (req: Request, res: Response) => {
     console.log("server - order: add order: ", req.body);
     const order = req.body.order;
     const order_services = req.body.order_services;
-    req.body.order.oid = await genOrderId();
+    req.body.order.oid = await genOID();
     const orResult = await m_orderInsert(order);
     if (orResult.affectedRows) {
         const odResult = await m_orderDescInsert(
-            formOrderDesc(req.body.order.oid, order_services)
+            formatOrderDesc(req.body.order.oid, order_services)
         );
-        if (odResult.affectedRows) {
+        if (odResult?.affectedRows) {
             return res.status(200).json({
                 status: RES_STATUS.SUCCESS,
                 msg: "successed insert order",
                 data: { order: orResult, order_services: odResult },
             });
+        } else {
+            throw new Error();
         }
     }
     return res.status(400).json({
@@ -139,7 +142,7 @@ export const orderUpdate = async (req: Request, res: Response) => {
         const result = await m_orderUpdateWithDesc(
             order,
             order.oid,
-            formOrderDesc(req.body.order.oid, order_services)
+            formatOrderDesc(req.body.order.oid, order_services)
         );
         if (result) {
             return res.status(200).json({
@@ -163,6 +166,12 @@ export const orderUpdate = async (req: Request, res: Response) => {
     }
 };
 
+/**
+ * @description not used api
+ * @param req
+ * @param res
+ * @returns
+ */
 export const clientOrders = async (req: Request, res: Response) => {
     console.log("server - order: get client orders: ", req.body.cid);
     const result = await m_clientOrders(req.body.cid);
@@ -204,7 +213,7 @@ export const orderUpdatePayments = async (req: Request, res: Response) => {
     const delResult = await m_deletePayment(req.body.fk_oid);
     //if (delResult.affectedRows) {
     const updatePayRes = await m_updatePayments(
-        formPayment(req.body.fk_oid, req.body.payments)
+        formatPayment(req.body.fk_oid, req.body.payments)
     );
     const updatePaidRes = await m_orderUpdateProperty(
         "paid",
@@ -226,11 +235,18 @@ export const orderUpdatePayments = async (req: Request, res: Response) => {
     });
 };
 
+/**
+ * @description not used api
+ * @param req
+ * @param res
+ * @returns
+ */
 export const findClient = async (req: Request, res: Response) => {
     console.log("-> server - order: find client: ", req.body.oid);
     const clientID = await m_findClientID(req.body.oid);
-    if (clientID) {
-        const client = await m_clientGetSingle(clientID);
+    console.log("---> test cid: ", clientID);
+    if (clientID && clientID.length) {
+        const client = await m_clientGetSingle(clientID[0].cid);
         if (client) {
             return res.status(200).json({
                 status: RES_STATUS.SUCCESS,
@@ -246,6 +262,12 @@ export const findClient = async (req: Request, res: Response) => {
     });
 };
 
+/**
+ * @description not used api
+ * @param req
+ * @param res
+ * @returns
+ */
 export const findOrder = async (req: Request, res: Response) => {
     console.log("-> server - order: find order: ", req.body.oid);
     const order = await m_findOrder(req.body.oid);

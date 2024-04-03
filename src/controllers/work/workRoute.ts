@@ -13,17 +13,40 @@ import {
     WL_STOP_TIMER,
     WL_TODAY,
 } from "../../utils/reqList";
+import { accessCheck } from "../../middleware/accessCheck";
 const router = express.Router();
 
-router.post(JOB_ASSIGN, workCtl.wlUpdate);
+router.post(JOB_ASSIGN, accessCheck, workCtl.wlUpdate);
 router.get(WL_ALL, workCtl.wlAll);
-router.post(WL_SIGNLE_UPDATE_H, workCtl.wlSingleUpdateHours);
-router.delete(WL_SINGLE_DEL, workCtl.wlSingleDel);
+router.post(WL_SIGNLE_UPDATE_H, accessCheck, workCtl.wlSingleUpdateHours);
+router.delete(WL_SINGLE_DEL, accessCheck, workCtl.wlSingleDel);
 router.get(WL_TODAY, workCtl.wlGetToday);
-router.post(WL_START_TIMER, checkWLStatusMW, workCtl.wlStartWorkTime);
-router.post(WL_RESET_TIMER, checkWLStatusMW, workCtl.wlResetWorkTime);
-router.post(WL_PAUSE_TIMER, checkWLStatusMW, workCtl.wlPauseWorkTime);
-router.post(WL_RESUME_TIMER, checkWLStatusMW, workCtl.wlResumeWorkTime);
-router.post(WL_STOP_TIMER, checkWLStatusMW, workCtl.wlStopWorkTime);
+router.post(
+    WL_START_TIMER,
+    accessCheck,
+    checkWLStatusMW,
+    workCtl.wlStartWorkTime
+);
+router.post(
+    WL_RESET_TIMER,
+    accessCheck,
+    checkWLStatusMW,
+    workCtl.wlResetWorkTime
+);
+router.post(
+    WL_PAUSE_TIMER,
+    [accessCheck, checkWLStatusMW],
+    workCtl.wlPauseWorkTime
+);
+router.post(
+    WL_RESUME_TIMER,
+    [accessCheck, checkWLStatusMW],
+    workCtl.wlResumeWorkTime
+);
+router.post(
+    WL_STOP_TIMER,
+    [accessCheck, checkWLStatusMW],
+    workCtl.wlStopWorkTime
+);
 
 export default router;

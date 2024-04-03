@@ -12,7 +12,7 @@ import {
     m_staffIsPropertyExist,
 } from "../../models/staffModel";
 import { encodePW, replaceStaffPW } from "../../libs/utils";
-import { genStaffUid } from "../../libs/id";
+import { genUID } from "../../libs/id";
 
 /**
  * @description retrieve list of all staff with info
@@ -93,7 +93,7 @@ export const staffSingleInstert = async (req: Request, res: Response) => {
 
     if (!emailDup && !phoneDup) {
         const newPW = await encodePW(req.body[0].password);
-        const newUid = await genStaffUid(
+        const newUid = await genUID(
             uidPrefix[req.body[0].role as "employee" | "manager" | "labor"]
         );
         const result = await m_staffInsert({

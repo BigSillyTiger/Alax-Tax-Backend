@@ -123,12 +123,12 @@ export const createTables = async () => {
         await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.PAYSLIP} (
             psid VARCHAR(11) NOT NULL PRIMARY KEY,
             fk_uid VARCHAR(4) NOT NULL,
-            ps_status VARCHAR(20) NOT NULL DEFAULT 'pending',
-            ps_note VARCHAR(500),
+            status VARCHAR(20) NOT NULL DEFAULT 'pending',
+            note VARCHAR(500),
             hr DECIMAL(5,2) UNSIGNED DEFAULT 0,
             archive BOOLEAN NOT NULL DEFAULT FALSE,
-            s_period DATE NOT NULL,
-            e_period DATE NOT NULL,
+            s_date DATE NOT NULL,
+            e_date DATE NOT NULL,
             created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )`);
         await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.BONUS} (

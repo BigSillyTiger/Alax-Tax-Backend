@@ -12,10 +12,10 @@ import {
     m_clientUpdate,
     m_clientArchiveSingle,
 } from "../../models/clientsModel";
-import { genClientUid } from "../../libs/id";
+import { genCID } from "../../libs/id";
 
 const phaseClientsData = async (items: any /* placeholder */) => {
-    const cid = await genClientUid();
+    const cid = await genCID();
     return items.map((item: any) => {
         const {
             first_name,
