@@ -30,12 +30,15 @@ export const m_addStaff = async (
     orders: 0 | 1 | 2,
     calendar: 0 | 1 | 2,
     staff: 0 | 1 | 2,
-    setting: 0 | 1 | 2
+    setting: 0 | 1 | 2,
+    hr: number,
+    bsb: string,
+    account: string
 ) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `INSERT INTO ${DB_TABLE_LIST.STAFF} (first_name, last_name, email, phone, password, role, address, suburb, city, state, country, postcode, dashboard, clients, orders, calendar, staff, setting) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+            `INSERT INTO ${DB_TABLE_LIST.STAFF} (first_name, last_name, email, phone, password, role, address, suburb, city, state, country, postcode, dashboard, clients, orders, calendar, staff, setting, hr, bsb, account) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
             [
                 first_name,
                 last_name,
@@ -55,6 +58,9 @@ export const m_addStaff = async (
                 calendar,
                 staff,
                 setting,
+                hr,
+                bsb,
+                account,
             ]
         );
         console.log("-> insert result: ", result);

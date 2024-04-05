@@ -46,7 +46,10 @@ export const registerNewUser = async (req: Request, res: Response) => {
             req.body.orders,
             req.body.calendar,
             req.body.staff,
-            req.body.setting
+            req.body.setting,
+            req.body.hr,
+            req.body.bsb,
+            req.body.account
         );
 
         if (insertMRes) {

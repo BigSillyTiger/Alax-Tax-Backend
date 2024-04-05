@@ -29,6 +29,8 @@ export const createTables = async () => {
         setting TINYINT NOT NULL DEFAULT 0,
         access TINYINT NOT NULL DEFAULT 1,
         hr TINYINT NOT NULL DEFAULT 25,
+        bsb VARCHAR(10),
+        account VARCHAR(15),
         created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )`);
 

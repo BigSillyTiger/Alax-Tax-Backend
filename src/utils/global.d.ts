@@ -90,6 +90,8 @@ export type TstaffData = {
     staff: TpageAccess;
     setting: TpageAccess;
     hr: number;
+    bsb: string;
+    account: string;
 };
 
 export type ToriWorkLog = {

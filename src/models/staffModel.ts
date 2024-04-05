@@ -46,7 +46,7 @@ export const m_staffInsert = async (staff: TstaffData) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `INSERT INTO ${DB_TABLE_LIST.STAFF} (uid, first_name, last_name, phone, email, password, address, role, suburb, city, state, country, postcode, dashboard, clients, orders, calendar, staff, setting, hr) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+            `INSERT INTO ${DB_TABLE_LIST.STAFF} (uid, first_name, last_name, phone, email, password, address, role, suburb, city, state, country, postcode, dashboard, clients, orders, calendar, staff, setting, hr, bsb, account) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
             [
                 staff.uid,
                 staff.first_name,
@@ -68,6 +68,8 @@ export const m_staffInsert = async (staff: TstaffData) => {
                 staff.staff,
                 staff.setting,
                 staff.hr,
+                staff.bsb,
+                staff.account,
             ]
         );
         connection.release();
@@ -154,7 +156,7 @@ export const m_staffUpdate = async (staff: any) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `UPDATE ${DB_TABLE_LIST.STAFF} SET first_name = ?, last_name = ?, phone = ?, email = ?, address = ?, role = ?, suburb = ?, city = ?, state = ?, country = ?, postcode = ?, dashboard = ?, clients = ?, orders = ?, calendar = ?, staff = ?, setting = ?, hr = ? WHERE uid = ?`,
+            `UPDATE ${DB_TABLE_LIST.STAFF} SET first_name = ?, last_name = ?, phone = ?, email = ?, address = ?, role = ?, suburb = ?, city = ?, state = ?, country = ?, postcode = ?, dashboard = ?, clients = ?, orders = ?, calendar = ?, staff = ?, setting = ?, hr = ?, bsb = ?, account = ? WHERE uid = ?`,
             [
                 staff.first_name,
                 staff.last_name,
@@ -174,6 +176,8 @@ export const m_staffUpdate = async (staff: any) => {
                 staff.staff,
                 staff.setting,
                 staff.hr,
+                staff.bsb,
+                staff.account,
                 staff.uid,
             ]
         );
