@@ -268,7 +268,7 @@ export const m_wlGetAll = async (
         const [rows] = await connection.query(
             `SELECT 
                 wl.*,
-                s.first_name, s.last_name, s.email, s.phone,
+                s.first_name, s.last_name, s.email, s.phone, s.hr,
                 o.address, o.suburb, o.city, o.state, o.country, o.postcode
             FROM ${DB_TABLE_LIST.WORK_LOG} wl 
             INNER JOIN ${DB_TABLE_LIST.STAFF} s ON wl.fk_uid = s.uid
