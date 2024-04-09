@@ -1,7 +1,7 @@
 import type { ResultSetHeader, RowDataPacket } from "mysql2";
 import { DB_TABLE_LIST } from "../utils/config";
 import adminPool from "./adminPool";
-import { Tbonus, Tdedction, TnewPayslip, Tpayslip } from "@/utils/global";
+import { Tbonus, Tdeduction, TnewPayslip, Tpayslip } from "@/utils/global";
 
 export const m_psSingleInsert = async (
     payslip: any,
@@ -47,16 +47,4 @@ export const m_psLastBID = async () => {
     }
 };
 
-export const m_psLastDID = async () => {
-    try {
-        const connection = await adminPool.getConnection();
-        const [result] = await connection.query<RowDataPacket[]>(
-            `SELECT did FROM ${DB_TABLE_LIST.DEDUCTION} ORDER BY did DESC LIMIT 1;`
-        );
-        connection.release();
-        return result as RowDataPacket[];
-    } catch (error) {
-        console.log("-> error: retrieve last did - ", error);
-        return null;
-    }
-};
+

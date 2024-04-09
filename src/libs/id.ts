@@ -5,6 +5,7 @@ import { uidPrefix } from "../utils/config";
 import { m_uidGetLastStaff } from "../models/staffModel";
 import { m_clientsLastCID } from "../models/clientsModel";
 import { m_ordersLastOID } from "../models/ordersModel";
+import { m_deductLastDID } from "../models/workLogModel";
 
 export const genPSID = async () => {
     try {
@@ -44,22 +45,36 @@ export const genBID = async () => {
     }
 };
 
-export const genDID = async () => {
+/**
+ * @description generate multiple beduction id
+ * @returns
+ */
+export const genDID = async (count: number) => {
     try {
-        const result = await m_psLastBID();
-        let newId = "001";
-        const date = genDate();
-        if (result) {
-            const dateCmp = date === result[0].oid.slice(1, 7);
-            result.length && dateCmp
-                ? (newId = String(
-                      parseInt(result[0].oid.slice(-3), 10) + 1
-                  ).padStart(3, "0"))
-                : (newId = "001");
+        let ids = [];
+        let currentNumber = 1;
+        const currentDate = genDate();
+        const lastId = await m_deductLastDID();
+
+        if (lastId?.length) {
+            const lastIdDate = lastId[0].substring(1, 7);
+            currentNumber = parseInt(lastId[0].substring(7), 10);
+
+            if (lastIdDate === currentDate) {
+                currentNumber++;
+            } else {
+                currentNumber = 1;
+            }
         }
-        return `${uidPrefix.deduction}${date}${newId}`;
+
+        for (let i = 0; i < count; i++) {
+            let number = (currentNumber + i).toString().padStart(3, "0");
+            ids.push(`${uidPrefix.deduction}${currentDate}${number}`);
+        }
+
+        return ids;
     } catch (error) {
-        return null;
+        throw new Error("Error generating deduction id");
     }
 };
 

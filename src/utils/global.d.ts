@@ -262,9 +262,9 @@ export type Tbonus = {
     note: string;
 };
 
-export type Tdedction = {
-    fk_psid: string;
-    fk_uid: string;
+export type Tdeduction = {
+    did: string;
+    fk_wlid: string;
     amount: number;
     note: string;
 };

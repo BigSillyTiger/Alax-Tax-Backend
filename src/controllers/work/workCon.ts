@@ -11,13 +11,15 @@ import {
     m_wlResetWorkTime,
     m_wlGetBTimeWID,
     m_wlUpdateEtime,
+    m_wlSingleUpdate,
 } from "../../models/workLogModel";
 import type { Request, Response } from "express";
 import type { TworkLog, ToriWorkLog } from "../../utils/global";
 import { calBreakTime, genAUDate, genHHMM, genYYYYHHMM } from "../../libs/time";
-import { genWorkLogsWithNewWLID } from "../../libs/format";
+import { formatDeduction, genWorkLogsWithNewWLID } from "../../libs/format";
 import { formatWorkLog } from "../../libs/format";
 import { RES_STATUS } from "../../utils/config";
+import { genDID } from "../../libs/id";
 
 export const wlAll = async (req: Request, res: Response) => {
     console.log("server - work log: get all work logs");
@@ -75,8 +77,41 @@ export const wlUpdate = async (req: Request, res: Response) => {
     }
 };
 
+export const wlSingleUpdate = async (req: Request, res: Response) => {
+    console.log("server - work log: single update hours and deduction");
+    try {
+        const newDeductions = await genDID(req.body.deduction.length).then(
+            (dids) =>
+                formatDeduction(
+                    dids,
+                    req.body.hourData.wlid,
+                    req.body.deduction
+                )
+        );
+
+        const result = await m_wlSingleUpdate(req.body.hourData, newDeductions);
+        if (result) {
+            return res.status(200).json({
+                status: RES_STATUS.SUC_UPDATE_WORKLOG,
+                msg: "Success:  work log: single update hours and deduction",
+                data: result,
+            });
+        }
+    } catch (error) {
+        console.log(
+            "err: work log: single update hours and deduction: ",
+            error
+        );
+        return res.status(400).json({
+            status: RES_STATUS.FAILED_UPDATE_WORKLOG,
+            msg: "Failed: work log: single update hours and deduction",
+            data: null,
+        });
+    }
+};
+
 export const wlSingleUpdateHours = async (req: Request, res: Response) => {
-    console.log("server - work log: single update");
+    console.log("server - work log: single update hours");
     try {
         console.log("-> work log time info: ", req.body);
         const result = await m_wlSingleUpdateHours(req.body);

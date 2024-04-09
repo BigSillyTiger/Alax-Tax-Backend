@@ -141,9 +141,7 @@ export const createTables = async () => {
             amount DECIMAL(10,2) UNSIGNED DEFAULT 0
         )`);
         await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.DEDUCTION} (
-            did VARCHAR(11) NOT NULL PRIMARY KEY,
-            fk_psid VARCHAR(11) NOT NULL,
-            fk_uid VARCHAR(4) NOT NULL,
+            fk_wlid VARCHAR(11) NOT NULL,
             note VARCHAR(500),
             amount DECIMAL(10,2) UNSIGNED DEFAULT 0
         )`);

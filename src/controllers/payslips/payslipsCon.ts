@@ -20,12 +20,12 @@ export const psSingleInsert = async (req: Request, res: Response) => {
         if (!psid) throw new Error("Failed to generate new psid");
         const psData = formatPayslip(psid, req.body);
         const bonusData = formatBonus(psid, req.body.fk_uid, req.body.bonus);
-        const deductionData = formatDeduction(
+        /* const deductionData = formatDeduction(
             psid,
             req.body.fk_uid,
             req.body.deduction
-        );
-        const result = await m_psSingleInsert(psData, bonusData, deductionData);
+        ); */
+        //const result = await m_psSingleInsert(psData, bonusData, deductionData);
     } catch (error) {
         console.log("-> error: payslip: SingleInsert: ", error);
         return res.status(500).json({

@@ -149,12 +149,12 @@ export const formatBonus = (psid: string, uid: string, data: TnewBonus[]) => {
 };
 
 export const formatDeduction = (
-    psid: string,
-    uid: string,
+    did: string[],
+    wlid: string,
     data: TnewDeduction[]
 ) => {
-    return data.map((item: TnewDeduction) => {
-        const { note, amount } = item;
-        return [psid, uid, note, amount];
+    return data.map((item: TnewDeduction, index) => {
+        const { amount, note } = item;
+        return [did[index], wlid, amount, note];
     });
 };

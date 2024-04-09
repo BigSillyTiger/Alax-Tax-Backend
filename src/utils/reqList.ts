@@ -34,6 +34,7 @@ export const WL_RESET_TIMER = "/work/reset-timer";
 export const WL_PAUSE_TIMER = "/work/pause-timer";
 export const WL_RESUME_TIMER = "/work/resume-timer";
 export const WL_STOP_TIMER = "/work/stop-timer";
+export const WL_SINGLE_UPDATE = "/work/single-update";
 // Staff
 export const STAFF_ALL = "/staff/all";
 export const STAFF_INFO = "/staff/info";

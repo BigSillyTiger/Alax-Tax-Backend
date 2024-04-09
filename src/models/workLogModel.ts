@@ -337,6 +337,37 @@ export const m_wlSingleUpdateHours = async ({
     }
 };
 
+export const m_wlSingleUpdate = async (hourData: any, deduction: any[]) => {
+    try {
+        const connection = await adminPool.getConnection();
+        await connection.query("START TRANSACTION;");
+        await connection.query(
+            `
+            UPDATE ${DB_TABLE_LIST.WORK_LOG} 
+            SET s_time = ?, e_time = ?, b_hour = ?
+            WHERE wlid = ?;`,
+            [hourData.s_time, hourData.e_time, hourData.b_hour, hourData.wlid]
+        );
+        await connection.query(
+            `DELETE FROM ${DB_TABLE_LIST.DEDUCTION} WHERE fk_wlid = ?;`,
+            [hourData.wlid]
+        );
+        await connection.query(
+            `
+            INSERT INTO ${DB_TABLE_LIST.DEDUCTION} (did, fk_wlid, amount, note) VALUES ?;
+        `,
+            [deduction]
+        );
+
+        await connection.query("COMMIT;");
+        connection.release();
+        return true;
+    } catch (error) {
+        console.log("err: single update work log: ", error);
+        return false;
+    }
+};
+
 export const m_wlSingleArchive = async (wlid: string) => {
     try {
         const connection = await adminPool.getConnection();
@@ -469,6 +500,20 @@ export const m_wlGetWLStatusWid = async (wlid: string) => {
         return rows as RowDataPacket[];
     } catch (error) {
         console.log("err: get wl_status with wlid: ", error);
+        return null;
+    }
+};
+
+export const m_deductLastDID = async () => {
+    try {
+        const connection = await adminPool.getConnection();
+        const [result] = await connection.query<RowDataPacket[]>(
+            `SELECT did FROM ${DB_TABLE_LIST.DEDUCTION} ORDER BY did DESC LIMIT 1;`
+        );
+        connection.release();
+        return result as RowDataPacket[];
+    } catch (error) {
+        console.log("-> error: retrieve last did - ", error);
         return null;
     }
 };

@@ -4,6 +4,7 @@ import checkWLStatusMW from "../../middleware/checkWLStatus";
 import {
     JOB_ASSIGN,
     WL_ALL,
+    WL_SINGLE_UPDATE,
     WL_PAUSE_TIMER,
     WL_RESET_TIMER,
     WL_RESUME_TIMER,
@@ -48,5 +49,6 @@ router.post(
     [accessCheck, checkWLStatusMW],
     workCtl.wlStopWorkTime
 );
+router.post(WL_SINGLE_UPDATE, workCtl.wlSingleUpdate);
 
 export default router;
