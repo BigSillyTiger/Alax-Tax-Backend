@@ -57,8 +57,8 @@ export const genDID = async (count: number) => {
         const lastId = await m_deductLastDID();
 
         if (lastId?.length) {
-            const lastIdDate = lastId[0].substring(1, 7);
-            currentNumber = parseInt(lastId[0].substring(7), 10);
+            const lastIdDate = lastId[0].did.substring(1, 7);
+            currentNumber = parseInt(lastId[0].did.substring(7), 10);
 
             if (lastIdDate === currentDate) {
                 currentNumber++;
@@ -74,6 +74,7 @@ export const genDID = async (count: number) => {
 
         return ids;
     } catch (error) {
+        console.log("-> error - genDID: ", error);
         throw new Error("Error generating deduction id");
     }
 };

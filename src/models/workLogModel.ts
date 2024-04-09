@@ -269,10 +269,24 @@ export const m_wlGetAll = async (
             `SELECT 
                 wl.*,
                 s.first_name, s.last_name, s.email, s.phone, s.hr, s.bsb, s.account,
-                o.address, o.suburb, o.city, o.state, o.country, o.postcode
+                o.address, o.suburb, o.city, o.state, o.country, o.postcode, deduction
             FROM ${DB_TABLE_LIST.WORK_LOG} wl 
             INNER JOIN ${DB_TABLE_LIST.STAFF} s ON wl.fk_uid = s.uid
             INNER JOIN ${DB_TABLE_LIST.ORDER_LIST} o ON wl.fk_oid = o.oid
+            LEFT JOIN (
+                SELECT 
+                    fk_wlid,
+                    JSON_ARRAYAGG(
+                        JSON_OBJECT(
+                            'did', did,
+                            'fk_wlid', fk_wlid,
+                            'amount', amount,
+                            'note', note
+                        )
+                    ) AS deduction
+                FROM ${DB_TABLE_LIST.DEDUCTION}
+                GROUP BY fk_wlid
+            ) D ON wl.wlid = D.fk_wlid
             WHERE wl.archive = ${archive};`
         );
         connection.release();

@@ -4,10 +4,10 @@ import checkWLStatusMW from "../../middleware/checkWLStatus";
 import {
     JOB_ASSIGN,
     WL_ALL,
-    WL_SINGLE_UPDATE,
     WL_PAUSE_TIMER,
     WL_RESET_TIMER,
     WL_RESUME_TIMER,
+    WL_SINGLE_UPDATE,
     WL_SIGNLE_UPDATE_H,
     WL_SINGLE_DEL,
     WL_START_TIMER,
@@ -19,6 +19,7 @@ const router = express.Router();
 
 router.post(JOB_ASSIGN, accessCheck, workCtl.wlUpdate);
 router.get(WL_ALL, workCtl.wlAll);
+router.post(WL_SINGLE_UPDATE, workCtl.wlSingleUpdate);
 router.post(WL_SIGNLE_UPDATE_H, accessCheck, workCtl.wlSingleUpdateHours);
 router.delete(WL_SINGLE_DEL, accessCheck, workCtl.wlSingleDel);
 router.get(WL_TODAY, workCtl.wlGetToday);
@@ -49,6 +50,5 @@ router.post(
     [accessCheck, checkWLStatusMW],
     workCtl.wlStopWorkTime
 );
-router.post(WL_SINGLE_UPDATE, workCtl.wlSingleUpdate);
 
 export default router;

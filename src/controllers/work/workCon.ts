@@ -79,6 +79,7 @@ export const wlUpdate = async (req: Request, res: Response) => {
 
 export const wlSingleUpdate = async (req: Request, res: Response) => {
     console.log("server - work log: single update hours and deduction");
+
     try {
         const newDeductions = await genDID(req.body.deduction.length).then(
             (dids) =>
