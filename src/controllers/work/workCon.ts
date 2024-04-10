@@ -12,6 +12,7 @@ import {
     m_wlGetBTimeWID,
     m_wlUpdateEtime,
     m_wlSingleUpdate,
+    m_wlSingleUpdateDeduction,
 } from "../../models/workLogModel";
 import type { Request, Response } from "express";
 import type { TworkLog, ToriWorkLog } from "../../utils/global";
@@ -79,7 +80,6 @@ export const wlUpdate = async (req: Request, res: Response) => {
 
 export const wlSingleUpdate = async (req: Request, res: Response) => {
     console.log("server - work log: single update hours and deduction");
-
     try {
         const newDeductions = await genDID(req.body.deduction.length).then(
             (dids) =>
@@ -106,6 +106,34 @@ export const wlSingleUpdate = async (req: Request, res: Response) => {
         return res.status(400).json({
             status: RES_STATUS.FAILED_UPDATE_WORKLOG,
             msg: "Failed: work log: single update hours and deduction",
+            data: null,
+        });
+    }
+};
+
+export const wlSingleUpdateDeduction = async (req: Request, res: Response) => {
+    console.log("server - work log: single update deduction ");
+    try {
+        const newDeductions = await genDID(req.body.deduction.length).then(
+            (dids) => formatDeduction(dids, req.body.wlid, req.body.deduction)
+        );
+
+        const result = await m_wlSingleUpdateDeduction(
+            req.body.wlid,
+            newDeductions
+        );
+        if (result) {
+            return res.status(200).json({
+                status: RES_STATUS.SUC_UPDATE_WORKLOG,
+                msg: "Success - work log: single update deduction",
+                data: result,
+            });
+        }
+    } catch (error) {
+        console.log("err - work log: single update deduction: ", error);
+        return res.status(400).json({
+            status: RES_STATUS.FAILED_UPDATE_WORKLOG,
+            msg: "Failed - work log: single update deduction",
             data: null,
         });
     }

@@ -37,7 +37,20 @@ export const genAUDate = () => {
         second: "2-digit",
     };
 
-    return new Date().toLocaleString("en-AU", dateOptionADL);
+    //return new Date().toLocaleString("en-AU", dateOptionADL);
+    const currentDate = new Date();
+    const hours = currentDate.getHours().toString().padStart(2, "0");
+    const formattedDate = currentDate.toLocaleString("en-AU", dateOptionADL);
+    return formattedDate.replace(
+        /\d{2}:\d{2}:\d{2}/,
+        `${hours}:${currentDate
+            .getMinutes()
+            .toString()
+            .padStart(2, "0")}:${currentDate
+            .getSeconds()
+            .toString()
+            .padStart(2, "0")}`
+    );
 };
 
 export const genYYYYHHMM = (date: string) => {
@@ -46,7 +59,6 @@ export const genYYYYHHMM = (date: string) => {
     // Extract day, month, and year
     const [, datePart] = parts;
     const [day, month, year] = datePart.split("/");
-    console.log(month, day, year);
 
     // Rearrange the date parts in yyyy-mm-dd format
     return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;

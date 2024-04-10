@@ -308,10 +308,24 @@ export const m_wlGetToday = async (
             `SELECT 
                 wl.*,
                 s.first_name, s.last_name, s.email, s.phone,
-                o.address, o.suburb, o.city, o.state, o.country, o.postcode
+                o.address, o.suburb, o.city, o.state, o.country, o.postcode, deduction
             FROM ${DB_TABLE_LIST.WORK_LOG} wl 
             INNER JOIN ${DB_TABLE_LIST.STAFF} s ON wl.fk_uid = s.uid
             INNER JOIN ${DB_TABLE_LIST.ORDER_LIST} o ON wl.fk_oid = o.oid
+            LEFT JOIN (
+                SELECT 
+                    fk_wlid,
+                    JSON_ARRAYAGG(
+                        JSON_OBJECT(
+                            'did', did,
+                            'fk_wlid', fk_wlid,
+                            'amount', amount,
+                            'note', note
+                        )
+                    ) AS deduction
+                FROM ${DB_TABLE_LIST.DEDUCTION}
+                GROUP BY fk_wlid
+            ) D ON wl.wlid = D.fk_wlid
             WHERE wl.wl_date = ? AND wl.archive = ?;`,
             [today, archive]
         );
@@ -348,6 +362,34 @@ export const m_wlSingleUpdateHours = async ({
     } catch (error) {
         console.log("err: single update work log hours: ", error);
         return null;
+    }
+};
+
+export const m_wlSingleUpdateDeduction = async (
+    wlid: string,
+    deduction: any[]
+) => {
+    try {
+        const connection = await adminPool.getConnection();
+        await connection.query("START TRANSACTION;");
+
+        await connection.query(
+            `DELETE FROM ${DB_TABLE_LIST.DEDUCTION} WHERE fk_wlid = ?;`,
+            [wlid]
+        );
+        await connection.query(
+            `
+            INSERT INTO ${DB_TABLE_LIST.DEDUCTION} (did, fk_wlid, amount, note) VALUES ?;
+        `,
+            [deduction]
+        );
+
+        await connection.query("COMMIT;");
+        connection.release();
+        return true;
+    } catch (error) {
+        console.log("err: single update work log deduction: ", error);
+        return false;
     }
 };
 
