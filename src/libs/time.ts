@@ -52,30 +52,35 @@ export const genYYYYHHMM = (date: string) => {
     return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
 };
 
-export const calBreakTime = (sTime: string, eTime: string) => {
+export const calBreakTime = (sTime: string, eTime: string, bHour: string) => {
     sTime = sTime ?? "00:00";
     eTime = eTime ?? "00:00";
+    bHour = bHour ?? "00:00";
     // Parse start time
     const [startHour, startMinute] = sTime.split(":").map(Number);
     // Parse end time
     const [endHour, endMinute] = eTime.split(":").map(Number);
+    // Parse break time
+    const [breakHour, breakMinute] = bHour.split(":").map(Number);
 
     // Convert time strings to total minutes
     const startTotalMinutes = startHour * 60 + startMinute;
     const endTotalMinutes = endHour * 60 + endMinute;
+    const breakTotalMinutes = breakHour * 60 + breakMinute;
 
     // Calculate total work time in minutes
-    let totalWorkMinutes = endTotalMinutes - startTotalMinutes;
+    let totalWorkMinutes =
+        endTotalMinutes - startTotalMinutes + breakTotalMinutes;
 
     // Handle cases where the break time is longer than the work time
     if (totalWorkMinutes < 0) {
         totalWorkMinutes = 0;
     }
 
-    // Convert total work time back to hh:mm format
-    const workHour = Math.floor(totalWorkMinutes / 60);
-    const workMinute = totalWorkMinutes % 60;
-    return `${workHour.toString().padStart(2, "0")}:${workMinute
+    // Convert total break time back to hh:mm format
+    const hour = Math.floor(totalWorkMinutes / 60);
+    const minute = totalWorkMinutes % 60;
+    return `${hour.toString().padStart(2, "0")}:${minute
         .toString()
         .padStart(2, "0")}`;
 };

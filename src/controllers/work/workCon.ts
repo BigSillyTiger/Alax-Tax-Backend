@@ -273,11 +273,15 @@ export const wlResumeWorkTime = async (req: Request, res: Response) => {
     console.log("server - work log: resume work time, wlid: ", req.body.wlid);
     try {
         const bTime2 = genHHMM(genAUDate()) as string;
-        const time = await m_wlGetBTimeWID(req.body.wlid);
-        console.log("-> bTime2: ", bTime2);
-        const bTime1 = time ? time[0].b_time : "00:00";
-        const bTime = calBreakTime(bTime1, bTime2);
-        console.log("-> cal break time: ", bTime);
+        const bTime1 = await m_wlGetBTimeWID(req.body.wlid).then((res) => {
+            if (res && res.length) return res[0].b_time;
+            else return "00:00";
+        });
+        const bHour = await m_wlGetBHourWID(req.body.wlid).then((res) => {
+            if (res && res.length) return res[0].b_hour;
+            else return "00:00";
+        });
+        const bTime = calBreakTime(bTime1, bTime2, bHour);
 
         const result = await m_wlResume(req.body.wlid, bTime as string);
         if (result && result.affectedRows) {
