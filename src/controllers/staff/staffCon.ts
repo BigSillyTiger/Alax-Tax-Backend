@@ -13,6 +13,7 @@ import {
 } from "../../models/staffModel";
 import { encodePW, replaceStaffPW } from "../../libs/utils";
 import { genUID } from "../../libs/id";
+import { formatStaff } from "../../libs/format";
 
 /**
  * @description retrieve list of all staff with info
@@ -82,25 +83,25 @@ export const staffSingleInstert = async (req: Request, res: Response) => {
     const phoneDup = await m_staffIsPropertyExist(
         "0", // new client does not nedd to check cid
         "phone",
-        req.body[0].phone
+        req.body.staff[0].phone
     );
     const emailDup = await m_staffIsPropertyExist(
         "0", // new client does not nedd to check cid
         "email",
-        req.body[0].email
+        req.body.staff[0].email
     );
     //console.log(`-> phoneDup: ${phoneDup}, emailDup: ${emailDup}`);
 
     if (!emailDup && !phoneDup) {
-        const newPW = await encodePW(req.body[0].password);
+        const newPW = await encodePW(req.body.staff[0].password);
         const newUid = await genUID(
-            uidPrefix[req.body[0].role as "employee" | "manager" | "labor"]
+            uidPrefix[
+                req.body.staff[0].role as "employee" | "manager" | "labor"
+            ]
         );
-        const result = await m_staffInsert({
-            ...req.body[0],
-            uid: newUid,
-            password: newPW,
-        });
+        const result = await m_staffInsert(
+            formatStaff(newUid, newPW, req.body.staff[0])
+        );
 
         if (result.affectedRows > 0) {
             logger.infoLog("staff: successed in register a new staff");

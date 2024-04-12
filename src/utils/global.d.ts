@@ -211,18 +211,25 @@ export type TstaffData = {
     email: string;
     password: string;
     address: string;
-    role: "manager" | "employee";
+    role: "manager" | "employee" | "labor";
     suburb: string;
     city: string;
     state: string;
     country: string;
     postcode: string;
+    bsb: string;
+    account: string;
     dashboard: TpageAccess;
     clients: TpageAccess;
     orders: TpageAccess;
     calendar: TpageAccess;
     staff: TpageAccess;
+    worklogs: TpageAccess;
     setting: TpageAccess;
+};
+
+export type TnewStaff = Partical<TstaffData> & {
+    pwConfirm: string;
 };
 
 export type ToriWorkLog = {

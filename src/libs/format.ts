@@ -2,6 +2,7 @@ import type {
     Tbonus,
     TnewBonus,
     TnewDeduction,
+    TnewStaff,
     Torder,
     ToriWorkLog,
 } from "../utils/global";
@@ -157,4 +158,31 @@ export const formatDeduction = (
         const { amount, note } = item;
         return [did[index], wlid, amount, note];
     });
+};
+
+export const formatStaff = (uid: string, pw: string, staff: TnewStaff) => {
+    return [
+        uid,
+        staff.first_name,
+        staff.last_name,
+        staff.phone,
+        staff.email,
+        pw,
+        staff.address,
+        staff.role,
+        staff.suburb,
+        staff.city,
+        staff.state,
+        staff.country,
+        staff.postcode,
+        staff.dashboard,
+        staff.clients,
+        staff.orders,
+        staff.calendar,
+        staff.staff,
+        staff.setting,
+        staff.hr,
+        staff.bsb,
+        staff.account,
+    ];
 };

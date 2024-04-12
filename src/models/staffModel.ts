@@ -1,7 +1,7 @@
 import { DB_TABLE_LIST, uidPrefix } from "../utils/config";
 import logger from "../libs/logger";
 import adminPool from "./adminPool";
-import { TstaffData } from "../utils/global";
+import { TnewStaff } from "../utils/global";
 import { RowDataPacket } from "mysql2";
 
 /**
@@ -42,35 +42,12 @@ export const m_staffGetSingle = async (uid: number) => {
     }
 };
 
-export const m_staffInsert = async (staff: TstaffData) => {
+export const m_staffInsert = async (staff: TnewStaff[]) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `INSERT INTO ${DB_TABLE_LIST.STAFF} (uid, first_name, last_name, phone, email, password, address, role, suburb, city, state, country, postcode, dashboard, clients, orders, calendar, staff, setting, hr, bsb, account) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
-            [
-                staff.uid,
-                staff.first_name,
-                staff.last_name,
-                staff.phone,
-                staff.email,
-                staff.password,
-                staff.address,
-                staff.role,
-                staff.suburb,
-                staff.city,
-                staff.state,
-                staff.country,
-                staff.postcode,
-                staff.dashboard,
-                staff.clients,
-                staff.orders,
-                staff.calendar,
-                staff.staff,
-                staff.setting,
-                staff.hr,
-                staff.bsb,
-                staff.account,
-            ]
+            `INSERT INTO ${DB_TABLE_LIST.STAFF} (uid, first_name, last_name, phone, email, password, address, role, suburb, city, state, country, postcode, dashboard, clients, orders, calendar, staff, setting, hr, bsb, account) VALUES (?)`,
+            [staff]
         );
         connection.release();
         return result[0];
