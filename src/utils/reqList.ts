@@ -44,6 +44,7 @@ export const STAFF_SINGLE_UPDATE = "/staff/single-update";
 export const STAFF_SINGLE_DEL = "/staff/single-del";
 export const STAFF_UPDATE_PW = "/staff/update-pw";
 
+// Order
 export const ORDER_ALL = "/order/all";
 export const ORDER_ADD = "/order/add";
 export const ORDER_UPDATE = "/order/update";

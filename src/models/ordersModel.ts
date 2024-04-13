@@ -165,30 +165,27 @@ export const m_clientOrders = async (cid: string) => {
 export const m_clientOrderWichId = async (cid: string) => {
     try {
         const connection = await adminPool.getConnection();
-        const result: any = await connection.query(
+        const [rows] = await connection.query(
             `
-            SELECT JSON_ARRAYAGG(
-                JSON_OBJECT(
-                    'oid', A.oid, 
-                    'fk_cid', A.fk_cid,  
-                    'address', A.address,
-                    'suburb', A.suburb,
-                    'city', A.city,
-                    'state', A.state,
-                    'country', A.country,
-                    'postcode', A.postcode,
-                    'status', A.status,
-                    'deposit', A.deposit,
-                    'gst', A.gst,
-                    'total', A.total,
-                    'paid', A.paid,
-                    'created_date', A.created_date,
-                    'invoice_date', A.invoice_date,
-                    'order_services', descriptions,
-                    'payments', paymentData,
-                    'client_info', clientInfo
-                )
-            )
+            SELECT 
+                A.oid, 
+                A.fk_cid,  
+                A.address,
+                A.suburb,
+                A.city,
+                A.state,
+                A.country,
+                A.postcode,
+                A.status,
+                A.deposit,
+                A.gst,
+                A.total,
+                A.paid,
+                A.created_date,
+                A.invoice_date,
+                order_services,
+                payments,
+                client_info
             FROM ${DB_TABLE_LIST.ORDER_LIST} A
             JOIN (
                 SELECT 
@@ -206,7 +203,7 @@ export const m_clientOrderWichId = async (cid: string) => {
                             'gst', gst,
                             'netto', netto
                         )
-                    ) AS descriptions
+                    ) AS order_services
                 FROM ${DB_TABLE_LIST.ORDER_SERVICE}
                 GROUP BY fk_oid
             ) B ON A.oid = B.fk_oid
@@ -219,7 +216,7 @@ export const m_clientOrderWichId = async (cid: string) => {
                             'paid', paid,
                             'paid_date', paid_date
                         )
-                    ) AS paymentData
+                    ) AS payments
                 FROM ${DB_TABLE_LIST.PAYMENT}
                 GROUP BY fk_oid 
             ) P ON A.oid = P.fk_oid
@@ -238,7 +235,7 @@ export const m_clientOrderWichId = async (cid: string) => {
                         'state', state,
                         'country', country,
                         'postcode', postcode
-                    ) AS clientInfo
+                    ) AS client_info
                 FROM ${DB_TABLE_LIST.CLIENT} 
             ) C ON A.fk_cid = C.cid
             WHERE A.fk_cid = ? AND A.archive = 0;
@@ -246,11 +243,7 @@ export const m_clientOrderWichId = async (cid: string) => {
             [cid]
         );
         connection.release();
-        /* console.log(
-            `-> id[${cid}] orders: `,
-            Object.values(result[0][0])[0]
-        ); */
-        return Object.values(result[0][0])[0];
+        return rows as RowDataPacket[];
     } catch (err) {
         console.log("err: get client order with id: ", err);
         return null;
