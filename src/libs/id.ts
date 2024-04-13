@@ -10,18 +10,19 @@ import { m_deductLastDID } from "../models/workLogModel";
 export const genPSID = async () => {
     try {
         const date = genDate();
-        const result = await m_psLastPSID();
+        const lastPsid = await m_psLastPSID();
         let newId = "001";
-        if (result) {
-            const dateCmp = date === result[0].oid.slice(2, 8);
-            result.length && dateCmp
+        if (lastPsid?.length) {
+            const dateCmp = date === lastPsid[0].psid.slice(2, 8);
+            lastPsid.length && dateCmp
                 ? (newId = String(
-                      parseInt(result[0].oid.slice(-3), 10) + 1
+                      parseInt(lastPsid[0].psid.slice(-3), 10) + 1
                   ).padStart(3, "0"))
                 : (newId = "001");
         }
         return `${uidPrefix.payslip}${date}${newId}`;
     } catch (error) {
+        console.log("-> error - genPSID: ", error);
         return null;
     }
 };

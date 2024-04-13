@@ -52,6 +52,7 @@ export enum RES_STATUS {
     SUC_ADD_NEW_SU = 207,
     SUC_UPDATE_WORKLOG = 208,
     SUC_DELETE_WORKLOG = 209,
+    SUC_INSERT_PAYSLIP = 210,
     //
     FAILED = 400,
     FAILED_DUP = 401,
@@ -62,6 +63,7 @@ export enum RES_STATUS {
     FAILED_ADD_NEW_SU = 406,
     FAILED_UPDATE_WORKLOG = 407,
     FAILED_DELETE_WORKLOG = 408,
+    FAILED_INSERT_PAYSLIP = 409,
 }
 
 export const sleep = (ms: number) =>

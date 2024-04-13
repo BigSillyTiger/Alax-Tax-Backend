@@ -7,7 +7,6 @@ import {
     m_clientOrderWichId,
     m_orderArchive,
     m_orderStatusUpdate,
-    m_deletePayment,
     m_orderUpdatePayments,
     m_orderUpdateProperty,
     m_findClientID,

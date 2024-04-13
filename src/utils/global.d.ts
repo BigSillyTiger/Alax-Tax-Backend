@@ -281,7 +281,7 @@ export type Tpayslip = {
     psid: string;
     fk_uid: string;
     status: string;
-    note: string;
+    paid: number;
     hr: number;
     s_date: string;
     e_date: string;

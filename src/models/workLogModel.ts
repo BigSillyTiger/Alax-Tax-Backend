@@ -404,16 +404,18 @@ export const m_wlSingleUpdate = async (hourData: any, deduction: any[]) => {
             WHERE wlid = ?;`,
             [hourData.s_time, hourData.e_time, hourData.b_hour, hourData.wlid]
         );
-        await connection.query(
-            `DELETE FROM ${DB_TABLE_LIST.DEDUCTION} WHERE fk_wlid = ?;`,
-            [hourData.wlid]
-        );
-        await connection.query(
-            `
-            INSERT INTO ${DB_TABLE_LIST.DEDUCTION} (did, fk_wlid, amount, note) VALUES ?;
-        `,
-            [deduction]
-        );
+        if (deduction?.length) {
+            await connection.query(
+                `DELETE FROM ${DB_TABLE_LIST.DEDUCTION} WHERE fk_wlid = ?;`,
+                [hourData.wlid]
+            );
+            await connection.query(
+                `
+                INSERT INTO ${DB_TABLE_LIST.DEDUCTION} (did, fk_wlid, amount, note) VALUES ?;
+            `,
+                [deduction]
+            );
+        }
 
         await connection.query("COMMIT;");
         connection.release();

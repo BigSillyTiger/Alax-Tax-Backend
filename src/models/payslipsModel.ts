@@ -5,18 +5,41 @@ import { Tbonus, Tdeduction, TnewPayslip, Tpayslip } from "@/utils/global";
 
 export const m_psSingleInsert = async (
     payslip: any,
-    bonus: any[],
-    deduction: any[]
+    bonus: any,
+    uid: string,
+    s_date: string,
+    e_date: string
 ) => {
     try {
+        console.log(`-> uid[${uid}] s_date[${s_date}] e_date[${e_date}]`);
         const connection = await adminPool.getConnection();
         await connection.query("START TRANSACTION;");
+        if (bonus?.length) {
+            await connection.query(
+                `
+                INSERT INTO ${DB_TABLE_LIST.BONUS} (fk_psid, fk_uid, note, amount) VALUES ?;
+            `,
+                [bonus]
+            );
+        }
         await connection.query(
-            `INSERT INTO ${DB_TABLE_LIST.PAYSLIP} (psid, fk_uid, period, pay_date, hours, rate, gross, tax, net, super, created_date) VALUES (?,?,?,?,?,?,?,?,?,?,?)`,
-            payslip
+            `INSERT INTO ${DB_TABLE_LIST.PAYSLIP} (psid, fk_uid, status, hr, s_date, e_date, paid) VALUES ?;`,
+            [payslip]
+        );
+        await connection.query(
+            `UPDATE ${DB_TABLE_LIST.WORK_LOG} 
+            SET wl_status = "unpaid"
+            WHERE wl_date BETWEEN '${s_date}' AND '${e_date}'
+            AND fk_uid = '${uid}'
+            AND wl_status = "confirmed";`
         );
         await connection.query("COMMIT;");
-    } catch (error) {}
+        connection.release();
+        return true;
+    } catch (error) {
+        console.log("-> error: payslip single insert - ", error);
+        return false;
+    }
 };
 
 export const m_psLastPSID = async () => {

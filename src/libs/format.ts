@@ -5,6 +5,7 @@ import type {
     TnewStaff,
     Torder,
     ToriWorkLog,
+    Tpayslip,
 } from "../utils/global";
 import { m_wlGetAllWLID } from "../models/workLogModel";
 import { genDate } from "./time";
@@ -137,9 +138,9 @@ export const genWorkLogsWithNewWLID = async (oriWorkLogs: ToriWorkLog[]) => {
  *          data for bonus table
  *          data for deduction table
  */
-export const formatPayslip = (psid: string, data: any) => {
-    const { fk_uid, status, note, hr, s_date, e_date } = data;
-    return [psid, fk_uid, status, note, hr, s_date, e_date];
+export const formatPayslip = (psid: string, data: Partial<Tpayslip>) => {
+    const { fk_uid, status, hr, s_date, e_date, paid } = data;
+    return [psid, fk_uid, status, hr, s_date, e_date, paid];
 };
 
 export const formatBonus = (psid: string, uid: string, data: TnewBonus[]) => {

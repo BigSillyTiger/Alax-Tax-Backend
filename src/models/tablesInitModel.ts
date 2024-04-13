@@ -126,7 +126,7 @@ export const createTables = async () => {
             psid VARCHAR(11) NOT NULL PRIMARY KEY,
             fk_uid VARCHAR(4) NOT NULL,
             status VARCHAR(20) NOT NULL DEFAULT 'pending',
-            note VARCHAR(500),
+            paid DECIMAL(10,2) UNSIGNED DEFAULT 0,
             hr DECIMAL(5,2) UNSIGNED DEFAULT 0,
             archive BOOLEAN NOT NULL DEFAULT FALSE,
             s_date DATE NOT NULL,
