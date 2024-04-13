@@ -75,6 +75,7 @@ export const uidPrefix = {
     labor: "L",
     manager: "M",
     order: "J",
+    payment: "P",
     payslip: "PS",
     workLog: "WL",
 };

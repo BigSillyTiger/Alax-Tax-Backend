@@ -4,7 +4,7 @@ import { uidPrefix } from "../utils/config";
 
 import { m_uidGetLastStaff } from "../models/staffModel";
 import { m_clientsLastCID } from "../models/clientsModel";
-import { m_ordersLastOID } from "../models/ordersModel";
+import { m_ordersLastOID, m_paymentLastPID } from "../models/ordersModel";
 import { m_deductLastDID } from "../models/workLogModel";
 
 export const genPSID = async () => {
@@ -23,6 +23,36 @@ export const genPSID = async () => {
         return `${uidPrefix.payslip}${date}${newId}`;
     } catch (error) {
         return null;
+    }
+};
+
+export const genPID = async (count: number) => {
+    try {
+        let ids = [];
+        let currentNumber = 1;
+        const currentDate = genDate();
+        const lastId = await m_paymentLastPID();
+
+        if (lastId?.length) {
+            const lastIdDate = lastId[0].pid.substring(1, 7);
+            currentNumber = parseInt(lastId[0].pid.substring(7), 10);
+
+            if (lastIdDate === currentDate) {
+                currentNumber++;
+            } else {
+                currentNumber = 1;
+            }
+        }
+
+        for (let i = 0; i < count; i++) {
+            let number = (currentNumber + i).toString().padStart(3, "0");
+            ids.push(`${uidPrefix.payment}${currentDate}${number}`);
+        }
+
+        return ids;
+    } catch (error) {
+        console.log("-> error - genPID: ", error);
+        throw new Error("Error generating payment id");
     }
 };
 

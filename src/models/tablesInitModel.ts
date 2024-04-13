@@ -102,7 +102,7 @@ export const createTables = async () => {
             netto DECIMAL(10,2) UNSIGNED NOT NULL
         )`);
         await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.PAYMENT} (
-            pid INT AUTO_INCREMENT PRIMARY KEY,
+            pid VARCHAR(11) NOT NULL PRIMARY KEY,
             fk_oid VARCHAR(11) NOT NULL,
             paid DECIMAL(10,2) UNSIGNED DEFAULT 0,
             paid_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP

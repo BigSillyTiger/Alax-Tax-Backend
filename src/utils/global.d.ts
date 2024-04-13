@@ -62,6 +62,7 @@ export type TorderDesc = {
 }[];
 
 export type Tpayment = {
+    pid: string;
     fk_oid: string;
     paid: number;
     paid_date: string;

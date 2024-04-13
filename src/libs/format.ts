@@ -71,9 +71,9 @@ export const formatWorkLog = (items: ToriWorkLog[]) => {
     });
 };
 
-export const formatPayment = (fk_oid: string, items: any) => {
-    return items.map((item: any) => {
-        return [fk_oid, item.paid, item.paid_date];
+export const formatPayment = (pids: string[], fk_oid: string, items: any) => {
+    return items.map((item: any, index: number) => {
+        return [pids[index], fk_oid, item.paid, item.paid_date];
     });
 };
 
@@ -152,9 +152,9 @@ export const formatBonus = (psid: string, uid: string, data: TnewBonus[]) => {
 export const formatDeduction = (
     did: string[],
     wlid: string,
-    data: TnewDeduction[]
+    items: TnewDeduction[]
 ) => {
-    return data.map((item: TnewDeduction, index) => {
+    return items.map((item: TnewDeduction, index) => {
         const { amount, note } = item;
         return [did[index], wlid, amount, note];
     });

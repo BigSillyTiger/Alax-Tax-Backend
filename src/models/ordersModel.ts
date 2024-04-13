@@ -62,6 +62,7 @@ export const m_orderGetAllWithDetails = async () => {
                 (SELECT 
                     JSON_ARRAYAGG(
                         JSON_OBJECT(
+                            'pid', P.pid,
                             'fk_oid', P.fk_oid,
                             'paid', P.paid,
                             'paid_date', P.paid_date
@@ -212,6 +213,7 @@ export const m_clientOrderWichId = async (cid: string) => {
                     fk_oid,
                     JSON_ARRAYAGG(
                         JSON_OBJECT(
+                            'pid', pid,
                             'fk_oid', fk_oid,
                             'paid', paid,
                             'paid_date', paid_date
@@ -258,7 +260,6 @@ export const m_orderDel = async (oid: string) => {
             [oid]
         );
         connection.release();
-        //console.log("-> delete order result: ", result);
         return result[0];
     } catch (err) {
         console.log("err: delete order: ", err);
@@ -460,6 +461,37 @@ export const m_updatePayments = async (payments: Tpayment) => {
     }
 };
 
+export const m_orderUpdatePayments = async (
+    fk_oid: string,
+    payments: Tpayment[],
+    totalPaid: number
+) => {
+    try {
+        const connection = await adminPool.getConnection();
+        await connection.query("START TRANSACTION;");
+        await connection.query(
+            `DELETE FROM ${DB_TABLE_LIST.PAYMENT} WHERE fk_oid = ?;`,
+            [fk_oid]
+        );
+        await connection.query(
+            `
+            INSERT INTO ${DB_TABLE_LIST.PAYMENT} (pid, fk_oid, paid, paid_date) VALUES ?;
+        `,
+            [payments]
+        );
+        await connection.query(
+            `UPDATE ${DB_TABLE_LIST.ORDER_LIST} SET paid = ? WHERE oid = ?`,
+            [totalPaid, fk_oid]
+        );
+        await connection.query("COMMIT;");
+        connection.release();
+        return true;
+    } catch (error) {
+        console.log("err: update payment: ", error);
+        return null;
+    }
+};
+
 export const m_findClientID = async (oid: string) => {
     try {
         const connection = await adminPool.getConnection();
@@ -558,6 +590,20 @@ export const m_ordersLastOID = async () => {
         return result as RowDataPacket[];
     } catch (error) {
         console.log("err: get last uid: ", error);
+        return null;
+    }
+};
+
+export const m_paymentLastPID = async () => {
+    try {
+        const connection = await adminPool.getConnection();
+        const [result] = await connection.query<RowDataPacket[]>(
+            `SELECT pid FROM ${DB_TABLE_LIST.PAYMENT} ORDER BY pid DESC LIMIT 1;`
+        );
+        connection.release();
+        return result as RowDataPacket[];
+    } catch (error) {
+        console.log("-> error: retrieve last pid - ", error);
         return null;
     }
 };

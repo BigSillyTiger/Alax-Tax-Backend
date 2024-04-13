@@ -8,7 +8,7 @@ import {
     m_orderArchive,
     m_orderStatusUpdate,
     m_deletePayment,
-    m_updatePayments,
+    m_orderUpdatePayments,
     m_orderUpdateProperty,
     m_findClientID,
     m_findOrder,
@@ -16,7 +16,7 @@ import {
     m_orderUpdateWithDesc,
 } from "../../models/ordersModel";
 import { formatOrderDesc, formatPayment } from "../../libs/format";
-import { genOID } from "../../libs/id";
+import { genOID, genPID } from "../../libs/id";
 import { genOrderWithWorkLogs } from "../../libs/format";
 import { m_clientGetSingle } from "../../models/clientsModel";
 import { m_wlGetALLWithLogStructure } from "../../models/workLogModel";
@@ -210,17 +210,17 @@ export const orderChangeStatus = async (req: Request, res: Response) => {
 
 export const orderUpdatePayments = async (req: Request, res: Response) => {
     console.log("server - order: update payments: ", req.body);
-    const delResult = await m_deletePayment(req.body.fk_oid);
-    //if (delResult.affectedRows) {
-    const updatePayRes = await m_updatePayments(
-        formatPayment(req.body.fk_oid, req.body.payments)
+    const newPayments = await genPID(req.body.payments.length).then((pids) =>
+        formatPayment(pids, req.body.fk_oid, req.body.payments)
     );
-    const updatePaidRes = await m_orderUpdateProperty(
-        "paid",
-        req.body.paid,
-        req.body.fk_oid
+
+    const result = await m_orderUpdatePayments(
+        req.body.fk_oid,
+        newPayments,
+        req.body.paid
     );
-    if (updatePayRes.affectedRows && updatePaidRes.affectedRows) {
+
+    if (result) {
         return res.status(200).json({
             status: RES_STATUS.SUC_UPDATE_PAYMENTS,
             msg: `successed update payments[${req.body.fk_oid}] payments`,
