@@ -3,7 +3,11 @@ import { RES_STATUS, uidPrefix } from "../../utils/config";
 import logger from "../../libs/logger";
 import { encodePW } from "../../libs/utils";
 import { genPSID, genUID } from "../../libs/id";
-import { m_psSingleDel, m_psSingleInsert } from "../../models/payslipsModel";
+import {
+    m_psSingleDel,
+    m_psSingleInsert,
+    m_psStatusUpdate,
+} from "../../models/payslipsModel";
 import { formatBonus, formatDeduction, formatPayslip } from "../../libs/format";
 
 export const psSingleInsert = async (req: Request, res: Response) => {
@@ -50,6 +54,13 @@ export const psSingleInsert = async (req: Request, res: Response) => {
     }
 };
 
+/**
+ * @description Delete payslip and update work_logs table
+ *              - work_logs table: wl_status = "confirmed", fk_psid = null
+ * @param req
+ * @param res
+ * @returns
+ */
 export const psSingleDel = async (req: Request, res: Response) => {
     console.log("-> server - payslip: SingleDel: ", req.body);
     try {
@@ -71,6 +82,36 @@ export const psSingleDel = async (req: Request, res: Response) => {
         return res.status(500).json({
             status: RES_STATUS.FAILED_DEL_PAYSLIP,
             msg: "Failed to delete payslip",
+            data: false,
+        });
+    }
+};
+
+/**
+ * @description Update payslip status and update work_logs table
+ *              - work_logs table:
+ *                  - payslip status = "pending": wl_status = "unpaid"
+ *                  - payslip status = "completed": wl_status = "completed"
+ * @returns
+ */
+export const psStatusUpdate = async (req: Request, res: Response) => {
+    console.log("-> server - payslip: StatusUpdate: ", req.body);
+    try {
+        const psid = req.body.psid;
+        const ps_status = req.body.status; // payslip status
+        const wl_status = ps_status === "pending" ? "unpaid" : "completed";
+        const result = await m_psStatusUpdate(psid, ps_status, wl_status);
+        if (!result) throw new Error("Failed to update payslip status");
+        return res.status(200).json({
+            status: RES_STATUS.SUC_UPDATE_PAYSLIP,
+            msg: "Success - Payslip status updated",
+            data: true,
+        });
+    } catch (error) {
+        console.log("-> error: payslip: StatusUpdate: ", error);
+        return res.status(500).json({
+            status: RES_STATUS.FAILED_UPDATE_PAYSLIP,
+            msg: "Failed to update payslip status",
             data: false,
         });
     }

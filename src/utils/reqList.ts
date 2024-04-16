@@ -71,5 +71,6 @@ export const PAYSLIP_SINGLE_INSERT = "/payslip/single-insert";
 export const PAYSLIP_SINGLE_UPDATE = "/payslip/single-update";
 export const PAYSLIP_SINGLE_DEL = "/payslip/single-del";
 export const PAYSLIP_SINGLE_ARCHIVE = "/payslip/single-archive";
+export const PAYSLIP_STATUS_UPDATE = "/payslip/status-update";
 export const PAYSLIP_ALL = "/payslip/all";
 export const PAYSLIP_ALL_W_UID = "/payslip/all_w_uid";

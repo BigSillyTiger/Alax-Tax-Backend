@@ -98,3 +98,27 @@ export const m_psSingleDel = async (psid: string) => {
         return false;
     }
 };
+
+export const m_psStatusUpdate = async (
+    psid: string,
+    ps_status: string,
+    wl_status: string
+) => {
+    try {
+        console.log("-> update psid: ", psid);
+        const connection = await adminPool.getConnection();
+        await connection.query("START TRANSACTION;");
+        await connection.query(
+            `UPDATE ${DB_TABLE_LIST.PAYSLIP} SET status = '${ps_status}' WHERE psid = '${psid}';`
+        );
+        await connection.query(
+            `UPDATE ${DB_TABLE_LIST.WORK_LOG} SET wl_status = '${wl_status}' WHERE fk_psid = '${psid}';`
+        );
+        await connection.query("COMMIT;");
+        connection.release();
+        return true;
+    } catch (error) {
+        console.log("-> error: payslip status update - ", error);
+        return false;
+    }
+};
