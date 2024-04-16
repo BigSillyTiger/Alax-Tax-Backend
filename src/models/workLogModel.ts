@@ -393,7 +393,7 @@ export const m_wlSingleUpdateDeduction = async (
     }
 };
 
-export const m_wlSingleUpdate = async (hourData: any, deduction: any[]) => {
+export const m_wlSingleUpdateHD = async (hourData: any, deduction: any[]) => {
     try {
         const connection = await adminPool.getConnection();
         await connection.query("START TRANSACTION;");
@@ -404,6 +404,12 @@ export const m_wlSingleUpdate = async (hourData: any, deduction: any[]) => {
             WHERE wlid = ?;`,
             [hourData.s_time, hourData.e_time, hourData.b_hour, hourData.wlid]
         );
+        if (hourData.e_time !== "00:00" || hourData.e_time !== "00:00:00") {
+            await connection.query(
+                `UPDATE ${DB_TABLE_LIST.WORK_LOG} SET wl_status = ? WHERE wlid = ?;`,
+                ["confirmed", hourData.wlid]
+            );
+        }
         if (deduction?.length) {
             await connection.query(
                 `DELETE FROM ${DB_TABLE_LIST.DEDUCTION} WHERE fk_wlid = ?;`,
@@ -572,6 +578,21 @@ export const m_deductLastDID = async () => {
         return result as RowDataPacket[];
     } catch (error) {
         console.log("-> error: retrieve last did - ", error);
+        return null;
+    }
+};
+
+export const m_wlUpdateStatus = async (wlid: string, status: string) => {
+    try {
+        const connection = await adminPool.getConnection();
+        const [rows] = await connection.query(
+            `UPDATE ${DB_TABLE_LIST.WORK_LOG} SET wl_status = ? WHERE wlid = ?;`,
+            [status, wlid]
+        );
+        connection.release();
+        return rows as ResultSetHeader;
+    } catch (error) {
+        console.log("err: update work log status: ", error);
         return null;
     }
 };

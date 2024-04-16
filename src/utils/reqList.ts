@@ -28,6 +28,8 @@ export const JOB_ASSIGN = "/work/update";
 export const WL_ALL = "/work/all";
 export const WL_SIGNLE_UPDATE_H = "/work/single-update-hours";
 export const WL_SIGNLE_UPDATE_D = "/work/single-update-deduction";
+export const WL_SINGLE_UPDATE_H_D = "/work/single-update-h-d";
+export const WL_STATUS = "/work/status";
 export const WL_SINGLE_DEL = "/work/single-del";
 export const WL_TODAY = "/work/today";
 export const WL_START_TIMER = "/work/start-timer";
@@ -35,7 +37,6 @@ export const WL_RESET_TIMER = "/work/reset-timer";
 export const WL_PAUSE_TIMER = "/work/pause-timer";
 export const WL_RESUME_TIMER = "/work/resume-timer";
 export const WL_STOP_TIMER = "/work/stop-timer";
-export const WL_SINGLE_UPDATE = "/work/single-update";
 // Staff
 export const STAFF_ALL = "/staff/all";
 export const STAFF_INFO = "/staff/info";

@@ -7,8 +7,9 @@ import {
     WL_PAUSE_TIMER,
     WL_RESET_TIMER,
     WL_RESUME_TIMER,
-    WL_SINGLE_UPDATE,
+    WL_SINGLE_UPDATE_H_D,
     WL_SIGNLE_UPDATE_H,
+    WL_STATUS,
     WL_SINGLE_DEL,
     WL_START_TIMER,
     WL_STOP_TIMER,
@@ -20,11 +21,12 @@ const router = express.Router();
 
 router.post(JOB_ASSIGN, accessCheck, workCtl.wlUpdate);
 router.get(WL_ALL, workCtl.wlAll);
-router.post(WL_SINGLE_UPDATE, workCtl.wlSingleUpdate);
+router.post(WL_SINGLE_UPDATE_H_D, workCtl.wlSingleUpdateHD);
 router.post(WL_SIGNLE_UPDATE_D, accessCheck, workCtl.wlSingleUpdateDeduction);
 router.post(WL_SIGNLE_UPDATE_H, accessCheck, workCtl.wlSingleUpdateHours);
 router.delete(WL_SINGLE_DEL, accessCheck, workCtl.wlSingleDel);
 router.get(WL_TODAY, workCtl.wlGetToday);
+router.put(WL_STATUS, workCtl.wlChangeStatus);
 router.post(
     WL_START_TIMER,
     accessCheck,

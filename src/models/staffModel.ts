@@ -11,11 +11,33 @@ import { RowDataPacket } from "mysql2";
 export const m_staffGetAll = async () => {
     try {
         const connection = await adminPool.getConnection();
-        const result: any = await connection.query(
-            `SELECT * FROM ${DB_TABLE_LIST.STAFF} WHERE archive = 0`
+        const [rows] = await connection.query(
+            `SELECT 
+                A.*,
+                payslips
+            FROM ${DB_TABLE_LIST.STAFF} A
+            LEFT JOIN (
+                SELECT 
+                    fk_uid,
+                    JSON_ARRAYAGG(
+                        JSON_OBJECT(
+                            'psid', psid,
+                            'fk_uid', fk_uid,
+                            'status', status,
+                            'hr', hr,
+                            's_date', s_date,
+                            'e_date', e_date,
+                            'paid', paid
+                        )
+                    ) as payslips
+                FROM ${DB_TABLE_LIST.PAYSLIP}
+                GROUP BY fk_uid
+            ) P ON A.uid = P.fk_uid
+            WHERE archive = 0`
         );
         connection.release();
-        return result[0];
+        //console.log("-> all staff rows: ", rows);
+        return rows as RowDataPacket[];
     } catch (err) {
         console.log("err: get all staff: ", err);
         return null;

@@ -146,6 +146,29 @@ export const createTables = async () => {
             amount DECIMAL(10,2) UNSIGNED DEFAULT 0
         )`);
         //await connection.query();
+        /* await connection.query(`
+            CREATE TRIGGER update_wl_status 
+            AFTER UPDATE ON ${DB_TABLE_LIST.WORK_LOG}
+            FOR EACH ROW
+            BEGIN
+                IF (NEW.b_time != '00:00' OR NEW.b_time != '00:00:00')
+                THEN UPDATE ${DB_TABLE_LIST.WORK_LOG} SET wl_status = 'resting' WHERE wlid = NEW.wlid;
+                ELSEIF (NEW.s_time != '00:00' AND NEW.s_time != '00:00:00') 
+                    AND (NEW.e_time = '00:00' OR NEW.e_time = '00:00:00') 
+                    AND (NEW.b_time = '00:00' OR NEW.b_time = '00:00:00')
+                THEN
+                    UPDATE ${DB_TABLE_LIST.WORK_LOG} SET wl_status = 'ongoing'  WHERE wlid = NEW.wlid;
+                ELSEIF (NEW.s_time != '00:00' AND NEW.s_time != '00:00:00') 
+                    AND (NEW.e_time != '00:00' AND NEW.e_time != '00:00:00')
+                THEN
+                    UPDATE ${DB_TABLE_LIST.WORK_LOG} SET wl_status = 'unconfirmed' WHERE wlid = NEW.wlid;
+                ELSEIF  (NEW.s_time = '00:00' OR NEW.s_time = '00:00:00') 
+                    AND (NEW.e_time = '00:00' OR NEW.e_time = '00:00:00')
+                THEN
+                    UPDATE ${DB_TABLE_LIST.WORK_LOG} SET wl_status = 'pending' WHERE wlid = NEW.wlid;
+                END IF;
+            END
+        `); */
         connection.release();
         return true;
     } catch (err) {

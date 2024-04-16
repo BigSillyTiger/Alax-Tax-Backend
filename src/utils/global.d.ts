@@ -289,6 +289,10 @@ export type Tpayslip = {
     created_date: string;
 };
 
+export type TstaffWPayslip = TstaffData & {
+    payslips: Tpayslip[];
+};
+
 export type TnewPayslip = Partical<Tpayslip>;
 export type TnewBonus = Partical<Tbonus>;
 export type TnewDeduction = Partical<Tdeduction>;

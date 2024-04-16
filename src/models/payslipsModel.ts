@@ -1,11 +1,11 @@
 import type { ResultSetHeader, RowDataPacket } from "mysql2";
 import { DB_TABLE_LIST } from "../utils/config";
 import adminPool from "./adminPool";
-import { Tbonus, Tdeduction, TnewPayslip, Tpayslip } from "@/utils/global";
 
 export const m_psSingleInsert = async (
     payslip: any,
     bonus: any,
+    psid: string,
     uid: string,
     s_date: string,
     e_date: string
@@ -28,7 +28,9 @@ export const m_psSingleInsert = async (
         );
         await connection.query(
             `UPDATE ${DB_TABLE_LIST.WORK_LOG} 
-            SET wl_status = "unpaid"
+            SET 
+                wl_status = "unpaid",
+                fk_psid = '${psid}'
             WHERE wl_date BETWEEN '${s_date}' AND '${e_date}'
             AND fk_uid = '${uid}'
             AND wl_status = "confirmed";`
@@ -67,5 +69,32 @@ export const m_psLastBID = async () => {
     } catch (error) {
         console.log("-> error: retrieve last bid - ", error);
         return null;
+    }
+};
+
+export const m_psSingleDel = async (psid: string) => {
+    try {
+        console.log("-> delete psid: ", psid);
+        const connection = await adminPool.getConnection();
+        await connection.query("START TRANSACTION;");
+        // delete related bonus
+        await connection.query(
+            `DELETE FROM ${DB_TABLE_LIST.BONUS} WHERE fk_psid = '${psid}';`
+        );
+        // delete payslip
+        await connection.query(
+            `DELETE FROM ${DB_TABLE_LIST.PAYSLIP} WHERE psid = '${psid}';`
+        );
+        // reset fk_psid in work_log table
+        // reset wl_status to 'confirmed' in work_log table
+        await connection.query(
+            `UPDATE ${DB_TABLE_LIST.WORK_LOG} SET fk_psid = NULL, wl_status = 'confirmed' WHERE fk_psid = '${psid}';`
+        );
+        await connection.query("COMMIT;");
+        connection.release();
+        return true;
+    } catch (error) {
+        console.log("-> error: payslip single del - ", error);
+        return false;
     }
 };

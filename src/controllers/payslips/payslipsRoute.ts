@@ -14,5 +14,6 @@ import { accessCheck } from "../../middleware/accessCheck";
 const router = express.Router();
 
 router.post(PAYSLIP_SINGLE_INSERT, accessCheck, payslipsCtl.psSingleInsert);
+router.post(PAYSLIP_SINGLE_DEL, accessCheck, payslipsCtl.psSingleDel);
 
 export default router;

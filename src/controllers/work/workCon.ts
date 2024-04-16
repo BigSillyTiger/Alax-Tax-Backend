@@ -11,8 +11,9 @@ import {
     m_wlResetWorkTime,
     m_wlGetBTimeWID,
     m_wlUpdateEtime,
-    m_wlSingleUpdate,
+    m_wlSingleUpdateHD,
     m_wlSingleUpdateDeduction,
+    m_wlUpdateStatus,
 } from "../../models/workLogModel";
 import type { Request, Response } from "express";
 import type { TworkLog, ToriWorkLog } from "../../utils/global";
@@ -78,7 +79,7 @@ export const wlUpdate = async (req: Request, res: Response) => {
     }
 };
 
-export const wlSingleUpdate = async (req: Request, res: Response) => {
+export const wlSingleUpdateHD = async (req: Request, res: Response) => {
     console.log("server - work log: single update hours and deduction");
     try {
         const newDeductions = await genDID(req.body.deduction.length).then(
@@ -90,7 +91,10 @@ export const wlSingleUpdate = async (req: Request, res: Response) => {
                 )
         );
 
-        const result = await m_wlSingleUpdate(req.body.hourData, newDeductions);
+        const result = await m_wlSingleUpdateHD(
+            req.body.hourData,
+            newDeductions
+        );
         if (result) {
             return res.status(200).json({
                 status: RES_STATUS.SUC_UPDATE_WORKLOG,
@@ -161,6 +165,25 @@ export const wlSingleUpdateHours = async (req: Request, res: Response) => {
             msg: "Failed: work log: single update",
             data: null,
         });
+    }
+};
+
+export const wlChangeStatus = async (req: Request, res: Response) => {
+    console.log("server - work log: single update status");
+    try {
+        console.log("---> req.body: ", req.body.wlid, req.body.status);
+        const result = await m_wlUpdateStatus(req.body.wlid, req.body.status);
+        if (result?.affectedRows) {
+            return res.status(200).json({
+                status: RES_STATUS.SUC_UPDATE_WORKLOG,
+                msg: "Success:  work log: single update status",
+                data: result,
+            });
+        } else {
+            throw new Error("Failed - work log: update status");
+        }
+    } catch (error) {
+        console.log("err: work log: single update status: ", error);
     }
 };
 

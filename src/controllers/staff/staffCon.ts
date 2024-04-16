@@ -14,6 +14,7 @@ import {
 import { encodePW, replaceStaffPW } from "../../libs/utils";
 import { genUID } from "../../libs/id";
 import { formatStaff } from "../../libs/format";
+import { TstaffWPayslip } from "@/utils/global";
 
 /**
  * @description retrieve list of all staff with info
@@ -24,9 +25,13 @@ import { formatStaff } from "../../libs/format";
 export const staffAllInfo = async (req: Request, res: Response) => {
     logger.infoLog("server - staff: get all staff info");
     try {
-        const result = await m_staffGetAll();
+        const result = (await m_staffGetAll()) as TstaffWPayslip[];
 
-        if (result) {
+        if (result?.length) {
+            console.log(
+                "--> new staff data: ",
+                replaceStaffPW(result, "").length
+            );
             return res.status(200).json({
                 status: RES_STATUS.SUCCESS,
                 msg: "success: get all staff info",

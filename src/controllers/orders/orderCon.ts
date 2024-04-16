@@ -191,14 +191,18 @@ export const clientOrders = async (req: Request, res: Response) => {
 
 export const orderChangeStatus = async (req: Request, res: Response) => {
     console.log("server - order: change order status: ", req.body);
-    const result = await m_orderStatusUpdate(req.body.oid, req.body.status);
-    if (result.affectedRows) {
-        return res.status(200).json({
-            status: RES_STATUS.SUC_UPDATE_STATUS,
-            msg: `successed change order[${req.body.oid}] status`,
-            data: result,
-        });
-    } else {
+    try {
+        const result = await m_orderStatusUpdate(req.body.oid, req.body.status);
+        if (result.affectedRows) {
+            return res.status(200).json({
+                status: RES_STATUS.SUC_UPDATE_STATUS,
+                msg: `successed change order[${req.body.oid}] status`,
+                data: result,
+            });
+        } else {
+            throw new Error("error - update order status");
+        }
+    } catch (error) {
         return res.status(400).json({
             status: RES_STATUS.FAILED,
             msg: `Failed: change order[${req.body.oid}]`,
