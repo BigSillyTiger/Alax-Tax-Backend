@@ -74,3 +74,4 @@ export const PAYSLIP_SINGLE_ARCHIVE = "/payslip/single-archive";
 export const PAYSLIP_STATUS_UPDATE = "/payslip/status-update";
 export const PAYSLIP_ALL = "/payslip/all";
 export const PAYSLIP_ALL_W_UID = "/payslip/all_w_uid";
+export const PAYSLIP_BONUS_ALL = "/payslip/bonus-all";

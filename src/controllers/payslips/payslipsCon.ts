@@ -4,6 +4,7 @@ import logger from "../../libs/logger";
 import { encodePW } from "../../libs/utils";
 import { genPSID, genUID } from "../../libs/id";
 import {
+    m_psBonusAll,
     m_psSingleDel,
     m_psSingleInsert,
     m_psStatusUpdate,
@@ -113,6 +114,26 @@ export const psStatusUpdate = async (req: Request, res: Response) => {
             status: RES_STATUS.FAILED_UPDATE_PAYSLIP,
             msg: "Failed to update payslip status",
             data: false,
+        });
+    }
+};
+
+export const psBonusAll = async (req: Request, res: Response) => {
+    console.log("-> server - payslip: BonusAll: ", req.body);
+    try {
+        const result = await m_psBonusAll();
+        if (!result) throw new Error("Failed to get bonus data");
+        return res.status(200).json({
+            status: RES_STATUS.SUCCESS,
+            msg: "Success - Bonus data retrieved",
+            data: result,
+        });
+    } catch (error) {
+        console.log("-> error: payslip: BonusAll: ", error);
+        return res.status(500).json({
+            status: RES_STATUS.FAILED,
+            msg: "Failed to get bonus data",
+            data: null,
         });
     }
 };

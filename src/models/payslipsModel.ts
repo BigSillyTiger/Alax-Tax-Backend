@@ -122,3 +122,17 @@ export const m_psStatusUpdate = async (
         return false;
     }
 };
+
+export const m_psBonusAll = async () => {
+    try {
+        const connection = await adminPool.getConnection();
+        const [result] = await connection.query(
+            `SELECT * FROM ${DB_TABLE_LIST.BONUS};`
+        );
+        connection.release();
+        return result as RowDataPacket[];
+    } catch (error) {
+        console.log("-> error: payslip bonus all - ", error);
+        return false;
+    }
+};

@@ -9,6 +9,7 @@ import {
     PAYSLIP_SINGLE_UPDATE,
     PAYSLIP_ALL_W_UID,
     PAYSLIP_STATUS_UPDATE,
+    PAYSLIP_BONUS_ALL,
 } from "../../utils/reqList";
 import { accessCheck } from "../../middleware/accessCheck";
 
@@ -17,5 +18,6 @@ const router = express.Router();
 router.post(PAYSLIP_SINGLE_INSERT, accessCheck, payslipsCtl.psSingleInsert);
 router.post(PAYSLIP_SINGLE_DEL, accessCheck, payslipsCtl.psSingleDel);
 router.put(PAYSLIP_STATUS_UPDATE, accessCheck, payslipsCtl.psStatusUpdate);
+router.get(PAYSLIP_BONUS_ALL, accessCheck, payslipsCtl.psBonusAll);
 
 export default router;
