@@ -15,6 +15,7 @@ import {
     WL_STOP_TIMER,
     WL_TODAY,
     WL_SIGNLE_UPDATE_D,
+    WL_TOMORROW,
 } from "../../utils/reqList";
 import { accessCheck } from "../../middleware/accessCheck";
 const router = express.Router();
@@ -26,6 +27,7 @@ router.post(WL_SIGNLE_UPDATE_D, accessCheck, workCtl.wlSingleUpdateDeduction);
 router.post(WL_SIGNLE_UPDATE_H, accessCheck, workCtl.wlSingleUpdateHours);
 router.delete(WL_SINGLE_DEL, accessCheck, workCtl.wlSingleDel);
 router.get(WL_TODAY, workCtl.wlGetToday);
+router.get(WL_TOMORROW, workCtl.wlGetTomorrow);
 router.put(WL_STATUS, workCtl.wlChangeStatus);
 router.post(
     WL_START_TIMER,

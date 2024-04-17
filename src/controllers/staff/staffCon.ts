@@ -28,10 +28,6 @@ export const staffAllInfo = async (req: Request, res: Response) => {
         const result = (await m_staffGetAll()) as TstaffWPayslip[];
 
         if (result?.length) {
-            console.log(
-                "--> new staff data: ",
-                replaceStaffPW(result, "").length
-            );
             return res.status(200).json({
                 status: RES_STATUS.SUCCESS,
                 msg: "success: get all staff info",

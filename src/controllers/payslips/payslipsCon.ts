@@ -29,8 +29,7 @@ export const psSingleInsert = async (req: Request, res: Response) => {
             req.body.payslip.fk_uid,
             req.body.bonus
         );
-        console.log("-> new psData: ", psData);
-        console.log("-> new bonusData: ", bonusData);
+
         const result = await m_psSingleInsert(
             [psData],
             bonusData,

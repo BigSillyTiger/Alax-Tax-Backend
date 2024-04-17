@@ -24,7 +24,15 @@ export const genHHMM = (...args: any[]) => {
     }
 };
 
-export const genAUDate = () => {
+/**
+ * @description generate date of 6 digits with format of ddmmyy
+ * @param day
+ *          - 0 : today by default
+ *          - plus: future days
+ *          - minus: past days
+ * @returns date of format dd/mm/yyyy
+ */
+export const genAUDate = (day: number = 0) => {
     const dateOptionADL: Intl.DateTimeFormatOptions = {
         timeZone: "Australia/Adelaide",
         hour12: false,
@@ -37,20 +45,11 @@ export const genAUDate = () => {
         second: "2-digit",
     };
 
-    //return new Date().toLocaleString("en-AU", dateOptionADL);
     const currentDate = new Date();
-    const hours = currentDate.getHours().toString().padStart(2, "0");
-    const formattedDate = currentDate.toLocaleString("en-AU", dateOptionADL);
-    return formattedDate.replace(
-        /\d{2}:\d{2}:\d{2}/,
-        `${hours}:${currentDate
-            .getMinutes()
-            .toString()
-            .padStart(2, "0")}:${currentDate
-            .getSeconds()
-            .toString()
-            .padStart(2, "0")}`
+    const targetDate = new Date(
+        currentDate.getTime() + day * 24 * 60 * 60 * 1000
     );
+    return targetDate.toLocaleString("en-AU", dateOptionADL);
 };
 
 export const genYYYYHHMM = (date: string) => {

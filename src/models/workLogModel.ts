@@ -46,7 +46,7 @@ export const m_wlGetAllOrdersWithWL = async () => {
                     'order_services', all_services,
                     'payments', paymentData,
                     'client_info', clientInfo,
-                    'work_logs', workLogs
+                    'wlUnion', workLogs
                 )
             )
             FROM ${DB_TABLE_LIST.ORDER_LIST} O
@@ -110,7 +110,7 @@ export const m_wlGetAllOrdersWithWL = async () => {
                             'wl_date', logs.wl_date,
                             'assigned_work', logs.logs_array
                         )
-                    ) AS workLogs
+                    ) AS wlUnion
                 FROM ${DB_TABLE_LIST.ORDER_LIST} O
                 LEFT JOIN (
                     SELECT
@@ -298,8 +298,8 @@ export const m_wlGetAll = async (
     }
 };
 
-export const m_wlGetToday = async (
-    today: string,
+export const m_wlGetTheDay = async (
+    day: string,
     archive = 0
 ): Promise<RowDataPacket[] | null> => {
     try {
@@ -327,13 +327,13 @@ export const m_wlGetToday = async (
                 GROUP BY fk_wlid
             ) D ON wl.wlid = D.fk_wlid
             WHERE wl.wl_date = ? AND wl.archive = ?;`,
-            [today, archive]
+            [day, archive]
         );
         connection.release();
         return rows as RowDataPacket[];
     } catch (error) {
-        console.log("err: get today work logs: ", error);
-        return null;
+        console.log("err: get day work logs: ", error);
+        return [];
     }
 };
 

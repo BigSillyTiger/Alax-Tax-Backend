@@ -3,7 +3,7 @@ import {
     m_wlUpdateAssignments,
     m_wlSingleUpdateHours,
     m_wlSingleArchive,
-    m_wlGetToday,
+    m_wlGetTheDay,
     m_wlGetBHourWID,
     m_wlResume,
     m_wlPause,
@@ -215,26 +215,40 @@ export const wlGetToday = async (req: Request, res: Response) => {
     const today = genYYYYHHMM(genAUDate());
     console.log(`server - work log: get today's[${today}] work logs`);
     try {
-        const worklogsResult = await m_wlGetToday(today);
-        if (worklogsResult && worklogsResult.length) {
-            return res.status(200).json({
-                status: RES_STATUS.SUCCESS,
-                msg: `successed retrieve today's[${today}] work logs`,
-                data: worklogsResult,
-            });
-        } else {
-            return res.status(400).json({
-                status: RES_STATUS.FAILED,
-                msg: `Failed: retrieve today's[${today}] work logs`,
-                data: null,
-            });
-        }
+        const worklogsResult = await m_wlGetTheDay(today);
+
+        return res.status(200).json({
+            status: RES_STATUS.SUCCESS,
+            msg: `successed retrieve today's[${today}] work logs`,
+            data: worklogsResult,
+        });
     } catch (error) {
         console.log("err: work log: get today's work logs: ", error);
         return res.status(400).json({
             status: RES_STATUS.FAILED,
             msg: "Failed: get today's work logs",
-            data: null,
+            data: [],
+        });
+    }
+};
+
+export const wlGetTomorrow = async (req: Request, res: Response) => {
+    const day = genYYYYHHMM(genAUDate(1));
+    console.log(`server - work log: get tomorrow's[${day}] work logs`);
+    try {
+        const worklogsResult = await m_wlGetTheDay(day);
+
+        return res.status(200).json({
+            status: RES_STATUS.SUCCESS,
+            msg: `successed retrieve tomorrow's[${day}] work logs`,
+            data: worklogsResult,
+        });
+    } catch (error) {
+        console.log("err: work log: get tomorrow's work logs: ", error);
+        return res.status(400).json({
+            status: RES_STATUS.FAILED,
+            msg: "Failed: get tomorrow's work logs",
+            data: [],
         });
     }
 };

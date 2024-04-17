@@ -32,6 +32,7 @@ export const WL_SINGLE_UPDATE_H_D = "/work/single-update-h-d";
 export const WL_STATUS = "/work/status";
 export const WL_SINGLE_DEL = "/work/single-del";
 export const WL_TODAY = "/work/today";
+export const WL_TOMORROW = "/work/tomorrow";
 export const WL_START_TIMER = "/work/start-timer";
 export const WL_RESET_TIMER = "/work/reset-timer";
 export const WL_PAUSE_TIMER = "/work/pause-timer";

@@ -86,7 +86,7 @@ export const genOrderWithWorkLogs = (
         const workLogsOfOrder = workLogs.filter(
             (log: any) => log.fk_oid === order.oid
         );
-        return { ...order, work_logs: workLogsOfOrder };
+        return { ...order, wlUnion: workLogsOfOrder };
     });
 };
 

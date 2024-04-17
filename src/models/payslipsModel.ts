@@ -11,7 +11,7 @@ export const m_psSingleInsert = async (
     e_date: string
 ) => {
     try {
-        console.log(`-> uid[${uid}] s_date[${s_date}] e_date[${e_date}]`);
+        //console.log(`-> uid[${uid}] s_date[${s_date}] e_date[${e_date}]`);
         const connection = await adminPool.getConnection();
         await connection.query("START TRANSACTION;");
         if (bonus?.length) {
