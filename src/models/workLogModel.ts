@@ -126,7 +126,6 @@ export const m_wlGetAllOrdersWithWL = async () => {
                                 's_time', wl.s_time,
                                 'b_time', wl.b_time,
                                 'b_hour', wl.b_hour,
-                                'wl_note', wl.wl_note,
                                 'wl_status', wl.wl_status,
                                 'confirm_status', wl.confirm_status,
                                 'archive', wl.archive,
@@ -180,7 +179,6 @@ export const m_wlGetALLWithLogStructure = async () => {
                             's_time', wl.s_time,
                             'b_time', wl.b_time,
                             'b_hour', wl.b_hour,
-                            'wl_note', wl.wl_note,
                             'wl_status', wl.wl_status,
                             'confirm_status', wl.confirm_status,
                             'archive', wl.archive,
@@ -231,7 +229,7 @@ export const m_wlUpdateAssignments = async (oid: string, data: any[]) => {
         );
         await connection.query(
             `
-            INSERT INTO ${DB_TABLE_LIST.WORK_LOG} (wlid, fk_oid, fk_uid, wl_date, s_time, e_time, b_time, b_hour, wl_status, wl_note, confirm_status, archive) VALUES ?;
+            INSERT INTO ${DB_TABLE_LIST.WORK_LOG} (wlid, fk_oid, fk_uid, wl_date, s_time, e_time, b_time, b_hour, wl_status, confirm_status, archive) VALUES ?;
         `,
             [data]
         );

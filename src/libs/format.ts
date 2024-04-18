@@ -51,7 +51,6 @@ export const formatWorkLog = (items: ToriWorkLog[]) => {
             b_time,
             b_hour,
             wl_status,
-            wl_note,
             confirm_status,
             archive,
         } = item;
@@ -65,7 +64,6 @@ export const formatWorkLog = (items: ToriWorkLog[]) => {
             b_time,
             b_hour,
             wl_status,
-            wl_note,
             confirm_status,
             archive,
         ];

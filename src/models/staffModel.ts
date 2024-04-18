@@ -36,7 +36,7 @@ export const m_staffGetAll = async () => {
             WHERE archive = 0`
         );
         connection.release();
-        //console.log("-> all staff rows: ", rows);
+        console.log("-> all staff rows: ", rows);
         return rows as RowDataPacket[];
     } catch (err) {
         console.log("err: get all staff: ", err);

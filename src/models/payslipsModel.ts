@@ -2,6 +2,20 @@ import type { ResultSetHeader, RowDataPacket } from "mysql2";
 import { DB_TABLE_LIST } from "../utils/config";
 import adminPool from "./adminPool";
 
+export const m_psAll = async () => {
+    try {
+        const connection = await adminPool.getConnection();
+        const [result] = await connection.query(
+            `SELECT * FROM ${DB_TABLE_LIST.PAYSLIP};`
+        );
+        connection.release();
+        return result as RowDataPacket[];
+    } catch (error) {
+        console.log("-> error: payslip all - ", error);
+        return false;
+    }
+};
+
 export const m_psSingleInsert = async (
     payslip: any,
     bonus: any,

@@ -1,15 +1,34 @@
 import type { Request, Response } from "express";
-import { RES_STATUS, uidPrefix } from "../../utils/config";
-import logger from "../../libs/logger";
-import { encodePW } from "../../libs/utils";
-import { genPSID, genUID } from "../../libs/id";
+import { RES_STATUS } from "../../utils/config";
+import { genPSID } from "../../libs/id";
 import {
+    m_psAll,
     m_psBonusAll,
     m_psSingleDel,
     m_psSingleInsert,
     m_psStatusUpdate,
 } from "../../models/payslipsModel";
-import { formatBonus, formatDeduction, formatPayslip } from "../../libs/format";
+import { formatBonus, formatPayslip } from "../../libs/format";
+
+export const psAll = async (req: Request, res: Response) => {
+    console.log("-> server - payslip: All: ");
+    try {
+        const result = await m_psAll();
+        if (!result) throw new Error("Failed to get payslip data");
+        return res.status(200).json({
+            status: RES_STATUS.SUCCESS,
+            msg: "Success - Payslip data retrieved",
+            data: result,
+        });
+    } catch (error) {
+        console.log("-> error: payslip: All: ", error);
+        return res.status(500).json({
+            status: RES_STATUS.FAILED,
+            msg: "Failed to get payslip data",
+            data: [],
+        });
+    }
+};
 
 export const psSingleInsert = async (req: Request, res: Response) => {
     console.log("-> server - payslip: SingleInsert: ", req.body);
@@ -132,7 +151,7 @@ export const psBonusAll = async (req: Request, res: Response) => {
         return res.status(500).json({
             status: RES_STATUS.FAILED,
             msg: "Failed to get bonus data",
-            data: null,
+            data: [],
         });
     }
 };

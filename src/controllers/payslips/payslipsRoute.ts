@@ -19,5 +19,6 @@ router.post(PAYSLIP_SINGLE_INSERT, accessCheck, payslipsCtl.psSingleInsert);
 router.post(PAYSLIP_SINGLE_DEL, accessCheck, payslipsCtl.psSingleDel);
 router.put(PAYSLIP_STATUS_UPDATE, accessCheck, payslipsCtl.psStatusUpdate);
 router.get(PAYSLIP_BONUS_ALL, accessCheck, payslipsCtl.psBonusAll);
+router.get(PAYSLIP_ALL, accessCheck, payslipsCtl.psAll);
 
 export default router;
