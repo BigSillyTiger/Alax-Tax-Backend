@@ -56,7 +56,7 @@ export const m_clientIsPropertyExist = async (
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `SELECT ${property} FROM ${DB_TABLE_LIST.CLIENT} WHERE ${property} = ? AND cid != ?`,
+            `SELECT ${property} FROM ${DB_TABLE_LIST.CLIENT} WHERE ${property} = ? AND cid != ? AND archive = 0`,
             [data, cid]
         );
         connection.release();
@@ -85,16 +85,21 @@ export const m_clientDelSingle = async (cid: string) => {
 export const m_clientArchiveSingle = async (cid: string) => {
     try {
         const connection = await adminPool.getConnection();
-        const result: any = await connection.query(
+        await connection.query("START TRANSACTION;");
+        await connection.query(
             `UPDATE ${DB_TABLE_LIST.CLIENT} SET archive = ? WHERE cid = ?`,
             [1, cid]
         );
+        await connection.query(
+            `UPDATE ${DB_TABLE_LIST.CLIENT} SET phone = CONCAT('A', phone), email = CONCAT('A', email) WHERE cid = ? AND archive = 1`,
+            [cid]
+        );
+        await connection.query("COMMIT;");
         connection.release();
-        console.log("-> archive client result: ", result);
-        return result[0];
+        return true;
     } catch (err) {
         console.log("err: archive client: ", err);
-        return null;
+        return false;
     }
 };
 

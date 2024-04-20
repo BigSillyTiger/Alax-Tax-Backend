@@ -159,17 +159,21 @@ export const clientSingleInstert = async (req: Request, res: Response) => {
 export const clientSingleDel = async (req: Request, res: Response) => {
     // Delete client
     console.log("-> server - client: delete clientID: ", req.body);
-
-    //const result = await m_clientDelSingle(req.body.cid);
-    const result = await m_clientArchiveSingle(req.body.cid);
-    // Return success
-    if (result.affectedRows > 0) {
-        return res.status(200).json({
-            status: RES_STATUS.SUC_DEL, // delete success
-            msg: `Successed: delete client[id: ${req.body.cid}]`,
-            data: "",
-        });
-    } else {
+    try {
+        //const result = await m_clientDelSingle(req.body.cid);
+        const result = await m_clientArchiveSingle(req.body.cid);
+        // Return success
+        if (result) {
+            return res.status(200).json({
+                status: RES_STATUS.SUC_DEL, // delete success
+                msg: `Successed: delete client[id: ${req.body.cid}]`,
+                data: "",
+            });
+        } else {
+            throw new Error("Failed: delete client");
+        }
+    } catch (error) {
+        console.log("-> server - client: delete clientID: ", error);
         return res.status(403).json({
             status: RES_STATUS.FAILED_DEL,
             msg: `Failed: delete client[id: ${req.body.cid}]`,

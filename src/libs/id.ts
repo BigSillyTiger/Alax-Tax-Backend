@@ -118,7 +118,7 @@ export const genOID = async () => {
         const result = await m_ordersLastOID();
         const date = genDate();
         let newId = "001";
-        if (result) {
+        if (result && result.length) {
             const dateCmp = date === result[0].oid.slice(1, 7);
             result.length && dateCmp
                 ? (newId = String(
@@ -140,7 +140,7 @@ export const genUID = async (
 ) => {
     const result = await m_uidGetLastStaff(prefix);
     let newId = "";
-    result
+    result?.length
         ? (newId = String(parseInt(result[0].uid.slice(1), 10) + 1).padStart(
               3,
               "0"
@@ -155,7 +155,7 @@ export const genUID = async (
 export const genCID = async () => {
     const result = await m_clientsLastCID();
     let newId = "";
-    result
+    result && result.length
         ? (newId = String(parseInt(result[0].cid.slice(1), 10) + 1).padStart(
               4,
               "0"

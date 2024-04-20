@@ -143,20 +143,33 @@ export const staffSingleInstert = async (req: Request, res: Response) => {
  */
 export const staffSingleArchive = async (req: Request, res: Response) => {
     logger.infoLog("server - staff: archive single staff");
-    console.log("-> archieve single staff, ", req.body.uid);
-    const result = await m_staffArchiveSingle(req.body.uid);
-    if (result) {
-        return res.status(200).json({
-            status: RES_STATUS.SUCCESS,
-            msg: "success: archive single staff",
-            data: result,
+    try {
+        if (req.body.uid === "M001" || req.body.uid === "M002") {
+            return res.status(200).json({
+                status: RES_STATUS.FAILED,
+                msg: "fail: can not delete manager account",
+                data: null,
+            });
+        }
+        const result = await m_staffArchiveSingle(req.body.uid);
+
+        if (result) {
+            return res.status(200).json({
+                status: RES_STATUS.SUCCESS,
+                msg: "success: archive single staff",
+                data: result,
+            });
+        } else {
+            throw new Error("error: archive single staff");
+        }
+    } catch (error) {
+        console.log("err: archive single staff: ", error);
+        return res.status(500).json({
+            status: RES_STATUS.FAILED,
+            msg: "fail: archive single staff",
+            data: null,
         });
     }
-    return res.status(500).json({
-        status: RES_STATUS.FAILED,
-        msg: "fail: archive single staff",
-        data: null,
-    });
 };
 
 /**

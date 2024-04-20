@@ -29,27 +29,30 @@ import { Torder } from "../../utils/global";
  */
 export const orderAll = async (req: Request, res: Response) => {
     console.log("server - order: get all orders");
-    //const orderResult = await m_orderGetAll();
-    const ordersResult = await m_orderGetAllWithDetails();
-    //const ordersResult = await m_wlGetAllOrdersWithWL();
-    const workLogsResult = await m_wlGetALLWithLogStructure();
-    const result = genOrderWithWorkLogs(
-        ordersResult as Torder[],
-        workLogsResult
-    );
-    //console.log("--> all work logs: ", result);
+    try {
+        const ordersResult = await m_orderGetAllWithDetails();
+        //const ordersResult = await m_wlGetAllOrdersWithWL();
+        const workLogsResult = await m_wlGetALLWithLogStructure();
+        console.log("---> order with detail: ", ordersResult);
+        console.log("---> wl  with all: ", workLogsResult);
 
-    if (result.length) {
+        const result = genOrderWithWorkLogs(
+            ordersResult as Torder[],
+            workLogsResult
+        );
+        console.log("---> the new order: ", result);
+
         return res.status(200).json({
             status: RES_STATUS.SUCCESS,
             msg: "successed retrieve all orders",
             data: result,
         });
-    } else {
+    } catch (error) {
+        console.log("ERROR: server - orderAll: get all orders");
         return res.status(400).json({
             status: RES_STATUS.FAILED,
             msg: "Failed: retrieve all orders",
-            data: null,
+            data: [],
         });
     }
 };
@@ -92,7 +95,10 @@ export const orderAdd = async (req: Request, res: Response) => {
     console.log("server - order: add order: ", req.body);
     const order = req.body.order;
     const order_services = req.body.order_services;
-    req.body.order.oid = await genOID();
+    const newOid = await genOID();
+    console.log("==> new oid: ", newOid);
+    order.oid = newOid;
+
     const orResult = await m_orderInsert(order);
     if (orResult.affectedRows) {
         const odResult = await m_orderDescInsert(
@@ -117,18 +123,23 @@ export const orderAdd = async (req: Request, res: Response) => {
 
 export const orderDel = async (req: Request, res: Response) => {
     console.log("server - order: delete order: ", req.body);
-    const result = await m_orderArchive(req.body.oid);
-    if (result) {
-        return res.status(200).json({
-            status: RES_STATUS.SUC_DEL,
-            msg: `successed delete order[${req.body.oid}]`,
-            data: result,
-        });
-    } else {
+    try {
+        const result = await m_orderArchive(req.body.oid);
+        if (result) {
+            return res.status(200).json({
+                status: RES_STATUS.SUC_DEL,
+                msg: `successed delete order[${req.body.oid}]`,
+                data: result,
+            });
+        } else {
+            throw new Error("error - delete order");
+        }
+    } catch (error) {
+        console.log("ERROR: server - orderDel: delete order: ", req.body);
         return res.status(400).json({
-            status: RES_STATUS.FAILED_DEL,
+            status: RES_STATUS.FAILED,
             msg: `Failed: delete order[${req.body.oid}]`,
-            data: null,
+            data: false,
         });
     }
 };

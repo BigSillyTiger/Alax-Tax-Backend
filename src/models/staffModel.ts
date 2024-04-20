@@ -36,7 +36,7 @@ export const m_staffGetAll = async () => {
             WHERE archive = 0`
         );
         connection.release();
-        console.log("-> all staff rows: ", rows);
+        //console.log("-> all staff rows: ", rows);
         return rows as RowDataPacket[];
     } catch (err) {
         console.log("err: get all staff: ", err);
@@ -88,15 +88,21 @@ export const m_staffArchiveSingle = async (uid: number) => {
     try {
         console.log("-> archieve uid: ", uid);
         const connection = await adminPool.getConnection();
-        const result: any = await connection.query(
+        await connection.query("START TRANSACTION;");
+        await connection.query(
             `UPDATE ${DB_TABLE_LIST.STAFF} SET archive = 1 WHERE uid = ?`,
             [uid]
         );
+        await connection.query(
+            `UPDATE ${DB_TABLE_LIST.STAFF} SET phone = CONCAT('A', phone), email = CONCAT('A', email) WHERE uid = ? AND archive = 1`,
+            [uid]
+        );
+        await connection.query("COMMIT;");
         connection.release();
-        return result[0];
+        return true;
     } catch (err) {
         console.log("err: archive single staff: ", err);
-        return null;
+        return false;
     }
 };
 
@@ -219,8 +225,11 @@ export const m_uidGetLastStaff = async (
 ) => {
     try {
         const connection = await adminPool.getConnection();
-        const [result] = await connection.query(
+        /* const [result] = await connection.query(
             `SELECT uid FROM ${DB_TABLE_LIST.STAFF} WHERE uid LIKE '${prefix}%' AND archive = 0 ORDER BY uid DESC LIMIT 1`
+        ); */
+        const [result] = await connection.query(
+            `SELECT uid FROM ${DB_TABLE_LIST.STAFF} WHERE uid LIKE '${prefix}%' ORDER BY uid DESC LIMIT 1`
         );
         connection.release();
         return result as RowDataPacket[];

@@ -10,8 +10,8 @@ export const createTables = async () => {
         uid VARCHAR(4) NOT NULL PRIMARY KEY,
         first_name VARCHAR(255) NOT NULL,
         last_name VARCHAR(255) NOT NULL,
-        email VARCHAR(255) NOT NULL UNIQUE,
-        phone VARCHAR(20) NOT NULL UNIQUE,
+        email VARCHAR(50) NOT NULL,
+        phone VARCHAR(20) NOT NULL,
         password VARCHAR(255) NOT NULL,
         address VARCHAR(255),
         suburb VARCHAR(100) DEFAULT 'Adelaide',
@@ -51,8 +51,8 @@ export const createTables = async () => {
             archive BOOLEAN DEFAULT FALSE NOT NULL,
             first_name VARCHAR(255) NOT NULL,
             last_name VARCHAR(255) NOT NULL,
-            phone VARCHAR(25) NOT NULL UNIQUE,
-            email VARCHAR(255) NOT NULL UNIQUE,
+            phone VARCHAR(25) NOT NULL,
+            email VARCHAR(50) NOT NULL,
             address VARCHAR(255),
             suburb VARCHAR(100) DEFAULT 'Adelaide',
             city VARCHAR(100) DEFAULT 'Adelaide',
@@ -87,8 +87,8 @@ export const createTables = async () => {
             deposit DECIMAL(9,2) UNSIGNED DEFAULT 0,
             paid DECIMAL(10,2) UNSIGNED DEFAULT 0,
             created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            quotation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            invoice_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            quotation_date TIMESTAMP DEFAULT DEFAULT NULL,
+            invoice_date TIMESTAMP DEFAULT DEFAULT NULL
         )`);
         await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.ORDER_SERVICE} (
             id INT AUTO_INCREMENT PRIMARY KEY,

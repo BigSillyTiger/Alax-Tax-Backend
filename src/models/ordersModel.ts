@@ -270,16 +270,23 @@ export const m_orderDel = async (oid: string) => {
 export const m_orderArchive = async (oid: string) => {
     try {
         const connection = await adminPool.getConnection();
-        const result: any = await connection.query(
+        await connection.query("START TRANSACTION;");
+        await connection.query(
             `UPDATE ${DB_TABLE_LIST.ORDER_LIST} SET archive = ? WHERE oid = ?`,
             [1, oid]
         );
+        await connection.query(
+            `UPDATE ${DB_TABLE_LIST.WORK_LOG} SET archive = ? WHERE fk_oid = ?`,
+            [1, oid]
+        );
+        await connection.query("COMMIT;");
         connection.release();
+
         //console.log("-> archive order result: ", result);
-        return result[0];
+        return true;
     } catch (err) {
         console.log("err: archive order: ", err);
-        return null;
+        return false;
     }
 };
 

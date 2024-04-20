@@ -81,9 +81,9 @@ export const genOrderWithWorkLogs = (
     workLogs: ToriWorkLog[]
 ) => {
     return orders.map((order: any) => {
-        const workLogsOfOrder = workLogs.filter(
-            (log: any) => log.fk_oid === order.oid
-        );
+        const workLogsOfOrder = workLogs?.length
+            ? workLogs.filter((log: any) => log.fk_oid === order.oid)
+            : [];
         return { ...order, wlUnion: workLogsOfOrder };
     });
 };

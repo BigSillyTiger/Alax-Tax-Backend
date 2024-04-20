@@ -34,13 +34,20 @@ export const wlAll = async (req: Request, res: Response) => {
                 data: worklogsResult,
             });
         } else {
-            return res.status(400).json({
-                status: RES_STATUS.FAILED,
-                msg: "Failed: retrieve all work logs",
-                data: null,
+            return res.status(200).json({
+                status: RES_STATUS.SUCCESS,
+                msg: "successed retrieve all work logs[0]",
+                data: [],
             });
         }
-    } catch (error) {}
+    } catch (error) {
+        console.log("err: work log: get all work logs: ", error);
+        return res.status(400).json({
+            status: RES_STATUS.FAILED,
+            msg: "Failed: get all work logs",
+            data: [],
+        });
+    }
 };
 
 export const wlUpdate = async (req: Request, res: Response) => {
@@ -191,7 +198,7 @@ export const wlSingleDel = async (req: Request, res: Response) => {
     console.log("server - work log: single delete");
     try {
         const result = await m_wlSingleArchive(req.body.wlid);
-        console.log("-> delete result: ", result);
+
         if (result?.affectedRows) {
             return res.status(200).json({
                 status: RES_STATUS.SUC_DELETE_WORKLOG,
