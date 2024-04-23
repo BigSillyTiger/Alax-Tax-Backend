@@ -1,15 +1,18 @@
 import type {
+    TaccumulatedPayments,
     Tbonus,
     TnewBonus,
     TnewDeduction,
     TnewStaff,
     Torder,
     ToriWorkLog,
+    TpaymentAll,
     Tpayslip,
 } from "../utils/global";
 import { m_wlGetAllWLID } from "../models/workLogModel";
 import { genDate } from "./time";
-import { uidPrefix } from "../utils/config";
+import { MONTHS, uidPrefix } from "../utils/config";
+import { plusAB } from "./calculate";
 
 export const formatOrderDesc = (id: number, items: any) => {
     return items.map((item: any, index: number) => {
@@ -184,4 +187,50 @@ export const formatStaff = (uid: string, pw: string, staff: TnewStaff) => {
         staff.bsb,
         staff.account,
     ];
+};
+
+export const accumulatePaymentsByMonth = (payments: TpaymentAll[]) => {
+    const monthlyPayments: { [year: string]: { [month: string]: number } } = {};
+
+    // Iterate over payments
+    for (const payment of payments) {
+        const date = new Date(payment.paid_date);
+        const year = date.getFullYear().toString();
+        const month = date.toLocaleString("en-AU", { month: "long" });
+
+        // Initialize year if not exists
+        if (!monthlyPayments[year]) {
+            monthlyPayments[year] = {};
+        }
+
+        // Add payment to the corresponding month
+        monthlyPayments[year][month] = plusAB(
+            monthlyPayments[year][month] || 0,
+            payment.paid
+        );
+    }
+
+    // Find the latest year
+    const latestYear = Math.max(...Object.keys(monthlyPayments).map(Number));
+
+    // Iterate over each year
+    for (const year in monthlyPayments) {
+        const yearData = monthlyPayments[year];
+        const sortedYearData: { [month: string]: number } = {};
+
+        // Determine the latest month of the current year or the latest year
+        const latestMonth =
+            parseInt(year) === latestYear ? new Date().getMonth() : 11;
+
+        // Iterate over ordered months
+        for (let i = 0; i <= latestMonth; i++) {
+            const month = MONTHS[i];
+            sortedYearData[month] = yearData[month] || 0;
+        }
+
+        // Replace the original year data with the sorted year data
+        monthlyPayments[year] = sortedYearData;
+    }
+
+    return monthlyPayments;
 };

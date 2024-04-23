@@ -53,7 +53,6 @@ export const ORDER_UPDATE = "/order/update";
 export const ORDER_DEL = "/order/del";
 export const ORDER_W_CLIENT = "/order/withClientID";
 export const ORDER_STATUS = "/order/status";
-
 export const PAYMENT_UPDATE = "/order/updatePayments";
 export const INVOICE_ISSUE_UPDATE = "/order/updateInvoiceIssue";
 
@@ -76,3 +75,9 @@ export const PAYSLIP_STATUS_UPDATE = "/payslip/status-update";
 export const PAYSLIP_ALL = "/payslip/all";
 export const PAYSLIP_ALL_W_UID = "/payslip/all_w_uid";
 export const PAYSLIP_BONUS_ALL = "/payslip/bonus-all";
+
+// Charts - by month or by week
+export const CT_ORDER_PAYMENT = "/charts/order-payment";
+export const CT_ORDER_UNPAID = "/charts/order-unpaid";
+export const CT_ORDER_NEW = "/charts/order-new";
+export const CT_ORDER_UNFINISHED = "/charts/order-unfinished";

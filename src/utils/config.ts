@@ -94,3 +94,18 @@ export const allowedWLTimerURLs = {
     unconfirmed: [WL_RESET_TIMER],
     canceled: [],
 };
+
+export const MONTHS = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+];

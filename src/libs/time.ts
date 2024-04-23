@@ -52,15 +52,24 @@ export const genAUDate = (day: number = 0) => {
     return targetDate.toLocaleString("en-AU", dateOptionADL);
 };
 
-export const genYYYYHHMM = (date: string) => {
-    const parts = date.split(", ");
+export const genYYYYHHMM = (...args: any[]) => {
+    if (args.length === 1 && args[0] instanceof Date) {
+        const dateObj = new Date(args[0]);
+        const year = dateObj.getFullYear();
+        const month = String(dateObj.getMonth() + 1).padStart(2, "0"); // Month is 0-indexed
+        const day = String(dateObj.getDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
+    } // if (args.length === 1 && typeof args[0] === "string")
+    else {
+        const parts = args[0].split(", ");
 
-    // Extract day, month, and year
-    const [, datePart] = parts;
-    const [day, month, year] = datePart.split("/");
+        // Extract day, month, and year
+        const [, datePart] = parts;
+        const [day, month, year] = datePart.split("/");
 
-    // Rearrange the date parts in yyyy-mm-dd format
-    return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+        // Rearrange the date parts in yyyy-mm-dd format
+        return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+    }
 };
 
 export const calBreakTime = (sTime: string, eTime: string, bHour: string) => {

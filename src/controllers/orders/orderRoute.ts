@@ -10,6 +10,7 @@ import {
     ORDER_W_CLIENT,
     PAYMENT_UPDATE,
 } from "../../utils/reqList";
+
 const router = express.Router();
 
 router.get(ORDER_ALL, orderCtl.orderAll);

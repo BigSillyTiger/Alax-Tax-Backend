@@ -614,3 +614,17 @@ export const m_paymentLastPID = async () => {
         return null;
     }
 };
+
+export const m_paymentALL = async () => {
+    try {
+        const connection = await adminPool.getConnection();
+        const [result] = await connection.query(
+            `SELECT paid, paid_date FROM ${DB_TABLE_LIST.PAYMENT}`
+        );
+        connection.release();
+        return result as RowDataPacket[];
+    } catch (error) {
+        console.log("-> error: retrieve all payments - ", error);
+        return null;
+    }
+};

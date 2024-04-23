@@ -19,6 +19,7 @@ import orderRouter from "./controllers/orders/orderRoute";
 import staffRouter from "./controllers/staff/staffRoute";
 import workRouter from "./controllers/work/workRoute";
 import payslipRouter from "./controllers/payslips/payslipsRoute";
+import chartRouter from "./controllers/charts/chartRoute";
 import dotenv from "dotenv";
 
 //dotenv.config({ path: "../../.env" });
@@ -45,6 +46,7 @@ app.use(settingRouter);
 app.use(staffRouter);
 app.use(workRouter);
 app.use(payslipRouter);
+app.use(chartRouter);
 app.use(express.static("./public"));
 
 app.listen(process.env.PORT || 5005, () => {
