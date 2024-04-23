@@ -290,17 +290,13 @@ export type TstaffWPayslip = TstaffData & {
     payslips: Tpayslip[];
 };
 
-// the data retrived from payment table
-export type TpaymentAll = {
-    paid: number;
-    paid_date: string;
+export type TaccumulatedItem = {
+    count: number;
+    date: string;
 };
 
-// the returned date
-export type TaccumulatedPayments = {
-    year: string;
-    month: string[];
-    paid: number[];
+export type TaccumulatedResult = {
+    [year: string]: { [month: string]: number };
 };
 
 export type TnewPayslip = Partical<Tpayslip>;

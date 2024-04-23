@@ -1,12 +1,10 @@
 import type {
-    TaccumulatedPayments,
-    Tbonus,
+    TaccumulatedItem,
     TnewBonus,
     TnewDeduction,
     TnewStaff,
     Torder,
     ToriWorkLog,
-    TpaymentAll,
     Tpayslip,
 } from "../utils/global";
 import { m_wlGetAllWLID } from "../models/workLogModel";
@@ -189,33 +187,33 @@ export const formatStaff = (uid: string, pw: string, staff: TnewStaff) => {
     ];
 };
 
-export const accumulatePaymentsByMonth = (payments: TpaymentAll[]) => {
-    const monthlyPayments: { [year: string]: { [month: string]: number } } = {};
+export const accumulateByMonth = (items: TaccumulatedItem[]) => {
+    const monthlyItems: { [year: string]: { [month: string]: number } } = {};
 
     // Iterate over payments
-    for (const payment of payments) {
-        const date = new Date(payment.paid_date);
+    for (const item of items) {
+        const date = new Date(item.date);
         const year = date.getFullYear().toString();
         const month = date.toLocaleString("en-AU", { month: "long" });
 
         // Initialize year if not exists
-        if (!monthlyPayments[year]) {
-            monthlyPayments[year] = {};
+        if (!monthlyItems[year]) {
+            monthlyItems[year] = {};
         }
 
         // Add payment to the corresponding month
-        monthlyPayments[year][month] = plusAB(
-            monthlyPayments[year][month] || 0,
-            payment.paid
+        monthlyItems[year][month] = plusAB(
+            monthlyItems[year][month] || 0,
+            item.count
         );
     }
 
     // Find the latest year
-    const latestYear = Math.max(...Object.keys(monthlyPayments).map(Number));
+    const latestYear = Math.max(...Object.keys(monthlyItems).map(Number));
 
     // Iterate over each year
-    for (const year in monthlyPayments) {
-        const yearData = monthlyPayments[year];
+    for (const year in monthlyItems) {
+        const yearData = monthlyItems[year];
         const sortedYearData: { [month: string]: number } = {};
 
         // Determine the latest month of the current year or the latest year
@@ -229,8 +227,8 @@ export const accumulatePaymentsByMonth = (payments: TpaymentAll[]) => {
         }
 
         // Replace the original year data with the sorted year data
-        monthlyPayments[year] = sortedYearData;
+        monthlyItems[year] = sortedYearData;
     }
 
-    return monthlyPayments;
+    return monthlyItems;
 };

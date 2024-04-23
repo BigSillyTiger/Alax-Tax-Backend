@@ -628,3 +628,31 @@ export const m_paymentALL = async () => {
         return null;
     }
 };
+
+export const m_orderAllCount = async () => {
+    try {
+        const connection = await adminPool.getConnection();
+        const [result] = await connection.query(
+            `SELECT created_date FROM ${DB_TABLE_LIST.ORDER_LIST} WHERE archive = 0`
+        );
+        connection.release();
+        return result as RowDataPacket[];
+    } catch (error) {
+        console.log("-> error: retrieve all orders count - ", error);
+        return null;
+    }
+};
+
+export const m_orderAllUnpaid = async () => {
+    try {
+        const connection = await adminPool.getConnection();
+        const [result] = await connection.query(
+            `SELECT (total - paid) * -1 as unpaid, created_date FROM ${DB_TABLE_LIST.ORDER_LIST} WHERE archive = 0`
+        );
+        connection.release();
+        return result as RowDataPacket[];
+    } catch (error) {
+        console.log("-> error: retrieve all unpaid orders - ", error);
+        return null;
+    }
+};
