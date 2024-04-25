@@ -258,7 +258,26 @@ export const m_wlGetAllWLID = async (): Promise<RowDataPacket[] | null> => {
     }
 };
 
-export const m_wlGetAll = async (
+export const m_wlGetAllAbstract = async (): Promise<RowDataPacket[] | null> => {
+    try {
+        const connection = await adminPool.getConnection();
+        const [rows] = await connection.query(
+            `SELECT 
+                wl.wlid, wl.fk_oid, wl.fk_uid, wl.wl_date,
+                s.first_name, s.last_name, s.role
+            FROM ${DB_TABLE_LIST.WORK_LOG} wl
+            INNER JOIN ${DB_TABLE_LIST.STAFF} s ON wl.fk_uid = s.uid
+            ;`
+        );
+        connection.release();
+        return rows as RowDataPacket[];
+    } catch (error) {
+        console.log("err: get all work logs abstract: ", error);
+        return null;
+    }
+};
+
+export const m_wlGetAllWDeduct = async (
     archive = 0
 ): Promise<RowDataPacket[] | null> => {
     try {
@@ -291,7 +310,7 @@ export const m_wlGetAll = async (
         //console.log("-> test rows: ", rows);
         return rows as RowDataPacket[];
     } catch (error) {
-        console.log("err: get all work logs: ", error);
+        console.log("err: get all work logs w deduction: ", error);
         return null;
     }
 };

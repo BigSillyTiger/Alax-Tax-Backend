@@ -55,6 +55,7 @@ export const ORDER_W_CLIENT = "/order/withClientID";
 export const ORDER_STATUS = "/order/status";
 export const PAYMENT_UPDATE = "/order/updatePayments";
 export const INVOICE_ISSUE_UPDATE = "/order/updateInvoiceIssue";
+export const ORDER_ALL_ARRANGEMENT = "/order/all_arrangement";
 
 // Assist
 export const SETTING_UNI_ALL = "/setting/uni_all";

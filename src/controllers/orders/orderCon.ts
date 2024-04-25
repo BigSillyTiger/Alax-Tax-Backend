@@ -13,13 +13,22 @@ import {
     m_findOrder,
     m_orderGetAllWithDetails,
     m_orderUpdateWithDesc,
+    m_orderGetAllAbstract,
 } from "../../models/ordersModel";
-import { formatOrderDesc, formatPayment } from "../../libs/format";
+import {
+    formatOrderArrangement,
+    formatOrderDesc,
+    formatPayment,
+} from "../../libs/format";
 import { genOID, genPID } from "../../libs/id";
 import { genOrderWithWorkLogs } from "../../libs/format";
 import { m_clientGetSingle } from "../../models/clientsModel";
-import { m_wlGetALLWithLogStructure } from "../../models/workLogModel";
-import { Torder } from "../../utils/global";
+import {
+    m_wlGetAllAbstract,
+    m_wlGetALLWithLogStructure,
+} from "../../models/workLogModel";
+import { Torder, TorderAbstract, TwlAbstract } from "../../utils/global";
+import { promise } from "zod";
 
 /**
  * @description return all orders from orders table with client first name and last name from clients table
@@ -33,14 +42,11 @@ export const orderAll = async (req: Request, res: Response) => {
         const ordersResult = await m_orderGetAllWithDetails();
         //const ordersResult = await m_wlGetAllOrdersWithWL();
         const workLogsResult = await m_wlGetALLWithLogStructure();
-        console.log("---> order with detail: ", ordersResult);
-        console.log("---> wl  with all: ", workLogsResult);
 
         const result = genOrderWithWorkLogs(
             ordersResult as Torder[],
             workLogsResult
         );
-        console.log("---> the new order: ", result);
 
         return res.status(200).json({
             status: RES_STATUS.SUCCESS,
@@ -318,4 +324,33 @@ export const updateInvoiceIssue = async (req: Request, res: Response) => {
         msg: `Failed: update invoice issue date[${req.body.oid}]`,
         data: null,
     });
+};
+
+export const orderAllArrangement = async (req: Request, res: Response) => {
+    console.log("-> server - order: get all orders arrangement");
+    try {
+        const [orderAbstract, wlAbstract] = await Promise.all([
+            m_orderGetAllAbstract().then((res) => res),
+            m_wlGetAllAbstract().then((res) => res),
+        ]);
+        const newOrderArrangement = formatOrderArrangement(
+            orderAbstract as TorderAbstract[],
+            wlAbstract as TwlAbstract[]
+        );
+
+        return res.status(200).json({
+            status: RES_STATUS.SUCCESS,
+            msg: "successed retrieve all orders arrangement",
+            data: newOrderArrangement,
+        });
+    } catch (error) {
+        console.log(
+            "ERROR: server - orderAllArrangement: get all orders arrangement"
+        );
+        return res.status(400).json({
+            status: RES_STATUS.FAILED,
+            msg: "Failed: retrieve all orders arrangement",
+            data: [],
+        });
+    }
 };

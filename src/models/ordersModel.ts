@@ -8,16 +8,22 @@ import { ResultSetHeader, RowDataPacket } from "mysql2";
  *
  * @returns
  */
-export const m_orderGetAll = async () => {
+export const m_orderGetAllAbstract = async () => {
     try {
         const connection = await adminPool.getConnection();
-        const [rows] = await connection.query(
-            `SELECT ${DB_TABLE_LIST.ORDER_LIST}.*, ${DB_TABLE_LIST.CLIENT}.first_name, ${DB_TABLE_LIST.CLIENT}.last_name, ${DB_TABLE_LIST.CLIENT}.phone FROM ${DB_TABLE_LIST.ORDER_LIST} INNER JOIN ${DB_TABLE_LIST.CLIENT} ON ${DB_TABLE_LIST.ORDER_LIST}.fk_cid = ${DB_TABLE_LIST.CLIENT}.cid ORDER BY created_date DESC`
+        const [result] = await connection.query(
+            `SELECT
+                o.oid, o.fk_cid, o.address, o.suburb, o.city, o.state, o.country, o.postcode, o.status,
+                c.first_name, c.last_name, c.phone, c.email
+            FROM ${DB_TABLE_LIST.ORDER_LIST} o
+            JOIN ${DB_TABLE_LIST.CLIENT} c ON o.fk_cid = c.cid
+            WHERE o.archive = 0;
+            `
         );
         connection.release();
-        return rows;
+        return result as RowDataPacket[];
     } catch (err) {
-        console.log("err: get all orders: ", err);
+        console.log("err: get all orders abstract: ", err);
         return null;
     }
 };
@@ -619,7 +625,7 @@ export const m_paymentALL = async () => {
     try {
         const connection = await adminPool.getConnection();
         const [result] = await connection.query(
-            `SELECT paid, paid_date FROM ${DB_TABLE_LIST.PAYMENT}`
+            `SELECT p.paid, p.paid_date FROM ${DB_TABLE_LIST.PAYMENT} p JOIN ${DB_TABLE_LIST.ORDER_LIST} o ON p.fk_oid = o.oid WHERE o.archive = 0`
         );
         connection.release();
         return result as RowDataPacket[];

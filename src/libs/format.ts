@@ -4,11 +4,13 @@ import type {
     TnewDeduction,
     TnewStaff,
     Torder,
+    TorderAbstract,
     ToriWorkLog,
     Tpayslip,
+    TwlAbstract,
 } from "../utils/global";
 import { m_wlGetAllWLID } from "../models/workLogModel";
-import { genDate } from "./time";
+import { genDate, genYYYYHHMM } from "./time";
 import { MONTHS, uidPrefix } from "../utils/config";
 import { plusAB } from "./calculate";
 
@@ -231,4 +233,75 @@ export const accumulateByMonth = (items: TaccumulatedItem[]) => {
     }
 
     return monthlyItems;
+};
+
+export const formatOrderArrangement = (
+    orders: TorderAbstract[],
+    worklogs: TwlAbstract[]
+) => {
+    if (orders.length === 0 || worklogs.length === 0) {
+        return [];
+    }
+
+    // Create a map to store arrangement objects
+    const arrangementMap = new Map();
+
+    // Iterate over worklogs to populate arrangementMap
+    worklogs.forEach((worklog) => {
+        const key = `${worklog.wl_date}`;
+        if (!arrangementMap.has(key)) {
+            arrangementMap.set(key, {
+                date: genYYYYHHMM(worklog.wl_date),
+                arrangement: [],
+            });
+        }
+        const arrangement = arrangementMap.get(key);
+
+        // Find the corresponding order for the worklog
+        const order = orders.find((order) => order.oid === worklog.fk_oid);
+        if (!order) {
+            return;
+        }
+
+        // Create a new wl object
+        const wlItem = {
+            first_name: worklog.first_name,
+            last_name: worklog.last_name,
+            fk_uid: worklog.fk_uid,
+            role: worklog.role,
+        };
+
+        // Check if an arrangement item for this order already exists
+        let arrangementItem = arrangement.arrangement.find(
+            (item: any) => item.order.oid === order.oid
+        );
+        if (!arrangementItem) {
+            // If not, create a new arrangement item
+            arrangementItem = {
+                order: {
+                    oid: order.oid,
+                    fk_cid: order.fk_cid,
+                    first_name: order.first_name,
+                    last_name: order.last_name,
+                    phone: order.phone,
+                    address: order.address,
+                    suburb: order.suburb,
+                    city: order.city,
+                    state: order.state,
+                    country: order.country,
+                    postcode: order.postcode,
+                    status: order.status,
+                },
+                wl: [],
+            };
+            arrangement.arrangement.push(arrangementItem);
+        }
+
+        // Push the wl object to the corresponding arrangement item
+        arrangementItem.wl.push(wlItem);
+    });
+
+    // Convert map values to array
+    const result = Array.from(arrangementMap.values());
+    return result;
 };

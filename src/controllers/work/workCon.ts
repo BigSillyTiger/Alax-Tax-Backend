@@ -1,5 +1,5 @@
 import {
-    m_wlGetAll,
+    m_wlGetAllWDeduct,
     m_wlUpdateAssignments,
     m_wlSingleUpdateHours,
     m_wlSingleArchive,
@@ -26,7 +26,7 @@ import { genDID } from "../../libs/id";
 export const wlAll = async (req: Request, res: Response) => {
     console.log("server - work log: get all work logs");
     try {
-        const worklogsResult = await m_wlGetAll();
+        const worklogsResult = await m_wlGetAllWDeduct();
         if (worklogsResult && worklogsResult.length) {
             return res.status(200).json({
                 status: RES_STATUS.SUCCESS,

@@ -299,6 +299,32 @@ export type TaccumulatedResult = {
     [year: string]: { [month: string]: number };
 };
 
+export type TwlAbstract = {
+    wlid: string;
+    fk_oid: string;
+    fk_uid: string;
+    wl_date: string;
+    first_name: string;
+    last_name: string;
+    role: string;
+};
+
+export type TorderAbstract = {
+    oid: string;
+    fk_cid: string;
+    address: string;
+    suburb: string;
+    city: string;
+    state: string;
+    country: string;
+    postcode: string;
+    status: string;
+    first_name: string;
+    last_name: string;
+    phone: string;
+    email: string;
+};
+
 export type TnewPayslip = Partical<Tpayslip>;
 export type TnewBonus = Partical<Tbonus>;
 export type TnewDeduction = Partical<Tdeduction>;
