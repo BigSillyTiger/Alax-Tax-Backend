@@ -16,6 +16,21 @@ export const m_psAll = async () => {
     }
 };
 
+export const m_psAllWUID = async (uid: string) => {
+    try {
+        const connection = await adminPool.getConnection();
+        const [result] = await connection.query(
+            `SELECT * FROM ${DB_TABLE_LIST.PAYSLIP} WHERE fk_uid = ?;`,
+            [uid]
+        );
+        connection.release();
+        return result as RowDataPacket[];
+    } catch (error) {
+        console.log("-> error: payslip all - ", error);
+        return false;
+    }
+};
+
 export const m_psSingleInsert = async (
     payslip: any,
     bonus: any,
@@ -142,6 +157,21 @@ export const m_psBonusAll = async () => {
         const connection = await adminPool.getConnection();
         const [result] = await connection.query(
             `SELECT * FROM ${DB_TABLE_LIST.BONUS};`
+        );
+        connection.release();
+        return result as RowDataPacket[];
+    } catch (error) {
+        console.log("-> error: payslip bonus all - ", error);
+        return false;
+    }
+};
+
+export const m_psBonusAllWUID = async (uid: string) => {
+    try {
+        const connection = await adminPool.getConnection();
+        const [result] = await connection.query(
+            `SELECT * FROM ${DB_TABLE_LIST.BONUS} WHERE fk_uid = ?;`,
+            [uid]
         );
         connection.release();
         return result as RowDataPacket[];

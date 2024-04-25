@@ -2,6 +2,7 @@ import logger from "../libs/logger";
 import adminPool from "./adminPool";
 import { DB_TABLE_LIST } from "../utils/config";
 import type { Tcompany } from "../utils/global";
+import { th } from "date-fns/locale";
 
 /**
  *
@@ -122,14 +123,18 @@ export const m_searchMbyEmail = async (email: string) => {
 export const m_levelCheck = async (uid: string) => {
     try {
         const connection = await adminPool.getConnection();
-        const result: any = await connection.query(
+        const [result] = await connection.query(
             `SELECT uid, first_name, last_name, role, access, dashboard, clients, orders, worklogs, calendar, staff, setting FROM ${DB_TABLE_LIST.STAFF} WHERE uid = '${uid}'`
         );
         connection.release();
-        return result[0][0];
+        if (Array.isArray(result) && result.length) {
+            return result[0];
+        } else {
+            throw new Error("level check error");
+        }
     } catch (err) {
         logger.errLog("level check rror: " + err);
-        return null;
+        return {};
     }
 };
 

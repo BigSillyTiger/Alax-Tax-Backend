@@ -14,29 +14,43 @@ import {
     m_wlSingleUpdateHD,
     m_wlSingleUpdateDeduction,
     m_wlUpdateStatus,
+    m_wlGetEmployeeWL,
+    m_wlGetEmployeeTheDay,
 } from "../../models/workLogModel";
 import type { Request, Response } from "express";
-import type { TworkLog, ToriWorkLog } from "../../utils/global";
+import type {
+    TworkLog,
+    ToriWorkLog,
+    TRequestWithUser,
+} from "../../utils/global";
 import { calBreakTime, genAUDate, genHHMM, genYYYYHHMM } from "../../libs/time";
 import { formatDeduction, genWorkLogsWithNewWLID } from "../../libs/format";
 import { formatWorkLog } from "../../libs/format";
-import { RES_STATUS } from "../../utils/config";
+import { RES_STATUS, uidPrefix } from "../../utils/config";
 import { genDID } from "../../libs/id";
 
-export const wlAll = async (req: Request, res: Response) => {
+export const wlAll = async (req: TRequestWithUser, res: Response) => {
     console.log("server - work log: get all work logs");
+    const uid = req.user?.userId as string;
+    const admin = req.user?.userId.charAt(0); // M - manager, E - employee
     try {
-        const worklogsResult = await m_wlGetAllWDeduct();
+        let worklogsResult;
+        if (admin === uidPrefix.manager) {
+            worklogsResult = await m_wlGetAllWDeduct();
+        } else {
+            worklogsResult = await m_wlGetEmployeeWL(uid);
+        }
+
         if (worklogsResult && worklogsResult.length) {
             return res.status(200).json({
                 status: RES_STATUS.SUCCESS,
-                msg: "successed retrieve all work logs",
+                msg: `successed retrieve all work logs[${uid}]`,
                 data: worklogsResult,
             });
         } else {
             return res.status(200).json({
                 status: RES_STATUS.SUCCESS,
-                msg: "successed retrieve all work logs[0]",
+                msg: `successed retrieve all work logs[${uid}] - 0`,
                 data: [],
             });
         }
@@ -218,11 +232,18 @@ export const wlSingleDel = async (req: Request, res: Response) => {
     }
 };
 
-export const wlGetToday = async (req: Request, res: Response) => {
+export const wlGetToday = async (req: TRequestWithUser, res: Response) => {
     const today = genYYYYHHMM(genAUDate());
     console.log(`server - work log: get today's[${today}] work logs`);
+    const uid = req.user?.userId as string;
+    const admin = req.user?.userId.charAt(0); // M - manager, E - employee
     try {
-        const worklogsResult = await m_wlGetTheDay(today);
+        let worklogsResult;
+        if (admin === uidPrefix.manager) {
+            worklogsResult = await m_wlGetTheDay(today);
+        } else {
+            worklogsResult = await m_wlGetEmployeeTheDay(today, uid);
+        }
 
         return res.status(200).json({
             status: RES_STATUS.SUCCESS,
@@ -380,11 +401,22 @@ export const wlResumeWorkTime = async (req: Request, res: Response) => {
     }
 };
 
-export const wlStopWorkTime = async (req: Request, res: Response) => {
+export const wlStopWorkTime = async (req: TRequestWithUser, res: Response) => {
     console.log("server - work log: stop work time, wlid: ", req.body.wlid);
+    //const uid = req.user?.userId as string;
+    const admin = req.user?.userId.charAt(0); // M - manager, E - employee
     try {
         const e_time = genHHMM(genAUDate()) as string;
-        const result = await m_wlUpdateEtime(req.body.wlid, e_time);
+        let result;
+        if (admin === uidPrefix.manager) {
+            result = await m_wlUpdateEtime(req.body.wlid, e_time);
+        } else {
+            result = await m_wlUpdateEtime(
+                req.body.wlid,
+                e_time,
+                "unconfirmed"
+            );
+        }
         if (result && result.affectedRows) {
             return res.status(200).json({
                 status: RES_STATUS.SUC_UPDATE_WORKLOG,

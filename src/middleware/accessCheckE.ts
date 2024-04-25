@@ -2,24 +2,24 @@ import { Response, NextFunction } from "express";
 import { verify } from "jsonwebtoken";
 import dotenv from "dotenv";
 import logger from "../libs/logger";
-import { RES_STATUS } from "../utils/config";
+import { RES_STATUS, uidPrefix } from "../utils/config";
 import { TRequestWithUser } from "../utils/global";
 
 dotenv.config();
 
 /**
- * @description middleware to check jwt
+ * @description middleware to check if user is the manager to access the route
  * @param req
  * @param res
  * @param next
  * @returns
  */
-export const authMW = (
+export const accessCheckE = (
     req: TRequestWithUser,
     res: Response,
     next: NextFunction
 ) => {
-    logger.infoLog("-> authenticate JWT checking...");
+    logger.infoLog("-> MW: Employee access checking...");
     const token = req.cookies.token;
     if (!token) {
         logger.infoLog("-> jwt cookies empty ");
@@ -35,12 +35,16 @@ export const authMW = (
             iat: number;
             exp: number;
         };
+        if (decoded.userID.charAt(0) !== uidPrefix.employee) {
+            throw new Error("Not Employee");
+        }
         // add user attr to req
-        req.user = { userId: decoded.userID };
-        console.log("-> verifed jwt");
+        req.user = { userId: "", username: "" };
+        req.user!.userId = decoded.userID;
+        console.log("-> verifed Employee jwt");
         next();
     } catch (err) {
-        console.log("-> unverifed jwt: ", err);
+        console.log("-> unverifed employee jwt: ", err);
         return res.status(403).json({
             msg: "not authorized token",
             status: RES_STATUS.FAILED,

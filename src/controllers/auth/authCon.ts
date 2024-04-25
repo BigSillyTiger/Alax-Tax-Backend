@@ -141,10 +141,10 @@ export const adminLogout = async (req: Request, res: Response) => {
  * @param res
  * @returns
  */
-export const accessCheck = async (req: TRequestWithUser, res: Response) => {
+export const accessCheckM = async (req: TRequestWithUser, res: Response) => {
     console.log("-> server - access check: ", req.body);
     const uid = req.user!.userId;
-    const access = await m_levelCheck(uid);
+    const access: { [key: string]: number } = await m_levelCheck(uid);
     if (access[req.body.page] !== 0) {
         return res.status(200).json({
             status: RES_STATUS.SUCCESS,

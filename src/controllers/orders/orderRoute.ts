@@ -11,6 +11,7 @@ import {
     PAYMENT_UPDATE,
     ORDER_ALL_ARRANGEMENT,
 } from "../../utils/reqList";
+import { authMW } from "../../middleware/authMW";
 
 const router = express.Router();
 
@@ -25,6 +26,6 @@ router.put(ORDER_STATUS, orderCtl.orderChangeStatus);
 router.post("/order/clientOrders", orderCtl.clientOrders);
 router.put(PAYMENT_UPDATE, orderCtl.orderUpdatePayments);
 router.put(INVOICE_ISSUE_UPDATE, orderCtl.updateInvoiceIssue);
-router.get(ORDER_ALL_ARRANGEMENT, orderCtl.orderAllArrangement);
+router.get(ORDER_ALL_ARRANGEMENT, [authMW], orderCtl.orderAllArrangement);
 
 export default router;

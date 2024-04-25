@@ -5,14 +5,14 @@ import {
     CT_ORDER_UNFINISHED,
     CT_ORDER_UNPAID,
 } from "../../utils/reqList";
-import { accessCheck } from "../../middleware/accessCheck";
+import { authMW } from "../../middleware/authMW";
 import * as chartCtl from "./chartCon";
 
 const router = express.Router();
 
-router.get(CT_ORDER_PAYMENT, accessCheck, chartCtl.ctAllPayments);
-router.get(CT_ORDER_NEW, accessCheck);
-router.get(CT_ORDER_UNFINISHED, accessCheck);
-router.get(CT_ORDER_UNPAID, accessCheck);
+router.get(CT_ORDER_PAYMENT, [authMW], chartCtl.ctAllPayments);
+/* router.get(CT_ORDER_NEW, accessCheckM);
+router.get(CT_ORDER_UNFINISHED, accessCheckM);
+router.get(CT_ORDER_UNPAID, accessCheckM); */
 
 export default router;

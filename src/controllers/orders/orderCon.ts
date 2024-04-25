@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import { RES_STATUS } from "../../utils/config";
+import { RES_STATUS, uidPrefix } from "../../utils/config";
 import {
     m_orderDescInsert,
     m_orderInsert,
@@ -27,7 +27,14 @@ import {
     m_wlGetAllAbstract,
     m_wlGetALLWithLogStructure,
 } from "../../models/workLogModel";
-import { Torder, TorderAbstract, TwlAbstract } from "../../utils/global";
+import {
+    Tarrangement,
+    Torder,
+    TorderAbstract,
+    TorderArrangement,
+    TRequestWithUser,
+    TwlAbstract,
+} from "../../utils/global";
 import { promise } from "zod";
 
 /**
@@ -326,8 +333,13 @@ export const updateInvoiceIssue = async (req: Request, res: Response) => {
     });
 };
 
-export const orderAllArrangement = async (req: Request, res: Response) => {
+export const orderAllArrangement = async (
+    req: TRequestWithUser,
+    res: Response
+) => {
     console.log("-> server - order: get all orders arrangement");
+    const uid = req.user?.userId as string;
+    const admin = req.user?.userId.charAt(0); // M - manager, E - employee
     try {
         const [orderAbstract, wlAbstract] = await Promise.all([
             m_orderGetAllAbstract().then((res) => res),
@@ -336,7 +348,12 @@ export const orderAllArrangement = async (req: Request, res: Response) => {
         const newOrderArrangement = formatOrderArrangement(
             orderAbstract as TorderAbstract[],
             wlAbstract as TwlAbstract[]
-        );
+        ).filter((oa: TorderArrangement) => {
+            if (admin === uidPrefix.manager) return true;
+            return oa.arrangement.some((a: Tarrangement) =>
+                a.wl.some((w) => w.fk_uid === uid)
+            );
+        });
 
         return res.status(200).json({
             status: RES_STATUS.SUCCESS,

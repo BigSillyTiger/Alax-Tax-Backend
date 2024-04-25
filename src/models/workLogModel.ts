@@ -273,7 +273,44 @@ export const m_wlGetAllAbstract = async (): Promise<RowDataPacket[] | null> => {
         return rows as RowDataPacket[];
     } catch (error) {
         console.log("err: get all work logs abstract: ", error);
-        return null;
+        return [];
+    }
+};
+
+export const m_wlGetEmployeeWL = async (
+    uid: string
+): Promise<RowDataPacket[] | null> => {
+    try {
+        const connection = await adminPool.getConnection();
+        const [rows] = await connection.query(
+            `SELECT 
+                wl.*,
+                s.first_name, s.last_name, s.email, s.phone, s.hr, s.bsb, s.account,
+                o.address, o.suburb, o.city, o.state, o.country, o.postcode, deduction
+            FROM ${DB_TABLE_LIST.WORK_LOG} wl 
+            INNER JOIN ${DB_TABLE_LIST.STAFF} s ON wl.fk_uid = s.uid
+            INNER JOIN ${DB_TABLE_LIST.ORDER_LIST} o ON wl.fk_oid = o.oid
+            LEFT JOIN (
+                SELECT 
+                    fk_wlid,
+                    JSON_ARRAYAGG(
+                        JSON_OBJECT(
+                            'did', did,
+                            'fk_wlid', fk_wlid,
+                            'amount', amount,
+                            'note', note
+                        )
+                    ) AS deduction
+                FROM ${DB_TABLE_LIST.DEDUCTION}
+                GROUP BY fk_wlid
+            ) D ON wl.wlid = D.fk_wlid
+            WHERE wl.archive = 0 AND wl.fk_uid = '${uid}';`
+        );
+        connection.release();
+        return rows as RowDataPacket[];
+    } catch (error) {
+        console.log("err: get employee work logs: ", error);
+        return [];
     }
 };
 
@@ -312,6 +349,46 @@ export const m_wlGetAllWDeduct = async (
     } catch (error) {
         console.log("err: get all work logs w deduction: ", error);
         return null;
+    }
+};
+
+export const m_wlGetEmployeeTheDay = async (
+    day: string,
+    uid: string,
+    archive = 0
+): Promise<RowDataPacket[] | null> => {
+    try {
+        const connection = await adminPool.getConnection();
+        const [rows] = await connection.query(
+            `SELECT 
+                wl.*,
+                s.first_name, s.last_name, s.email, s.phone,
+                o.address, o.suburb, o.city, o.state, o.country, o.postcode, deduction
+            FROM ${DB_TABLE_LIST.WORK_LOG} wl 
+            INNER JOIN ${DB_TABLE_LIST.STAFF} s ON wl.fk_uid = s.uid
+            INNER JOIN ${DB_TABLE_LIST.ORDER_LIST} o ON wl.fk_oid = o.oid
+            LEFT JOIN (
+                SELECT 
+                    fk_wlid,
+                    JSON_ARRAYAGG(
+                        JSON_OBJECT(
+                            'did', did,
+                            'fk_wlid', fk_wlid,
+                            'amount', amount,
+                            'note', note
+                        )
+                    ) AS deduction
+                FROM ${DB_TABLE_LIST.DEDUCTION}
+                GROUP BY fk_wlid
+            ) D ON wl.wlid = D.fk_wlid
+            WHERE wl.wl_date = ? AND wl.archive = ? AND wl.fk_uid = ?;`,
+            [day, archive, uid]
+        );
+        connection.release();
+        return rows as RowDataPacket[];
+    } catch (error) {
+        console.log("err: get day work logs: ", day, uid, error);
+        return [];
     }
 };
 
@@ -555,12 +632,16 @@ export const m_wlResetWorkTime = async (wlid: string) => {
     }
 };
 
-export const m_wlUpdateEtime = async (wlid: string, time: string) => {
+export const m_wlUpdateEtime = async (
+    wlid: string,
+    time: string,
+    status = "confirmed"
+) => {
     try {
         const connection = await adminPool.getConnection();
         const [rows] = await connection.query(
             `UPDATE ${DB_TABLE_LIST.WORK_LOG} SET e_time = ?, wl_status = ? WHERE wlid = ?;`,
-            [time, "confirmed", wlid]
+            [time, status, wlid]
         );
         connection.release();
         return rows as ResultSetHeader;

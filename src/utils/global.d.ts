@@ -3,7 +3,6 @@ import { Request } from "express";
 export type TRequestWithUser = Request & {
     user?: {
         userId: string;
-        username: string;
     };
 };
 
@@ -323,6 +322,16 @@ export type TorderAbstract = {
     last_name: string;
     phone: string;
     email: string;
+};
+
+export type Tarrangement = {
+    order: Partial<TorderAbstract>;
+    wl: Partial<TwlAbstract>[];
+};
+
+export type TorderArrangement = {
+    date: string;
+    arrangement: Tarrangement[];
 };
 
 export type TnewPayslip = Partical<Tpayslip>;

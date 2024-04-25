@@ -8,18 +8,18 @@ import { TRequestWithUser } from "../utils/global";
 dotenv.config();
 
 /**
- * @description middleware to check if user has access to the router
+ * @description middleware to check if user is the manager to access the route
  * @param req
  * @param res
  * @param next
  * @returns
  */
-export const accessCheck = (
+export const accessCheckM = (
     req: TRequestWithUser,
     res: Response,
     next: NextFunction
 ) => {
-    logger.infoLog("-> MW: access checking...");
+    logger.infoLog("-> MW: Manager access checking...");
     const token = req.cookies.token;
     if (!token) {
         logger.infoLog("-> jwt cookies empty ");
@@ -36,15 +36,15 @@ export const accessCheck = (
             exp: number;
         };
         if (decoded.userID.charAt(0) !== uidPrefix.manager) {
-            throw new Error("Not authorized user");
+            throw new Error("Not Manager");
         }
         // add user attr to req
-        req.user = { userId: "", username: "" };
+        req.user = { userId: "" };
         req.user!.userId = decoded.userID;
-        console.log("-> verifed jwt");
+        console.log("-> verifed manager jwt");
         next();
     } catch (err) {
-        console.log("-> unverifed jwt: ", err);
+        console.log("-> unverifed manager jwt: ", err);
         return res.status(403).json({
             msg: "not authorized token",
             status: RES_STATUS.FAILED,

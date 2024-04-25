@@ -13,20 +13,21 @@ import {
     SETTING_UNI_EDIT,
     SETTING_UPDATE_COMPANY,
 } from "../../utils/reqList";
+import { accessCheckM } from "../../middleware/accessCheckM";
+
 const router = express.Router();
 
 router.get(SETTING_UNI_ALL, managerCtl.universAll);
-router.post(SETTING_UNI_DEL, managerCtl.uniDel);
-router.put(SETTING_UNI_EDIT, managerCtl.uniEdit);
-router.post(SETTING_UNI_ADD, managerCtl.uniAdd);
+router.post(SETTING_UNI_DEL, [accessCheckM], managerCtl.uniDel);
+router.put(SETTING_UNI_EDIT, [accessCheckM], managerCtl.uniEdit);
+router.post(SETTING_UNI_ADD, [accessCheckM], managerCtl.uniAdd);
 router.get(SETTING_GET_COMPANY, managerCtl.getCompany);
-router.put(SETTING_UPDATE_COMPANY, managerCtl.updateCompany);
+router.put(SETTING_UPDATE_COMPANY, [accessCheckM], managerCtl.updateCompany);
 router.put(
     SETTING_LOGO_UPDATE,
-    clearDirectoryMW,
-    uploadMW.single("logo"),
+    [clearDirectoryMW, uploadMW.single("logo")],
     managerCtl.updateLogo
 );
-router.get(SETTING_LOGO, findLogoMW, managerCtl.getLogo);
+router.get(SETTING_LOGO, [findLogoMW], managerCtl.getLogo);
 
 export default router;

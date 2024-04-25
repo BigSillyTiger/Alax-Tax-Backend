@@ -1,19 +1,30 @@
 import type { Request, Response } from "express";
-import { RES_STATUS } from "../../utils/config";
+import { RES_STATUS, uidPrefix } from "../../utils/config";
 import { genPSID } from "../../libs/id";
 import {
     m_psAll,
+    m_psAllWUID,
     m_psBonusAll,
+    m_psBonusAllWUID,
     m_psSingleDel,
     m_psSingleInsert,
     m_psStatusUpdate,
 } from "../../models/payslipsModel";
 import { formatBonus, formatPayslip } from "../../libs/format";
+import { TRequestWithUser } from "@/utils/global";
 
-export const psAll = async (req: Request, res: Response) => {
+export const psAll = async (req: TRequestWithUser, res: Response) => {
     console.log("-> server - payslip: All: ");
+    const uid = req.user?.userId as string;
+    const admin = req.user?.userId.charAt(0); // M - manager, E - employee
     try {
-        const result = await m_psAll();
+        let result;
+        if (admin === uidPrefix.manager) {
+            result = await m_psAll();
+        } else {
+            result = await m_psAllWUID(uid);
+        }
+
         if (!result) throw new Error("Failed to get payslip data");
         return res.status(200).json({
             status: RES_STATUS.SUCCESS,
@@ -136,10 +147,17 @@ export const psStatusUpdate = async (req: Request, res: Response) => {
     }
 };
 
-export const psBonusAll = async (req: Request, res: Response) => {
+export const psBonusAll = async (req: TRequestWithUser, res: Response) => {
     console.log("-> server - payslip: BonusAll: ", req.body);
+    const uid = req.user?.userId as string;
+    const admin = req.user?.userId.charAt(0); // M - manager, E - employee
     try {
-        const result = await m_psBonusAll();
+        let result;
+        if (admin === uidPrefix.manager) {
+            result = await m_psBonusAll();
+        } else {
+            result = await m_psBonusAllWUID(uid);
+        }
         if (!result) throw new Error("Failed to get bonus data");
         return res.status(200).json({
             status: RES_STATUS.SUCCESS,

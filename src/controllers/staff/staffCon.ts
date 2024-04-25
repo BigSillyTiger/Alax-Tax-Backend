@@ -10,11 +10,12 @@ import {
     m_staffUpdateProperty,
     m_staffUpdate,
     m_staffIsPropertyExist,
+    m_staffGetWUID,
 } from "../../models/staffModel";
 import { encodePW, replaceStaffPW } from "../../libs/utils";
 import { genUID } from "../../libs/id";
 import { formatStaff } from "../../libs/format";
-import { TstaffWPayslip } from "@/utils/global";
+import { TRequestWithUser, TstaffWPayslip } from "../../utils/global";
 
 /**
  * @description retrieve list of all staff with info
@@ -22,10 +23,17 @@ import { TstaffWPayslip } from "@/utils/global";
  * @param res
  * @returns
  */
-export const staffAllInfo = async (req: Request, res: Response) => {
+export const staffAllInfo = async (req: TRequestWithUser, res: Response) => {
     logger.infoLog("server - staff: get all staff info");
     try {
-        const result = (await m_staffGetAll()) as TstaffWPayslip[];
+        const uid = req.user?.userId as string;
+        const admin = req.user?.userId.charAt(0); // M - manager, E - employee
+        let result;
+        if (admin === uidPrefix.manager) {
+            result = (await m_staffGetAll()) as TstaffWPayslip[];
+        } else {
+            result = (await m_staffGetWUID(uid)) as TstaffWPayslip[];
+        }
 
         if (result?.length) {
             return res.status(200).json({
@@ -33,8 +41,9 @@ export const staffAllInfo = async (req: Request, res: Response) => {
                 msg: "success: get all staff info",
                 data: replaceStaffPW(result, ""),
             });
+        } else {
+            throw new Error("error: get all staff info");
         }
-        throw new Error("error: get all staff info");
     } catch (error) {
         return res.status(500).json({
             status: RES_STATUS.FAILED,
