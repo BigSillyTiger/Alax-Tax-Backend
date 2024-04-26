@@ -282,6 +282,15 @@ export type Tpayslip = {
     s_date: string;
     e_date: string;
     archive: boolean;
+    company_name: string;
+    company_addr: string;
+    company_phone: string;
+    staff_name: string;
+    staff_phone: string;
+    staff_email: string;
+    staff_addr: string;
+    staff_bsb: string;
+    staff_acc: string;
     created_date: string;
 };
 

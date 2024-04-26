@@ -11,7 +11,7 @@ export const createTables = async () => {
         first_name VARCHAR(255) NOT NULL,
         last_name VARCHAR(255) NOT NULL,
         email VARCHAR(50) NOT NULL,
-        phone VARCHAR(20) NOT NULL,
+        phone VARCHAR(25) NOT NULL,
         password VARCHAR(255) NOT NULL,
         address VARCHAR(255),
         suburb VARCHAR(100) DEFAULT 'Adelaide',
@@ -130,6 +130,15 @@ export const createTables = async () => {
             archive BOOLEAN NOT NULL DEFAULT FALSE,
             s_date DATE NOT NULL,
             e_date DATE NOT NULL,
+            company_name VARCHAR(255) NOT NULL,
+            company_addr VARCHAR(255),
+            company_phone VARCHAR(25) NOT NULL,
+            staff_name VARCHAR(255) NOT NULL,
+            staff_phone VARCHAR(25) NOT NULL,
+            staff_email VARCHAR(50) NOT NULL,
+            staff_addr VARCHAR(255),
+            staff_bsb VARCHAR(10),
+            staff_acc VARCHAR(15),
             created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )`);
         await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.BONUS} (

@@ -27,7 +27,16 @@ export const m_staffGetAll = async () => {
                             'hr', hr,
                             's_date', s_date,
                             'e_date', e_date,
-                            'paid', paid
+                            'paid', paid,
+                            'company_name', company_name,
+                            'company_addr', company_addr,
+                            'company_phone', company_phone,
+                            'staff_name', staff_name,
+                            'staff_phone', staff_phone,
+                            'staff_email', staff_email,
+                            'staff_addr', staff_addr,
+                            'staff_bsb', staff_bsb,
+                            'staff_acc', staff_acc
                         )
                     ) as payslips
                 FROM ${DB_TABLE_LIST.PAYSLIP}
@@ -67,7 +76,16 @@ export const m_staffGetWUID = async (uid: string) => {
                             'hr', hr,
                             's_date', s_date,
                             'e_date', e_date,
-                            'paid', paid
+                            'paid', paid,
+                            'company_name', company_name,
+                            'company_addr', company_addr,
+                            'company_phone', company_phone,
+                            'staff_name', staff_name,
+                            'staff_phone', staff_phone,
+                            'staff_email', staff_email,
+                            'staff_addr', staff_addr,
+                            'staff_bsb', staff_bsb,
+                            'staff_acc', staff_acc
                         )
                     ) as payslips
                 FROM ${DB_TABLE_LIST.PAYSLIP}

@@ -140,8 +140,41 @@ export const genWorkLogsWithNewWLID = async (oriWorkLogs: ToriWorkLog[]) => {
  *          data for deduction table
  */
 export const formatPayslip = (psid: string, data: Partial<Tpayslip>) => {
-    const { fk_uid, status, hr, s_date, e_date, paid } = data;
-    return [psid, fk_uid, status, hr, s_date, e_date, paid];
+    const {
+        fk_uid,
+        status,
+        hr,
+        s_date,
+        e_date,
+        paid,
+        company_name,
+        company_addr,
+        company_phone,
+        staff_name,
+        staff_phone,
+        staff_email,
+        staff_addr,
+        staff_bsb,
+        staff_acc,
+    } = data;
+    return [
+        psid,
+        fk_uid,
+        status,
+        hr,
+        s_date,
+        e_date,
+        paid,
+        company_name,
+        company_addr,
+        company_phone,
+        staff_name,
+        staff_phone,
+        staff_email,
+        staff_addr,
+        staff_bsb,
+        staff_acc,
+    ];
 };
 
 export const formatBonus = (psid: string, uid: string, data: TnewBonus[]) => {

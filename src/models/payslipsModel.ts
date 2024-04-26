@@ -52,7 +52,7 @@ export const m_psSingleInsert = async (
             );
         }
         await connection.query(
-            `INSERT INTO ${DB_TABLE_LIST.PAYSLIP} (psid, fk_uid, status, hr, s_date, e_date, paid) VALUES ?;`,
+            `INSERT INTO ${DB_TABLE_LIST.PAYSLIP} (psid, fk_uid, status, hr, s_date, e_date, paid, company_name, company_addr, company_phone, staff_name, staff_phone, staff_email, staff_addr, staff_bsb, staff_acc) VALUES ?;`,
             [payslip]
         );
         await connection.query(
