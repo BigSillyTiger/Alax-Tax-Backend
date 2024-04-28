@@ -69,42 +69,50 @@ export const registerNewUser = async (req: Request, res: Response) => {
 
 export const adminLogin = async (req: Request, res: Response) => {
     console.log("server - login");
-    const manager = await m_searchMbyEmail(req.body.email);
+    try {
+        const staff = await m_searchMbyEmail(req.body.email);
 
-    if (manager?.uid) {
-        const pwMatch = await bcrypt.compare(
-            req.body.password,
-            manager.password
-        );
+        if (staff?.uid) {
+            const pwMatch = await bcrypt.compare(
+                req.body.password,
+                staff.password
+            );
 
-        if (!pwMatch) {
-            logger.warnLog(`error: loggin pw wrong`);
-            return res.status(404).json({ msg: "ERROR: wrong credentials" });
+            if (!pwMatch) {
+                logger.warnLog(`error: loggin pw wrong`);
+                return res
+                    .status(404)
+                    .json({ msg: "ERROR: wrong credentials" });
+            }
+            const token = generateToken(staff.uid as string);
+            logger.infoLog(`-> new login token: ${token}`);
+            const level = await m_levelCheck(staff.uid as string);
+
+            if (level) {
+                return res
+                    .cookie("token", token, {
+                        expires: new Date(
+                            Date.now() +
+                                parseInt(process.env.JWT_EXPIRE as string)
+                        ),
+                        httpOnly: true,
+                    })
+                    .json({
+                        status: RES_STATUS.SUCCESS,
+                        msg: "login success~~",
+                        data: level,
+                    });
+            }
         }
-        const token = generateToken(manager.uid as string);
-        logger.infoLog(`-> new login token: ${token}`);
-        const level = await m_levelCheck(manager.uid as string);
-        level;
-        if (level) {
-            return res
-                .cookie("token", token, {
-                    expires: new Date(
-                        Date.now() + parseInt(process.env.JWT_EXPIRE as string)
-                    ),
-                    httpOnly: true,
-                })
-                .json({
-                    status: RES_STATUS.SUCCESS,
-                    msg: "login success~~",
-                    data: level,
-                });
-        }
+        throw new Error("login error occurs");
+    } catch (error) {
+        console.log("-> login error: ", error);
+        return res.status(403).json({
+            status: RES_STATUS.FAILED,
+            msg: "ERROR: login error",
+            data: null,
+        });
     }
-    return res.status(403).json({
-        status: RES_STATUS.FAILED,
-        msg: "ERROR: login error",
-        data: null,
-    });
 };
 
 export const authCheck = async (req: TRequestWithUser, res: Response) => {

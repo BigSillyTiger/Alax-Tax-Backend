@@ -1,6 +1,6 @@
 import { DB_TABLE_LIST } from "../utils/config";
 import logger from "../libs/logger";
-import adminPool from "./adminPool";
+import adminPool from "../config/adminPool";
 import type { TclientData } from "../utils/global";
 import { RowDataPacket } from "mysql2";
 

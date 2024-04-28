@@ -1,6 +1,6 @@
 import type { ResultSetHeader, RowDataPacket } from "mysql2";
 import { DB_TABLE_LIST } from "../utils/config";
-import adminPool from "./adminPool";
+import adminPool from "../config/adminPool";
 
 export const m_psAll = async () => {
     try {

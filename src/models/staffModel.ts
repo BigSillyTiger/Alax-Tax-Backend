@@ -1,6 +1,6 @@
 import { DB_TABLE_LIST, uidPrefix } from "../utils/config";
 import logger from "../libs/logger";
-import adminPool from "./adminPool";
+import adminPool from "../config/adminPool";
 import { TnewStaff } from "../utils/global";
 import { RowDataPacket } from "mysql2";
 

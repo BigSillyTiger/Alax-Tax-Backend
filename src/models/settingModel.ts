@@ -1,5 +1,5 @@
 import logger from "../libs/logger";
-import adminPool from "./adminPool";
+import adminPool from "../config/adminPool";
 import { DB_TABLE_LIST } from "../utils/config";
 import type { Tcompany } from "../utils/global";
 import { th } from "date-fns/locale";

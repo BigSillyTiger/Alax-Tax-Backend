@@ -16,5 +16,7 @@ router.post(LOGIN, authCtl.adminLogin);
 router.get(LOGOUT, authCtl.adminLogout);
 router.get(ADMIN_CHECK, [authMW], authCtl.authCheck);
 router.post(ACCESS_CHECK, [authMW], authCtl.accessCheckM);
+//router.get(ADMIN_CHECK, [authMW], authCtl.authCheck);
+//router.post(ACCESS_CHECK, [authMW], authCtl.accessCheckM);
 
 export default router;

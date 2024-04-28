@@ -39,7 +39,7 @@ export const accessCheckE = (
             throw new Error("Not Employee");
         }
         // add user attr to req
-        req.user = { userId: "", username: "" };
+        req.user = { userId: "" };
         req.user!.userId = decoded.userID;
         console.log("-> verifed Employee jwt");
         next();

@@ -1,6 +1,6 @@
 import type { ResultSetHeader, RowDataPacket } from "mysql2";
 import { DB_TABLE_LIST } from "../utils/config";
-import adminPool from "./adminPool";
+import adminPool from "../config/adminPool";
 
 export const m_getLastWorkLog = async () => {
     try {
@@ -266,8 +266,7 @@ export const m_wlGetAllAbstract = async (): Promise<RowDataPacket[] | null> => {
                 wl.wlid, wl.fk_oid, wl.fk_uid, wl.wl_date,
                 s.first_name, s.last_name, s.role
             FROM ${DB_TABLE_LIST.WORK_LOG} wl
-            INNER JOIN ${DB_TABLE_LIST.STAFF} s ON wl.fk_uid = s.uid
-            ;`
+            INNER JOIN ${DB_TABLE_LIST.STAFF} s ON wl.fk_uid = s.uid AND wl.archive = 0;`
         );
         connection.release();
         return rows as RowDataPacket[];
