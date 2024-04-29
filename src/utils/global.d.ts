@@ -220,9 +220,9 @@ export type TstaffData = {
     dashboard: TpageAccess;
     clients: TpageAccess;
     orders: TpageAccess;
+    worklogs: TpageAccess;
     calendar: TpageAccess;
     staff: TpageAccess;
-    worklogs: TpageAccess;
     setting: TpageAccess;
 };
 

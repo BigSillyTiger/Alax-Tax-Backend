@@ -127,7 +127,7 @@ export const m_staffInsert = async (staff: TnewStaff[]) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `INSERT INTO ${DB_TABLE_LIST.STAFF} (uid, first_name, last_name, phone, email, password, address, role, suburb, city, state, country, postcode, dashboard, clients, orders, calendar, staff, setting, hr, bsb, account) VALUES (?)`,
+            `INSERT INTO ${DB_TABLE_LIST.STAFF} (uid, first_name, last_name, phone, email, password, address, role, suburb, city, state, country, postcode, dashboard, clients, orders, worklogs, calendar, staff, setting, hr, bsb, account) VALUES (?)`,
             [staff]
         );
         connection.release();

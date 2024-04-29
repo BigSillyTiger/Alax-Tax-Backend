@@ -6,9 +6,10 @@ const corsOptions: CorsOptions = {
         if (!origin || allowedOrigins.indexOf(origin) !== -1) {
             callback(null, true);
         } else {
-            const msg =
+            /* const msg =
                 "The CORS policy for this site does not allow access from the specified Origin.";
-            callback(new Error(msg), false);
+            callback(new Error(msg), false); */
+            callback(null, false);
         }
     },
     credentials: true,
