@@ -7,6 +7,7 @@ import {
     LOGIN,
     LOGOUT,
     REGISTER_NEW,
+    TEST,
 } from "../../utils/reqList";
 
 const router = express.Router();
@@ -18,5 +19,6 @@ router.get(ADMIN_CHECK, [authMW], authCtl.authCheck);
 router.post(ACCESS_CHECK, [authMW], authCtl.accessCheckM);
 //router.get(ADMIN_CHECK, [authMW], authCtl.authCheck);
 //router.post(ACCESS_CHECK, [authMW], authCtl.accessCheckM);
+router.get(TEST, authCtl.test);
 
 export default router;

@@ -1,17 +1,11 @@
-FROM node:18.16.0-alpine as build
+FROM node:alpine as build
 
+WORKDIR /home/node/app
 
-WORKDIR /app
-COPY package*.json ./
-# RUN npm install -g nodemon vite ts-node
+COPY package.json ./
+
 RUN npm install
-COPY . .
-RUN npm run build
 
-FROM build as production
-# set env
-ENV NODE_ENV=production
-WORKDIR /app
-COPY --from=build /app/dist ./dist
-EXPOSE 6464
+EXPOSE 8080
+
 CMD ["npm", "start"]

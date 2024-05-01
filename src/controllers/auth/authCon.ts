@@ -22,6 +22,10 @@ const generateToken = (userID: string): string => {
     });
 };
 
+export const test = async (req: Request, res: Response) => {
+    res.status(200).json({ msg: "test success" });
+};
+
 export const registerNewUser = async (req: Request, res: Response) => {
     logger.infoLog("server - register new staff");
     console.log("-> backend receive new staff: ", req.body);
