@@ -29,7 +29,7 @@ dotenv.config();
 const app = express();
 
 //app.use(expressPinoLogger({ logger: logger }));
-//app.use(cors({ credentials: true, origin: "http://170.64.177.203:5002" }));
+//app.use(cors({ credentials: true, origin: true }));
 app.use(cors(corsOptions));
 app.use(cookieParser());
 app.use(express.json());

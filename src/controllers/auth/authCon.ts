@@ -122,14 +122,18 @@ export const adminLogin = async (req: Request, res: Response) => {
 export const authCheck = async (req: TRequestWithUser, res: Response) => {
     const uid = req.user!.userId;
     logger.infoLog(`Server - authCheck, userID = ${uid}`);
-    const level = await m_levelCheck(uid);
-    if (level) {
-        return res.status(200).json({
-            status: RES_STATUS.SUCCESS,
-            msg: "welcome to the protected page",
-            data: level,
-        });
-    } else {
+    try {
+        const level = await m_levelCheck(uid);
+        if (level) {
+            return res.status(200).json({
+                status: RES_STATUS.SUCCESS,
+                msg: "welcome to the protected page",
+                data: level,
+            });
+        } else {
+            throw new Error("authcheck error");
+        }
+    } catch (error) {
         return res.status(403).json({
             status: RES_STATUS.FAILED,
             msg: "authcheck error",

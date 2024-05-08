@@ -190,7 +190,7 @@ export const updateLogo = async (req: Request, res: Response) => {
         return res.status(200).json({
             status: RES_STATUS.SUC_UPDATE_LOGO,
             msg: "successed: updating logo",
-            data: `http://${serverAddr}:${LPORT}/logo/${logo.filename}`,
+            data: `https://${serverAddr}/logo/${logo.filename}`,
         });
     }
 };
@@ -201,6 +201,6 @@ export const getLogo = async (req: Request, res: Response) => {
     return res.status(200).json({
         status: RES_STATUS.SUCCESS,
         msg: "successed: get logo",
-        data: `http://${serverAddr}:${LPORT}/logo/${req.body.logoFile[0]}`,
+        data: `https://${serverAddr}/logo/${req.body.logoFile[0]}`,
     });
 };
