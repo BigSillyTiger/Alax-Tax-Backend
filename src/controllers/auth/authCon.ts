@@ -1,7 +1,7 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import logger from "../../libs/logger";
-import { RES_STATUS } from "../../utils/config";
+import { RES_STATUS, uidPrefix } from "../../utils/config";
 import { Request, Response } from "express";
 import {
     m_addStaff,
@@ -77,6 +77,11 @@ export const adminLogin = async (req: Request, res: Response) => {
         const staff = await m_searchMbyEmail(req.body.email);
 
         if (staff?.uid) {
+            if (staff.uid.charAt(0) === uidPrefix.labor) {
+                throw new Error(
+                    "login error occurs - labor can not login here"
+                );
+            }
             const pwMatch = await bcrypt.compare(
                 req.body.password,
                 staff.password
