@@ -49,7 +49,10 @@ export const genAUDate = (day: number = 0) => {
     const targetDate = new Date(
         currentDate.getTime() + day * 24 * 60 * 60 * 1000
     );
-    return targetDate.toLocaleString("en-AU", dateOptionADL);
+
+    return targetDate
+        .toLocaleTimeString("en-AU", dateOptionADL)
+        .replace(" 24:", " 00:");
 };
 
 export const genYYYYHHMM = (...args: any[]) => {
