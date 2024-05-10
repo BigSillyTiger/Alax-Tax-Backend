@@ -216,12 +216,14 @@ export const m_staffUpdateProperty = async (
  * @param staff
  * @returns
  */
-export const m_staffUpdate = async (staff: any) => {
+export const m_staffUpdate = async (staff: any, newUID?: string) => {
     try {
         const connection = await adminPool.getConnection();
-        const result: any = await connection.query(
-            `UPDATE ${DB_TABLE_LIST.STAFF} SET first_name = ?, last_name = ?, phone = ?, email = ?, address = ?, role = ?, suburb = ?, city = ?, state = ?, country = ?, postcode = ?, dashboard = ?, clients = ?, orders = ?, calendar = ?, staff = ?, setting = ?, hr = ?, bsb = ?, account = ? WHERE uid = ?`,
+        await connection.query("START TRANSACTION;");
+        await connection.query(
+            `UPDATE ${DB_TABLE_LIST.STAFF} SET uid = ?, first_name = ?, last_name = ?, phone = ?, email = ?, address = ?, role = ?, suburb = ?, city = ?, state = ?, country = ?, postcode = ?, dashboard = ?, clients = ?, orders = ?, calendar = ?, staff = ?, setting = ?, hr = ?, bsb = ?, account = ? WHERE uid = ?`,
             [
+                staff.uid,
                 staff.first_name,
                 staff.last_name,
                 staff.phone,
@@ -245,11 +247,30 @@ export const m_staffUpdate = async (staff: any) => {
                 staff.uid,
             ]
         );
+        if (newUID) {
+            await connection.query(
+                `UPDATE ${DB_TABLE_LIST.STAFF} SET uid = ? WHERE uid = ?`,
+                [newUID, staff.uid]
+            );
+            await connection.query(
+                `UPDATE ${DB_TABLE_LIST.BONUS} SET fk_uid = ? WHERE fk_uid = ?`,
+                [newUID, staff.uid]
+            );
+            await connection.query(
+                `UPDATE ${DB_TABLE_LIST.PAYSLIP} SET fk_uid = ? WHERE fk_uid = ?`,
+                [newUID, staff.uid]
+            );
+            await connection.query(
+                `UPDATE ${DB_TABLE_LIST.WORK_LOG} SET fk_uid = ? WHERE fk_uid = ?`,
+                [newUID, staff.uid]
+            );
+        }
+        await connection.query("COMMIT;");
         connection.release();
-        return result[0];
+        return true;
     } catch (err) {
         console.log("err: update single staff: ", err);
-        return null;
+        return false;
     }
 };
 

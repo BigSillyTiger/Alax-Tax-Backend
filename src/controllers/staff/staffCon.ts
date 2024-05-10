@@ -212,19 +212,63 @@ export const staffSingleDel = async (req: Request, res: Response) => {
  */
 export const staffSingleUpdate = async (req: Request, res: Response) => {
     logger.infoLog("server - staff: update single staff");
-    const result = await m_staffUpdate(req.body);
-    if (result) {
-        return res.status(200).json({
-            status: RES_STATUS.SUCCESS,
-            msg: "success: update single staff",
-            data: result,
+    try {
+        // check if phone or email is duplicated
+        const phoneDup = await m_staffIsPropertyExist(
+            req.body.staff.uid,
+            "phone",
+            req.body.staff.phone
+        );
+        const emailDup = await m_staffIsPropertyExist(
+            req.body.staff.uid,
+            "email",
+            req.body.staff.email
+        );
+        if (phoneDup || emailDup) {
+            let temp =
+                phoneDup && !emailDup
+                    ? RES_STATUS.FAILED_DUP_PHONE
+                    : !phoneDup && emailDup
+                    ? RES_STATUS.FAILED_DUP_EMAIL
+                    : RES_STATUS.FAILED_DUP_P_E;
+
+            return res.status(200).json({
+                status: temp, // 401-phone existed, 402-email existed, 403-both existed
+                msg: "error: account or phone or email conflict, or error occurs",
+                data: "",
+            });
+        }
+
+        // need to generate new uid if role changed
+        let result;
+        if (req.body.staff.role !== req.body.currentRole) {
+            const newUid = await genUID(
+                uidPrefix[
+                    req.body.staff.role as "employee" | "manager" | "labor"
+                ]
+            );
+            result = await m_staffUpdate(req.body.staff, newUid);
+        } else {
+            // no need to change uid
+            result = await m_staffUpdate(req.body.staff);
+        }
+
+        if (result) {
+            return res.status(200).json({
+                status: RES_STATUS.SUCCESS,
+                msg: "success: update single staff",
+                data: result,
+            });
+        } else {
+            throw new Error("error: update single staff");
+        }
+    } catch (error) {
+        return res.status(500).json({
+            status: RES_STATUS.FAILED,
+            msg: "fail: update single staff",
+            data: null,
         });
     }
-    return res.status(500).json({
-        status: RES_STATUS.FAILED,
-        msg: "fail: update single staff",
-        data: null,
-    });
 };
 
 /**
