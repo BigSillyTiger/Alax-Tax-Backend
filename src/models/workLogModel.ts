@@ -227,14 +227,16 @@ export const m_wlUpdateAssignments = async (oid: string, data: any[]) => {
             `DELETE FROM ${DB_TABLE_LIST.WORK_LOG} WHERE fk_oid = ?;`,
             [oid]
         );
-        await connection.query(
-            `
+        // skip if data is empty
+        if (data && data.length) {
+            await connection.query(
+                `
             INSERT INTO ${DB_TABLE_LIST.WORK_LOG} (wlid, fk_oid, fk_uid, wl_date, s_time, e_time, b_time, b_hour, wl_status, confirm_status, archive) VALUES ?;
         `,
-            [data]
-        );
+                [data]
+            );
+        }
         await connection.query("COMMIT;");
-        console.log("-> finished transaction - update worklog");
         connection.release();
         return true;
     } catch (error) {

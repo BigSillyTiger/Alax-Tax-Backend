@@ -109,7 +109,7 @@ export const genWorkLogsWithNewWLID = async (oriWorkLogs: ToriWorkLog[]) => {
     ); */
 
     const existingWLIDs = await m_wlGetAllWLID().then((value) => {
-        if (!value) return new Set();
+        if (!value || !value.length) return new Set();
         return new Set(value.map((item) => item.wlid));
     });
 

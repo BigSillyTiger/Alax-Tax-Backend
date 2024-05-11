@@ -22,18 +22,24 @@ import payslipRouter from "./controllers/payslips/payslipsRoute";
 import chartRouter from "./controllers/charts/chartRoute";
 import dotenv from "dotenv";
 import corsOptions from "./config/corsOptions";
+//const bodyParser = require("body-parser");
 
 //dotenv.config({ path: "../../.env" });
 dotenv.config();
 
 const app = express();
 
+//app.use(bodyParser.json({ limit: "10000kb", extended: true }));
+//app.use(bodyParser.urlencoded({ limit: "10000kb", extended: true }));
+
 //app.use(expressPinoLogger({ logger: logger }));
 //app.use(cors({ credentials: true, origin: true }));
 app.use(cors(corsOptions));
 app.use(cookieParser());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+//app.use(express.json());
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ extended: true, limit: "50mb" }));
+//app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
 
 /*
