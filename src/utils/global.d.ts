@@ -104,6 +104,7 @@ export type ToriWorkLog = {
     b_time: string;
     b_hour: string;
     wl_status: string;
+    wl_note: string;
     confirm_status: boolean;
     archive: boolean;
 };
@@ -125,11 +126,6 @@ export type TassignedWork = {
     role: string;
 };
 
-export type TworkLog = {
-    fk_oid: string;
-    wl_date: string;
-    assigned_work: TassignedWork[];
-};
 import { Request } from "express";
 
 export type TRequestWithUser = Request & {
@@ -253,7 +249,7 @@ export type TassignedWork = ToriWorkLog & {
     role: string;
 };
 
-export type TworkLog = {
+export type TwlUnion = {
     fk_oid: string;
     wl_date: string;
     assigned_work: TassignedWork[];
@@ -315,6 +311,7 @@ export type TwlAbstract = {
     first_name: string;
     last_name: string;
     role: string;
+    wl_note: string;
 };
 
 export type TorderAbstract = {

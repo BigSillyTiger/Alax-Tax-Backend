@@ -54,6 +54,7 @@ export const formatWorkLog = (items: ToriWorkLog[]) => {
             b_time,
             b_hour,
             wl_status,
+            wl_note,
             confirm_status,
             archive,
         } = item;
@@ -67,6 +68,7 @@ export const formatWorkLog = (items: ToriWorkLog[]) => {
             b_time,
             b_hour,
             wl_status,
+            wl_note,
             confirm_status,
             archive,
         ];
@@ -303,6 +305,7 @@ export const formatOrderArrangement = (
             last_name: worklog.last_name,
             fk_uid: worklog.fk_uid,
             role: worklog.role,
+            wl_note: worklog.wl_note,
         };
 
         // Check if an arrangement item for this order already exists

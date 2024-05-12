@@ -19,7 +19,7 @@ import {
 } from "../../models/workLogModel";
 import type { Request, Response } from "express";
 import type {
-    TworkLog,
+    TwlUnion,
     ToriWorkLog,
     TRequestWithUser,
 } from "../../utils/global";
@@ -68,8 +68,8 @@ export const wlUpdate = async (req: Request, res: Response) => {
     console.log("server - work assignment update ");
     try {
         const tempWorkLogs = req.body.workLogs
-            .filter((wl: TworkLog) => wl.assigned_work.length > 0)
-            .flatMap((wl: TworkLog) =>
+            .filter((wl: TwlUnion) => wl.assigned_work.length > 0)
+            .flatMap((wl: TwlUnion) =>
                 wl.assigned_work.map(
                     ({ first_name, last_name, phone, email, role, ...rest }) =>
                         rest

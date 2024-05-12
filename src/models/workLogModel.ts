@@ -128,6 +128,7 @@ export const m_wlGetAllOrdersWithWL = async () => {
                                 'b_hour', wl.b_hour,
                                 'wl_status', wl.wl_status,
                                 'confirm_status', wl.confirm_status,
+                                'wl_note', wl.wl_note,
                                 'archive', wl.archive,
                                 'first_name', s.first_name,
                                 'last_name', s.last_name,
@@ -181,6 +182,7 @@ export const m_wlGetALLWithLogStructure = async () => {
                             'b_hour', wl.b_hour,
                             'wl_status', wl.wl_status,
                             'confirm_status', wl.confirm_status,
+                            'wl_note', wl.wl_note,
                             'archive', wl.archive,
                             'first_name', s.first_name,
                             'last_name', s.last_name,
@@ -231,7 +233,7 @@ export const m_wlUpdateAssignments = async (oid: string, data: any[]) => {
         if (data && data.length) {
             await connection.query(
                 `
-            INSERT INTO ${DB_TABLE_LIST.WORK_LOG} (wlid, fk_oid, fk_uid, wl_date, s_time, e_time, b_time, b_hour, wl_status, confirm_status, archive) VALUES ?;
+            INSERT INTO ${DB_TABLE_LIST.WORK_LOG} (wlid, fk_oid, fk_uid, wl_date, s_time, e_time, b_time, b_hour, wl_status, wl_note, confirm_status, archive) VALUES ?;
         `,
                 [data]
             );
@@ -265,7 +267,7 @@ export const m_wlGetAllAbstract = async (): Promise<RowDataPacket[] | null> => {
         const connection = await adminPool.getConnection();
         const [rows] = await connection.query(
             `SELECT 
-                wl.wlid, wl.fk_oid, wl.fk_uid, wl.wl_date,
+                wl.wlid, wl.fk_oid, wl.fk_uid, wl.wl_date, wl.wl_note,
                 s.first_name, s.last_name, s.role
             FROM ${DB_TABLE_LIST.WORK_LOG} wl
             INNER JOIN ${DB_TABLE_LIST.STAFF} s ON wl.fk_uid = s.uid AND wl.archive = 0;`

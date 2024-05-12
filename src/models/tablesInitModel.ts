@@ -119,6 +119,7 @@ export const createTables = async () => {
             b_hour VARCHAR(8) default '00:00:00',
             wl_status VARCHAR(20) NOT NULL DEFAULT 'pending',
             confirm_status TINYINT(1) DEFAULT 0,
+            wl_note VARCHAR(500),
             archive BOOLEAN DEFAULT FALSE NOT NULL
         )`);
         await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.PAYSLIP} (
