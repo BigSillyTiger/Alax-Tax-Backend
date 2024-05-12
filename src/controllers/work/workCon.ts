@@ -11,7 +11,8 @@ import {
     m_wlResetWorkTime,
     m_wlGetBTimeWID,
     m_wlUpdateEtime,
-    m_wlSingleUpdateHD,
+    m_wlSingleUpdateND,
+    m_wlSingleUpdateHND,
     m_wlSingleUpdateDeduction,
     m_wlUpdateStatus,
     m_wlGetEmployeeWL,
@@ -100,37 +101,63 @@ export const wlUpdate = async (req: Request, res: Response) => {
     }
 };
 
-export const wlSingleUpdateHD = async (req: Request, res: Response) => {
-    console.log("server - work log: single update hours and deduction");
+export const wlSingleUpdateND = async (req: Request, res: Response) => {
+    console.log("server - work log: single update note and deduction");
     try {
         const newDeductions = await genDID(req.body.deduction.length).then(
-            (dids) =>
-                formatDeduction(
-                    dids,
-                    req.body.hourData.wlid,
-                    req.body.deduction
-                )
+            (dids) => formatDeduction(dids, req.body.wlid, req.body.deduction)
         );
 
-        const result = await m_wlSingleUpdateHD(
-            req.body.hourData,
+        const result = await m_wlSingleUpdateND(
+            req.body.wlid,
+            req.body.note,
             newDeductions
         );
         if (result) {
             return res.status(200).json({
                 status: RES_STATUS.SUC_UPDATE_WORKLOG,
-                msg: "Success:  work log: single update hours and deduction",
+                msg: "Success:  work log: single update note and deduction",
+                data: result,
+            });
+        }
+    } catch (error) {
+        console.log("err: work log: single update note and deduction: ", error);
+        return res.status(400).json({
+            status: RES_STATUS.FAILED_UPDATE_WORKLOG,
+            msg: "Failed: work log: single update note and deduction",
+            data: null,
+        });
+    }
+};
+
+export const wlSingleUpdateHND = async (req: Request, res: Response) => {
+    console.log("server - work log: single update hours, note and deduction");
+    try {
+        const newDeductions = await genDID(req.body.deduction.length).then(
+            (dids) => formatDeduction(dids, req.body.wlid, req.body.deduction)
+        );
+
+        const result = await m_wlSingleUpdateHND(
+            req.body.wlid,
+            req.body.hourData,
+            req.body.note,
+            newDeductions
+        );
+        if (result) {
+            return res.status(200).json({
+                status: RES_STATUS.SUC_UPDATE_WORKLOG,
+                msg: "Success:  work log: single update hours, note and deduction",
                 data: result,
             });
         }
     } catch (error) {
         console.log(
-            "err: work log: single update hours and deduction: ",
+            "err: work log: single update hours, note and deduction: ",
             error
         );
         return res.status(400).json({
             status: RES_STATUS.FAILED_UPDATE_WORKLOG,
-            msg: "Failed: work log: single update hours and deduction",
+            msg: "Failed: work log: single update hours, note and deduction",
             data: null,
         });
     }

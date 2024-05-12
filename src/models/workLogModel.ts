@@ -490,7 +490,47 @@ export const m_wlSingleUpdateDeduction = async (
     }
 };
 
-export const m_wlSingleUpdateHD = async (hourData: any, deduction: any[]) => {
+export const m_wlSingleUpdateND = async (
+    wlid: string,
+    note: string,
+    deduction: any[]
+) => {
+    try {
+        const connection = await adminPool.getConnection();
+        await connection.query("START TRANSACTION;");
+        if (note) {
+            await connection.query(
+                `UPDATE ${DB_TABLE_LIST.WORK_LOG} SET wl_note = ? WHERE wlid = ?;`,
+                [note, wlid]
+            );
+        }
+        if (deduction?.length) {
+            await connection.query(
+                `DELETE FROM ${DB_TABLE_LIST.DEDUCTION} WHERE fk_wlid = ?;`,
+                [wlid]
+            );
+            await connection.query(
+                `
+                INSERT INTO ${DB_TABLE_LIST.DEDUCTION} (did, fk_wlid, amount, note) VALUES ?;
+            `,
+                [deduction]
+            );
+        }
+
+        await connection.query("COMMIT;");
+        connection.release();
+        return true;
+    } catch (error) {
+        console.log("err: single update work log: ", error);
+        return false;
+    }
+};
+export const m_wlSingleUpdateHND = async (
+    wlid: string,
+    hourData: any,
+    note: string,
+    deduction: any[]
+) => {
     try {
         const connection = await adminPool.getConnection();
         await connection.query("START TRANSACTION;");
@@ -499,18 +539,24 @@ export const m_wlSingleUpdateHD = async (hourData: any, deduction: any[]) => {
             UPDATE ${DB_TABLE_LIST.WORK_LOG} 
             SET s_time = ?, e_time = ?, b_hour = ?
             WHERE wlid = ?;`,
-            [hourData.s_time, hourData.e_time, hourData.b_hour, hourData.wlid]
+            [hourData.s_time, hourData.e_time, hourData.b_hour, wlid]
         );
         if (hourData.e_time !== "00:00" || hourData.e_time !== "00:00:00") {
             await connection.query(
                 `UPDATE ${DB_TABLE_LIST.WORK_LOG} SET wl_status = ? WHERE wlid = ?;`,
-                ["confirmed", hourData.wlid]
+                ["confirmed", wlid]
+            );
+        }
+        if (note) {
+            await connection.query(
+                `UPDATE ${DB_TABLE_LIST.WORK_LOG} SET wl_note = ? WHERE wlid = ?;`,
+                [note, wlid]
             );
         }
         if (deduction?.length) {
             await connection.query(
                 `DELETE FROM ${DB_TABLE_LIST.DEDUCTION} WHERE fk_wlid = ?;`,
-                [hourData.wlid]
+                [wlid]
             );
             await connection.query(
                 `
