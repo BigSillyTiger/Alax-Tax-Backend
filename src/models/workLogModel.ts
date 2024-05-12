@@ -490,70 +490,38 @@ export const m_wlSingleUpdateDeduction = async (
     }
 };
 
-export const m_wlSingleUpdateND = async (
-    wlid: string,
-    note: string,
-    deduction: any[]
-) => {
-    try {
-        const connection = await adminPool.getConnection();
-        await connection.query("START TRANSACTION;");
-        if (note) {
-            await connection.query(
-                `UPDATE ${DB_TABLE_LIST.WORK_LOG} SET wl_note = ? WHERE wlid = ?;`,
-                [note, wlid]
-            );
-        }
-        if (deduction?.length) {
-            await connection.query(
-                `DELETE FROM ${DB_TABLE_LIST.DEDUCTION} WHERE fk_wlid = ?;`,
-                [wlid]
-            );
-            await connection.query(
-                `
-                INSERT INTO ${DB_TABLE_LIST.DEDUCTION} (did, fk_wlid, amount, note) VALUES ?;
-            `,
-                [deduction]
-            );
-        }
-
-        await connection.query("COMMIT;");
-        connection.release();
-        return true;
-    } catch (error) {
-        console.log("err: single update work log: ", error);
-        return false;
-    }
-};
 export const m_wlSingleUpdateHND = async (
     wlid: string,
-    hourData: any,
-    note: string,
-    deduction: any[]
+    hourData: "skip" | { s_time: string; e_time: string; b_hour: string },
+    note: "skip" | string,
+    deduction: "skip" | any[],
+    status: "confirmed" | "unconfirmed"
 ) => {
     try {
         const connection = await adminPool.getConnection();
         await connection.query("START TRANSACTION;");
-        await connection.query(
-            `
-            UPDATE ${DB_TABLE_LIST.WORK_LOG} 
-            SET s_time = ?, e_time = ?, b_hour = ?
-            WHERE wlid = ?;`,
-            [hourData.s_time, hourData.e_time, hourData.b_hour, wlid]
-        );
-        if (hourData.e_time !== "00:00" || hourData.e_time !== "00:00:00") {
+        if (hourData !== "skip") {
             await connection.query(
-                `UPDATE ${DB_TABLE_LIST.WORK_LOG} SET wl_status = ? WHERE wlid = ?;`,
-                ["confirmed", wlid]
+                `
+                UPDATE ${DB_TABLE_LIST.WORK_LOG} 
+                SET s_time = ?, e_time = ?, b_hour = ?
+                WHERE wlid = ?;`,
+                [hourData.s_time, hourData.e_time, hourData.b_hour, wlid]
             );
+            if (hourData.e_time !== "00:00" && hourData.e_time !== "00:00:00") {
+                await connection.query(
+                    `UPDATE ${DB_TABLE_LIST.WORK_LOG} SET wl_status = ? WHERE wlid = ?;`,
+                    [status, wlid]
+                );
+            }
         }
-        if (note) {
+        if (note !== "skip") {
             await connection.query(
                 `UPDATE ${DB_TABLE_LIST.WORK_LOG} SET wl_note = ? WHERE wlid = ?;`,
                 [note, wlid]
             );
         }
-        if (deduction?.length) {
+        if (deduction !== "skip" && deduction?.length) {
             await connection.query(
                 `DELETE FROM ${DB_TABLE_LIST.DEDUCTION} WHERE fk_wlid = ?;`,
                 [wlid]

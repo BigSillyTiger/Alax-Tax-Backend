@@ -11,7 +11,6 @@ import {
     m_wlResetWorkTime,
     m_wlGetBTimeWID,
     m_wlUpdateEtime,
-    m_wlSingleUpdateND,
     m_wlSingleUpdateHND,
     m_wlSingleUpdateDeduction,
     m_wlUpdateStatus,
@@ -101,47 +100,27 @@ export const wlUpdate = async (req: Request, res: Response) => {
     }
 };
 
-export const wlSingleUpdateND = async (req: Request, res: Response) => {
-    console.log("server - work log: single update note and deduction");
-    try {
-        const newDeductions = await genDID(req.body.deduction.length).then(
-            (dids) => formatDeduction(dids, req.body.wlid, req.body.deduction)
-        );
-
-        const result = await m_wlSingleUpdateND(
-            req.body.wlid,
-            req.body.note,
-            newDeductions
-        );
-        if (result) {
-            return res.status(200).json({
-                status: RES_STATUS.SUC_UPDATE_WORKLOG,
-                msg: "Success:  work log: single update note and deduction",
-                data: result,
-            });
-        }
-    } catch (error) {
-        console.log("err: work log: single update note and deduction: ", error);
-        return res.status(400).json({
-            status: RES_STATUS.FAILED_UPDATE_WORKLOG,
-            msg: "Failed: work log: single update note and deduction",
-            data: null,
-        });
-    }
-};
-
-export const wlSingleUpdateHND = async (req: Request, res: Response) => {
+export const wlSingleUpdateHND = async (
+    req: TRequestWithUser,
+    res: Response
+) => {
     console.log("server - work log: single update hours, note and deduction");
     try {
-        const newDeductions = await genDID(req.body.deduction.length).then(
-            (dids) => formatDeduction(dids, req.body.wlid, req.body.deduction)
-        );
+        //const uid = req.user?.userId as string;
+        const isManager = req.user?.userId.charAt(0) === uidPrefix.manager; // M - manager, E - employee
+        const newDeductions =
+            req.body.deduction !== "skip"
+                ? await genDID(req.body.deduction.length).then((dids) =>
+                      formatDeduction(dids, req.body.wlid, req.body.deduction)
+                  )
+                : "skip";
 
         const result = await m_wlSingleUpdateHND(
-            req.body.wlid,
-            req.body.hourData,
-            req.body.note,
-            newDeductions
+            req.body.wlid, // string
+            req.body.hourData, // {s_time, e_time, b_time, b_hour} | "skip"
+            req.body.note, // string | "skip"
+            newDeductions, // {did, fk_wlid, amount, note}[] | "skip"
+            isManager ? "confirmed" : "unconfirmed"
         );
         if (result) {
             return res.status(200).json({
