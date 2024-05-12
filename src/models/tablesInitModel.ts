@@ -95,7 +95,7 @@ export const createTables = async () => {
             fk_oid VARCHAR(11) NOT NULL,
             title VARCHAR(255) NOT NULL,
             description VARCHAR(1000),
-            qty SMALLINT UNSIGNED NOT NULL DEFAULT 1,
+            qty DECIMAL(10,2) UNSIGNED NOT NULL DEFAULT 1,
             unit VARCHAR(20) NOT NULL,
             unit_price DECIMAL(10,2) UNSIGNED NOT NULL,
             gst DECIMAL(9,2) UNSIGNED NOT NULL,
