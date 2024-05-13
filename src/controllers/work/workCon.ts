@@ -198,9 +198,8 @@ export const wlSingleUpdateHours = async (req: Request, res: Response) => {
 export const wlChangeStatus = async (req: Request, res: Response) => {
     console.log("server - work log: single update status");
     try {
-        console.log("---> req.body: ", req.body.wlid, req.body.status);
         const result = await m_wlUpdateStatus(req.body.wlid, req.body.status);
-        if (result?.affectedRows) {
+        if (result) {
             return res.status(200).json({
                 status: RES_STATUS.SUC_UPDATE_WORKLOG,
                 msg: "Success:  work log: single update status",
@@ -373,11 +372,11 @@ export const wlResumeWorkTime = async (req: Request, res: Response) => {
     try {
         const bTime2 = genHHMM(genAUDate()) as string;
         const bTime1 = await m_wlGetBTimeWID(req.body.wlid).then((res) => {
-            if (res && res.length) return res[0].b_time;
+            if (res?.length) return res[0].b_time;
             else return "00:00";
         });
         const bHour = await m_wlGetBHourWID(req.body.wlid).then((res) => {
-            if (res && res.length) return res[0].b_hour;
+            if (res?.length) return res[0].b_hour;
             else return "00:00";
         });
         const bTime = calBreakTime(bTime1, bTime2, bHour);

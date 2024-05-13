@@ -700,14 +700,23 @@ export const m_deductLastDID = async () => {
 export const m_wlUpdateStatus = async (wlid: string, status: string) => {
     try {
         const connection = await adminPool.getConnection();
-        const [rows] = await connection.query(
-            `UPDATE ${DB_TABLE_LIST.WORK_LOG} SET wl_status = ? WHERE wlid = ?;`,
-            [status, wlid]
-        );
+        await connection.query("START TRANSACTION;");
+        if (status === "pending") {
+            await connection.query(
+                `UPDATE ${DB_TABLE_LIST.WORK_LOG} SET wl_status = ?, s_time = ?, e_time = ?, b_time = ?, b_hour = ? WHERE wlid = ?;`,
+                [status, "00:00", "00:00", "00:00", "00:00", wlid]
+            );
+        } else {
+            await connection.query(
+                `UPDATE ${DB_TABLE_LIST.WORK_LOG} SET wl_status = ? WHERE wlid = ?;`,
+                [status, wlid]
+            );
+        }
+        await connection.query("COMMIT;");
         connection.release();
-        return rows as ResultSetHeader;
+        return true;
     } catch (error) {
         console.log("err: update work log status: ", error);
-        return null;
+        return false;
     }
 };
