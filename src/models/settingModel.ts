@@ -134,7 +134,7 @@ export const m_levelCheck = async (uid: string) => {
         }
     } catch (err) {
         logger.errLog("level check rror: " + err);
-        return {};
+        return null;
     }
 };
 

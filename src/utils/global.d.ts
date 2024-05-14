@@ -6,6 +6,21 @@ export type TRequestWithUser = Request & {
     };
 };
 
+export type Tlevel = {
+    uid: string;
+    first_name: string;
+    last_name: string;
+    role: "manager" | "employee" | "labor";
+    access: boolean;
+    dashboard: number;
+    clients: number;
+    orders: number;
+    worklogs: number;
+    calendar: number;
+    staff: number;
+    setting: number;
+};
+
 export type TclientData = {
     cid: string;
     first_name: string;

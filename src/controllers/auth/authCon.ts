@@ -11,7 +11,7 @@ import {
 } from "../../models/settingModel";
 import dotenv from "dotenv";
 import { encodePW } from "../../libs/utils";
-import { TRequestWithUser } from "../../utils/global";
+import { Tlevel, TRequestWithUser } from "../../utils/global";
 
 dotenv.config();
 
@@ -127,12 +127,27 @@ export const adminLogin = async (req: Request, res: Response) => {
     }
 };
 
-export const authCheck = async (req: TRequestWithUser, res: Response) => {
+export const adminLogout = async (req: Request, res: Response) => {
+    try {
+        res.clearCookie("token");
+        res.status(200).json({ msg: "successfully logout" });
+    } catch (error) {
+        res.status(400).json({ error: "logout error" });
+    }
+};
+
+/**
+ * @description check current user's all access level
+ * @param req
+ * @param res
+ * @returns
+ */
+export const adminCheck = async (req: TRequestWithUser, res: Response) => {
     const uid = req.user!.userId;
     logger.infoLog(`Server - authCheck, userID = ${uid}`);
     try {
-        const level = await m_levelCheck(uid);
-        if (level) {
+        const level = (await m_levelCheck(uid)) as Tlevel | null;
+        if (level && level.access) {
             return res.status(200).json({
                 status: RES_STATUS.SUCCESS,
                 msg: "welcome to the protected page",
@@ -150,17 +165,8 @@ export const authCheck = async (req: TRequestWithUser, res: Response) => {
     }
 };
 
-export const adminLogout = async (req: Request, res: Response) => {
-    try {
-        res.clearCookie("token");
-        res.status(200).json({ msg: "successfully logout" });
-    } catch (error) {
-        res.status(400).json({ error: "logout error" });
-    }
-};
-
 /**
- * @description check if user has access to the page
+ * @description check if user has access to the specific one page
  * @param req
  * @param res
  * @returns
@@ -169,8 +175,10 @@ export const accessCheckM = async (req: TRequestWithUser, res: Response) => {
     console.log("-> server - access check: ", req.body);
     const uid = req.user!.userId;
     try {
-        const access: { [key: string]: number } = await m_levelCheck(uid);
-        if (access[req.body.page] !== 0) {
+        const access = (await m_levelCheck(uid)) as {
+            [key: string]: number;
+        } | null;
+        if (access && access[req.body.page] !== 0) {
             return res.status(200).json({
                 status: RES_STATUS.SUCCESS,
                 msg: "access check success",

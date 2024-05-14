@@ -15,10 +15,8 @@ const router = express.Router();
 router.post(REGISTER_NEW, authCtl.registerNewUser);
 router.post(LOGIN, authCtl.adminLogin);
 router.get(LOGOUT, authCtl.adminLogout);
-router.get(ADMIN_CHECK, [authMW], authCtl.authCheck);
+router.get(ADMIN_CHECK, [authMW], authCtl.adminCheck);
 router.post(ACCESS_CHECK, [authMW], authCtl.accessCheckM);
-//router.get(ADMIN_CHECK, [authMW], authCtl.authCheck);
-//router.post(ACCESS_CHECK, [authMW], authCtl.accessCheckM);
 router.get(TEST, authCtl.test);
 
 export default router;
