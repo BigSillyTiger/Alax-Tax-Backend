@@ -273,10 +273,55 @@ export const m_orderDel = async (oid: string) => {
     }
 };
 
+/**
+ * @description archive order
+ *              - fail: if current order has payment record
+ *              - fail: if current order has work log record
+ *              - fail: if current order status is not pending nor cancelled
+ * @param oid
+ * @returns
+ */
 export const m_orderArchive = async (oid: string) => {
     try {
         const connection = await adminPool.getConnection();
         await connection.query("START TRANSACTION;");
+
+        // check if the order has payment record
+        const [resultP] = await connection.query(
+            `
+            SELECT COUNT(pid) count FROM ${DB_TABLE_LIST.PAYMENT} WHERE fk_oid = ?`,
+            [oid]
+        );
+        if ((resultP as RowDataPacket)[0].count > 0) {
+            throw new Error("The order has payments, fail to archive");
+        }
+
+        // check if the order has work log record
+        const [resultW] = await connection.query(
+            `
+            SELECT COUNT(wlid) count FROM ${DB_TABLE_LIST.WORK_LOG} WHERE fk_oid = ? AND archive = 0
+        `,
+            [oid]
+        );
+        if ((resultW as RowDataPacket)[0].count > 0) {
+            throw new Error("The order has work logs, fail to archive");
+        }
+
+        // check if the order status is pending or cancelled
+        const [resultS] = await connection.query(
+            `SELECT status FROM ${DB_TABLE_LIST.ORDER_LIST} WHERE oid = ? AND archive = 0`,
+            [oid]
+        );
+
+        if (
+            (resultS as RowDataPacket)[0].status !== "pending" &&
+            (resultS as RowDataPacket)[0].status !== "cancelled"
+        ) {
+            throw new Error(
+                "The order status is not pending nor cancelled, fail to archive"
+            );
+        }
+
         await connection.query(
             `UPDATE ${DB_TABLE_LIST.ORDER_LIST} SET archive = ? WHERE oid = ?`,
             [1, oid]
@@ -486,12 +531,14 @@ export const m_orderUpdatePayments = async (
             `DELETE FROM ${DB_TABLE_LIST.PAYMENT} WHERE fk_oid = ?;`,
             [fk_oid]
         );
-        await connection.query(
-            `
-            INSERT INTO ${DB_TABLE_LIST.PAYMENT} (pid, fk_oid, paid, paid_date) VALUES ?;
-        `,
-            [payments]
-        );
+        if (payments?.length > 0) {
+            await connection.query(
+                `
+                INSERT INTO ${DB_TABLE_LIST.PAYMENT} (pid, fk_oid, paid, paid_date) VALUES ?;
+            `,
+                [payments]
+            );
+        }
         await connection.query(
             `UPDATE ${DB_TABLE_LIST.ORDER_LIST} SET paid = ? WHERE oid = ?`,
             [totalPaid, fk_oid]

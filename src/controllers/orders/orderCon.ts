@@ -149,8 +149,8 @@ export const orderDel = async (req: Request, res: Response) => {
         }
     } catch (error) {
         console.log("ERROR: server - orderDel: delete order: ", req.body);
-        return res.status(400).json({
-            status: RES_STATUS.FAILED,
+        return res.status(405).json({
+            status: RES_STATUS.FAILED_DEL,
             msg: `Failed: delete order[${req.body.oid}]`,
             data: false,
         });
@@ -237,7 +237,7 @@ export const orderChangeStatus = async (req: Request, res: Response) => {
 
 export const orderUpdatePayments = async (req: Request, res: Response) => {
     console.log("server - order: update payments: ", req.body);
-    const newPayments = await genPID(req.body.payments.length).then((pids) =>
+    const newPayments = await genPID(req.body.payments?.length).then((pids) =>
         formatPayment(pids, req.body.fk_oid, req.body.payments)
     );
 

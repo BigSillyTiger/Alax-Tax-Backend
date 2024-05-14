@@ -82,10 +82,27 @@ export const m_clientDelSingle = async (cid: string) => {
     }
 };
 
+/**
+ * @description archive single client
+ *              - if the client has orders, then fail to archive
+ *              - check if the client has order through the order table by cid/fk_cid
+ * @param cid
+ * @returns
+ */
 export const m_clientArchiveSingle = async (cid: string) => {
     try {
         const connection = await adminPool.getConnection();
         await connection.query("START TRANSACTION;");
+        const [result] = await connection.query(
+            `
+            SELECT COUNT(oid) count FROM ${DB_TABLE_LIST.ORDER_LIST} WHERE fk_cid = ? AND archive = 0
+        `,
+            [cid]
+        );
+        if ((result as RowDataPacket)[0].count > 0) {
+            throw new Error("The client has orders, fail to archive");
+        }
+
         await connection.query(
             `UPDATE ${DB_TABLE_LIST.CLIENT} SET archive = ? WHERE cid = ?`,
             [1, cid]

@@ -229,7 +229,7 @@ export const wlSingleDel = async (req: Request, res: Response) => {
         }
     } catch (error) {
         console.log("err: work log: single delete: ", error);
-        return res.status(400).json({
+        return res.status(405).json({
             status: RES_STATUS.FAILED_DELETE_WORKLOG,
             msg: "Failed: work log: single delete",
             data: null,

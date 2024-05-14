@@ -174,7 +174,7 @@ export const clientSingleDel = async (req: Request, res: Response) => {
         }
     } catch (error) {
         console.log("-> server - client: delete clientID: ", error);
-        return res.status(403).json({
+        return res.status(405).json({
             status: RES_STATUS.FAILED_DEL,
             msg: `Failed: delete client[id: ${req.body.cid}]`,
             data: "",

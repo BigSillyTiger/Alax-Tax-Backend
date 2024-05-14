@@ -140,6 +140,8 @@ export const m_staffInsert = async (staff: TnewStaff[]) => {
 
 /**
  * @description archive single staff by uid
+ *              - if the staff has worklogs, then fail to archive
+ *              - check if the staff has worklogs through the work_log table by uid/fk_uid
  * @param uid
  * @returns
  */
@@ -148,6 +150,15 @@ export const m_staffArchiveSingle = async (uid: number) => {
         console.log("-> archieve uid: ", uid);
         const connection = await adminPool.getConnection();
         await connection.query("START TRANSACTION;");
+
+        const [result] = await connection.query(
+            `SELECT COUNT(wlid) count FROM ${DB_TABLE_LIST.WORK_LOG} WHERE fk_uid = ? AND archive = 0`,
+            [uid]
+        );
+        if ((result as RowDataPacket)[0].count > 0) {
+            throw new Error("The staff has worklogs, fail to archive");
+        }
+
         await connection.query(
             `UPDATE ${DB_TABLE_LIST.STAFF} SET archive = 1 WHERE uid = ?`,
             [uid]

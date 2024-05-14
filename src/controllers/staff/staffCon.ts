@@ -150,7 +150,7 @@ export const staffSingleInstert = async (req: Request, res: Response) => {
  * @param res
  * @returns
  */
-export const staffSingleArchive = async (req: Request, res: Response) => {
+export const staffSingleDel = async (req: Request, res: Response) => {
     logger.infoLog("server - staff: archive single staff");
     try {
         if (req.body.uid === "M001" || req.body.uid === "M002") {
@@ -173,8 +173,8 @@ export const staffSingleArchive = async (req: Request, res: Response) => {
         }
     } catch (error) {
         console.log("err: archive single staff: ", error);
-        return res.status(500).json({
-            status: RES_STATUS.FAILED,
+        return res.status(405).json({
+            status: RES_STATUS.FAILED_DEL,
             msg: "fail: archive single staff",
             data: null,
         });
@@ -187,7 +187,7 @@ export const staffSingleArchive = async (req: Request, res: Response) => {
  * @param res
  * @returns
  */
-export const staffSingleDel = async (req: Request, res: Response) => {
+export const staffSingleDel_back = async (req: Request, res: Response) => {
     logger.infoLog("server - staff: delete single staff");
     const result = await m_staffDelSingle(req.body.uid);
     if (result) {

@@ -1,6 +1,7 @@
 import type { ResultSetHeader, RowDataPacket } from "mysql2";
 import { DB_TABLE_LIST } from "../utils/config";
 import adminPool from "../config/adminPool";
+import { th } from "date-fns/locale";
 
 export const m_getLastWorkLog = async () => {
     try {
@@ -543,9 +544,27 @@ export const m_wlSingleUpdateHND = async (
     }
 };
 
+/**
+ * @description archive single work log, to mock a delete operation
+ *              - fail if the worklog is not pending or cancelled
+ * @param wlid
+ * @returns
+ */
 export const m_wlSingleArchive = async (wlid: string) => {
     try {
         const connection = await adminPool.getConnection();
+        const [result] = await connection.query(
+            `
+            select wl_status from ${DB_TABLE_LIST.WORK_LOG} where wlid = ? AND archive = 0;
+        `,
+            [wlid]
+        );
+        if (
+            (result as RowDataPacket)[0].wl_status !== "pending" &&
+            (result as RowDataPacket)[0].wl_status !== "cancelled"
+        ) {
+            throw new Error("The work log is not pending or cancelled");
+        }
         const [rows] = await connection.query(
             `UPDATE ${DB_TABLE_LIST.WORK_LOG} SET archive = 1 WHERE wlid = ?;`,
             [wlid]
