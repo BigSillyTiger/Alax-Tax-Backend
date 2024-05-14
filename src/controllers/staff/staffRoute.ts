@@ -6,6 +6,7 @@ import {
     STAFF_SINGLE_DEL,
     STAFF_SINGLE_REGISTER,
     STAFF_SINGLE_UPDATE,
+    STAFF_UPDATE_ACCESS,
     STAFF_UPDATE_PW,
 } from "../../utils/reqList";
 import { accessCheckM } from "../../middleware/accessCheckM";
@@ -19,6 +20,7 @@ router.post(STAFF_SINGLE_REGISTER, [accessCheckM], staffCtl.staffSingleInstert);
 router.put(STAFF_SINGLE_DEL, [accessCheckM], staffCtl.staffSingleDel);
 //router.post("/staff/single-archive", staffCtl.staffSingleArchive);
 router.put(STAFF_SINGLE_UPDATE, [authMW], staffCtl.staffSingleUpdate);
+router.put(STAFF_UPDATE_ACCESS, [accessCheckM], staffCtl.staffUpdateAccess);
 router.get(STAFF_ALL, [authMW], staffCtl.staffAllInfo);
 router.put(STAFF_UPDATE_PW, staffCtl.staffUpdatePW);
 

@@ -78,6 +78,7 @@ export type TstaffData = {
     password: string;
     address: string;
     role: "manager" | "employee";
+    access: boolean;
     suburb: string;
     city: string;
     state: string;

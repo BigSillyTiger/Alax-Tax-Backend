@@ -45,6 +45,7 @@ export const STAFF_SINGLE_REGISTER = "/api/staff/single-insert";
 export const STAFF_SINGLE_UPDATE = "/api/staff/single-update";
 export const STAFF_SINGLE_DEL = "/api/staff/single-del";
 export const STAFF_UPDATE_PW = "/api/staff/update-pw";
+export const STAFF_UPDATE_ACCESS = "/api/staff/update-access";
 
 // Order
 export const ORDER_ALL = "/api/order/all";

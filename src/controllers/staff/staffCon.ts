@@ -211,7 +211,7 @@ export const staffSingleDel_back = async (req: Request, res: Response) => {
  * @returns
  */
 export const staffSingleUpdate = async (req: Request, res: Response) => {
-    logger.infoLog("server - staff: update single staff");
+    console.log("server - staff: update single staff ");
     try {
         // check if phone or email is duplicated
         const phoneDup = await m_staffIsPropertyExist(
@@ -239,9 +239,19 @@ export const staffSingleUpdate = async (req: Request, res: Response) => {
             });
         }
 
+        // can not change root managers' access
+        if (req.body.uid !== "M001" && req.body.uid !== "M002") {
+            req.body.staff.access = 1;
+        }
+
         // need to generate new uid if role changed
         let result;
-        if (req.body.staff.role !== req.body.currentRole) {
+        if (
+            req.body.staff.role !== req.body.currentRole &&
+            // can not change root managers' uid
+            req.body.uid !== "M001" &&
+            req.body.uid !== "M002"
+        ) {
             const newUid = await genUID(
                 uidPrefix[
                     req.body.staff.role as "employee" | "manager" | "labor"
@@ -266,6 +276,39 @@ export const staffSingleUpdate = async (req: Request, res: Response) => {
         return res.status(500).json({
             status: RES_STATUS.FAILED,
             msg: "fail: update single staff",
+            data: null,
+        });
+    }
+};
+
+/**
+ * @description update staff access
+ * @param req
+ * @param res
+ * @returns
+ */
+export const staffUpdateAccess = async (req: Request, res: Response) => {
+    console.log("-> server - staff: update access: ", req.body.accessody);
+    try {
+        const result = await m_staffUpdateProperty(
+            req.body.uid,
+            "access",
+            req.body.access
+        );
+        console.log("---> update staff access: ", result);
+        if (result) {
+            return res.status(200).json({
+                status: RES_STATUS.SUCCESS,
+                msg: "success: update staff access",
+                data: result,
+            });
+        } else {
+            throw new Error("error: update staff access");
+        }
+    } catch (error) {
+        return res.status(500).json({
+            status: RES_STATUS.FAILED,
+            msg: "fail: update staff access",
             data: null,
         });
     }

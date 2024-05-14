@@ -207,6 +207,7 @@ export const formatStaff = (uid: string, pw: string, staff: TnewStaff) => {
         pw,
         staff.address,
         staff.role,
+        staff.access,
         staff.suburb,
         staff.city,
         staff.state,

@@ -103,7 +103,7 @@ export const m_searchMbyEmail = async (email: string) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `SELECT uid, password FROM ${DB_TABLE_LIST.STAFF} WHERE email = ?`,
+            `SELECT uid, password, access FROM ${DB_TABLE_LIST.STAFF} WHERE email = ?`,
             [email]
         );
         connection.release();

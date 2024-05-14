@@ -127,7 +127,7 @@ export const m_staffInsert = async (staff: TnewStaff[]) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `INSERT INTO ${DB_TABLE_LIST.STAFF} (uid, first_name, last_name, phone, email, password, address, role, suburb, city, state, country, postcode, dashboard, clients, orders, worklogs, calendar, staff, setting, hr, bsb, account) VALUES (?)`,
+            `INSERT INTO ${DB_TABLE_LIST.STAFF} (uid, first_name, last_name, phone, email, password, address, role, access, suburb, city, state, country, postcode, dashboard, clients, orders, worklogs, calendar, staff, setting, hr, bsb, account) VALUES (?)`,
             [staff]
         );
         connection.release();
@@ -210,15 +210,15 @@ export const m_staffUpdateProperty = async (
 ) => {
     try {
         const connection = await adminPool.getConnection();
-        const result: any = await connection.query(
+        const [result] = await connection.query(
             `UPDATE ${DB_TABLE_LIST.STAFF} SET ${property} = ? WHERE uid = ?`,
             [data, uid]
         );
         connection.release();
-        return result[0];
+        return result as RowDataPacket[];
     } catch (err) {
         console.log("err: update single staff property: ", err);
-        return null;
+        return false;
     }
 };
 
@@ -232,7 +232,7 @@ export const m_staffUpdate = async (staff: any, newUID?: string) => {
         const connection = await adminPool.getConnection();
         await connection.query("START TRANSACTION;");
         await connection.query(
-            `UPDATE ${DB_TABLE_LIST.STAFF} SET uid = ?, first_name = ?, last_name = ?, phone = ?, email = ?, address = ?, role = ?, suburb = ?, city = ?, state = ?, country = ?, postcode = ?, dashboard = ?, clients = ?, orders = ?, calendar = ?, staff = ?, setting = ?, hr = ?, bsb = ?, account = ? WHERE uid = ?`,
+            `UPDATE ${DB_TABLE_LIST.STAFF} SET uid = ?, first_name = ?, last_name = ?, phone = ?, email = ?, address = ?, role = ?, access = ?, suburb = ?, city = ?, state = ?, country = ?, postcode = ?, dashboard = ?, clients = ?, orders = ?, calendar = ?, staff = ?, setting = ?, hr = ?, bsb = ?, account = ? WHERE uid = ?`,
             [
                 staff.uid,
                 staff.first_name,
@@ -241,6 +241,7 @@ export const m_staffUpdate = async (staff: any, newUID?: string) => {
                 staff.email,
                 staff.address,
                 staff.role,
+                staff.access,
                 staff.suburb,
                 staff.city,
                 staff.state,

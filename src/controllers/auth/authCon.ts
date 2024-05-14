@@ -81,7 +81,10 @@ export const adminLogin = async (req: Request, res: Response) => {
                 throw new Error(
                     "login error occurs - labor can not login here"
                 );
+            } else if (!staff.access) {
+                throw new Error("login error occurs - no access");
             }
+
             const pwMatch = await bcrypt.compare(
                 req.body.password,
                 staff.password
@@ -165,14 +168,18 @@ export const adminLogout = async (req: Request, res: Response) => {
 export const accessCheckM = async (req: TRequestWithUser, res: Response) => {
     console.log("-> server - access check: ", req.body);
     const uid = req.user!.userId;
-    const access: { [key: string]: number } = await m_levelCheck(uid);
-    if (access[req.body.page] !== 0) {
-        return res.status(200).json({
-            status: RES_STATUS.SUCCESS,
-            msg: "access check success",
-            data: access,
-        });
-    } else {
+    try {
+        const access: { [key: string]: number } = await m_levelCheck(uid);
+        if (access[req.body.page] !== 0) {
+            return res.status(200).json({
+                status: RES_STATUS.SUCCESS,
+                msg: "access check success",
+                data: access,
+            });
+        } else {
+            throw new Error("access check error");
+        }
+    } catch (error) {
         return res.status(500).json({
             status: RES_STATUS.FAILED,
             msg: "access check error",
