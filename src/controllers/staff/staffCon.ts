@@ -109,6 +109,7 @@ export const staffSingleInstert = async (req: Request, res: Response) => {
                 req.body.staff[0].role as "employee" | "manager" | "labor"
             ]
         );
+        req.body.staff[0].access = req.body.staff[0].role === "labor" ? 0 : 1;
         const result = await m_staffInsert(
             formatStaff(newUid, newPW, req.body.staff[0])
         );
@@ -240,8 +241,10 @@ export const staffSingleUpdate = async (req: Request, res: Response) => {
         }
 
         // can not change root managers' access
-        if (req.body.uid !== "M001" && req.body.uid !== "M002") {
+        if (req.body.staff.uid === "M001" || req.body.staff.uid === "M002") {
             req.body.staff.access = 1;
+        } else if (req.body.staff.role === "labor") {
+            req.body.staff.access = 0;
         }
 
         // need to generate new uid if role changed
