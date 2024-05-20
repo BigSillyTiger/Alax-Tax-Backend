@@ -92,7 +92,7 @@ export const allowedWLTimerURLs = {
     resting: [WL_RESUME_TIMER, WL_STOP_TIMER],
     pending: [WL_START_TIMER],
     confirmed: [WL_RESET_TIMER],
-    unconfirmed: [WL_RESET_TIMER],
+    processing: [WL_RESET_TIMER],
     canceled: [],
 };
 

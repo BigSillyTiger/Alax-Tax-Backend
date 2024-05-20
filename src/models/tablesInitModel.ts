@@ -170,7 +170,7 @@ export const createTables = async () => {
                 ELSEIF (NEW.s_time != '00:00' AND NEW.s_time != '00:00:00') 
                     AND (NEW.e_time != '00:00' AND NEW.e_time != '00:00:00')
                 THEN
-                    UPDATE ${DB_TABLE_LIST.WORK_LOG} SET wl_status = 'unconfirmed' WHERE wlid = NEW.wlid;
+                    UPDATE ${DB_TABLE_LIST.WORK_LOG} SET wl_status = 'processing' WHERE wlid = NEW.wlid;
                 ELSEIF  (NEW.s_time = '00:00' OR NEW.s_time = '00:00:00') 
                     AND (NEW.e_time = '00:00' OR NEW.e_time = '00:00:00')
                 THEN

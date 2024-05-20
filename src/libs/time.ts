@@ -75,6 +75,19 @@ export const genYYYYHHMM = (...args: any[]) => {
     }
 };
 
+export const addBreakTime = (extra: string, bHour: string) => {
+    const [hour, minute] = extra.split(":").map(Number);
+    const [breakHour, breakMinute] = bHour.split(":").map(Number);
+    // Convert time strings to total minutes
+    const totalMinutes = hour * 60 + minute + breakHour * 60 + breakMinute;
+    // Convert total break time back to hh:mm format
+    const newHour = Math.floor(totalMinutes / 60);
+    const newMinute = totalMinutes % 60;
+    return `${newHour.toString().padStart(2, "0")}:${newMinute
+        .toString()
+        .padStart(2, "0")}`;
+};
+
 export const calBreakTime = (sTime: string, eTime: string, bHour: string) => {
     sTime = sTime ?? "00:00";
     eTime = eTime ?? "00:00";

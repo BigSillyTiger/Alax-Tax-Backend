@@ -496,7 +496,7 @@ export const m_wlSingleUpdateHND = async (
     hourData: "skip" | { s_time: string; e_time: string; b_hour: string },
     note: "skip" | string,
     deduction: "skip" | any[],
-    status: "confirmed" | "unconfirmed"
+    status: "confirmed" | "processing"
 ) => {
     try {
         const connection = await adminPool.getConnection();
@@ -683,6 +683,21 @@ export const m_wlUpdateEtime = async (
         return rows as ResultSetHeader;
     } catch (error) {
         console.log("err: update e_time: ", error);
+        return null;
+    }
+};
+
+export const m_wlUpdateBhour = async (wlid: string, b_hour: string) => {
+    try {
+        const connection = await adminPool.getConnection();
+        const [rows] = await connection.query(
+            `UPDATE ${DB_TABLE_LIST.WORK_LOG} SET b_hour = ? WHERE wlid = ?;`,
+            [b_hour, wlid]
+        );
+        connection.release();
+        return rows as ResultSetHeader;
+    } catch (error) {
+        console.log("err: update b_hour: ", error);
         return null;
     }
 };

@@ -16,6 +16,7 @@ import {
     m_wlUpdateStatus,
     m_wlGetEmployeeWL,
     m_wlGetEmployeeTheDay,
+    m_wlUpdateBhour,
 } from "../../models/workLogModel";
 import type { Request, Response } from "express";
 import type {
@@ -23,7 +24,13 @@ import type {
     ToriWorkLog,
     TRequestWithUser,
 } from "../../utils/global";
-import { calBreakTime, genAUDate, genHHMM, genYYYYHHMM } from "../../libs/time";
+import {
+    addBreakTime,
+    calBreakTime,
+    genAUDate,
+    genHHMM,
+    genYYYYHHMM,
+} from "../../libs/time";
 import { formatDeduction, genWorkLogsWithNewWLID } from "../../libs/format";
 import { formatWorkLog } from "../../libs/format";
 import { RES_STATUS, uidPrefix } from "../../utils/config";
@@ -120,7 +127,7 @@ export const wlSingleUpdateHND = async (
             req.body.hourData, // {s_time, e_time, b_time, b_hour} | "skip"
             req.body.note, // string | "skip"
             newDeductions, // {did, fk_wlid, amount, note}[] | "skip"
-            isManager ? "confirmed" : "unconfirmed"
+            isManager ? "confirmed" : "processing"
         );
         if (result) {
             return res.status(200).json({
@@ -412,25 +419,23 @@ export const wlStopWorkTime = async (req: TRequestWithUser, res: Response) => {
     const admin = req.user?.userId.charAt(0); // M - manager, E - employee
     try {
         const e_time = genHHMM(genAUDate()) as string;
+
         let result;
-        if (admin === uidPrefix.manager) {
-            result = await m_wlUpdateEtime(req.body.wlid, e_time);
-        } else {
-            result = await m_wlUpdateEtime(
-                req.body.wlid,
-                e_time,
-                "unconfirmed"
-            );
-        }
-        if (result && result.affectedRows) {
-            return res.status(200).json({
-                status: RES_STATUS.SUC_UPDATE_WORKLOG,
-                msg: `Success:  worklog[${req.body.wlid}] stop work time`,
-                data: result,
-            });
-        } else {
+        result = await m_wlUpdateEtime(
+            req.body.wlid,
+            e_time,
+            admin === uidPrefix.manager ? "confirmed" : "processing"
+        );
+
+        if (!(result && result.affectedRows)) {
             throw new Error("Failed: work log: stop work time");
         }
+        await autoBreakTime(req.body.wlid);
+        return res.status(200).json({
+            status: RES_STATUS.SUC_UPDATE_WORKLOG,
+            msg: `Success:  worklog[${req.body.wlid}] stop work time`,
+            data: result,
+        });
     } catch (error) {
         console.log(
             "err: work log[",
@@ -443,5 +448,31 @@ export const wlStopWorkTime = async (req: TRequestWithUser, res: Response) => {
             msg: "Failed: work log: stop work time",
             data: null,
         });
+    }
+};
+
+/**
+ * @description this function is used to add break time automatically
+ *              - default break time is 30 minutes
+ *              - this fn will be called on wlStopWorkTime
+ * @param wlid
+ */
+const autoBreakTime = async (wlid: string) => {
+    try {
+        const bHour = await m_wlGetBHourWID(wlid).then((res) => {
+            if (res?.length) return res[0].b_hour;
+            else return "00:00";
+        });
+        const bTime = addBreakTime("00:30", bHour);
+
+        const result = await m_wlUpdateBhour(wlid, bTime as string);
+        if (result && result.affectedRows) {
+            return true;
+        } else {
+            throw new Error("Failed: auto break time");
+        }
+    } catch (error) {
+        console.log("err: auto break time: ", error);
+        return false;
     }
 };
