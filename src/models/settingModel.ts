@@ -179,7 +179,7 @@ export const m_updateCompany = async (company: Tcompany) => {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
             `
-            UPDATE ${DB_TABLE_LIST.COMPANY} SET name = ?, bld = ?, phone = ?, email = ?, address = ?, abn = ?, bsb = ?, acc = ? WHERE id = 1
+            UPDATE ${DB_TABLE_LIST.COMPANY} SET name = ?, bld = ?, phone = ?, email = ?, address = ?, abn = ?, bsb = ?, acc = ?, deposit_rate = ? WHERE id = 1
         `,
             [
                 company.name,
@@ -190,6 +190,7 @@ export const m_updateCompany = async (company: Tcompany) => {
                 company.abn,
                 company.bsb,
                 company.acc,
+                company.deposit_rate,
             ]
         );
         connection.release();
@@ -204,7 +205,7 @@ export const m_insertCompany = async (company: Tcompany) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `INSERT INTO ${DB_TABLE_LIST.COMPANY} (id, name, bld, phone, email, address, abn, bsb, acc) VALUES(?,?,?,?,?,?,?,?,?)`,
+            `INSERT INTO ${DB_TABLE_LIST.COMPANY} (id, name, bld, phone, email, address, abn, bsb, acc, desposit_rate) VALUES(?,?,?,?,?,?,?,?,?)`,
             [
                 1,
                 company.name,
@@ -215,6 +216,7 @@ export const m_insertCompany = async (company: Tcompany) => {
                 company.abn,
                 company.bsb,
                 company.acc,
+                company.deposit_rate,
             ]
         );
         connection.release();

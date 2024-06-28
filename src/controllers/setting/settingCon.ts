@@ -8,6 +8,7 @@ import {
     m_insertCompany,
 } from "../../models/settingModel";
 import dotenv from "dotenv";
+import { convertToFloat } from "../../libs/format";
 
 dotenv.config();
 
@@ -151,36 +152,43 @@ export const uniEdit = async (req: Request, res: Response) => {
 export const getCompany = async (req: Request, res: Response) => {
     console.log("-> server - company: get company info");
     const result = await m_getCompany();
+
     return res.status(200).json({
         status: RES_STATUS.SUCCESS,
         msg: "successed get company info",
+        //data: { ...result, deposit_rate: convertToFloat(result.deposit_rate) },
         data: result,
     });
 };
 
 export const updateCompany = async (req: Request, res: Response) => {
     console.log("-> server - company: update company info: ", req.body);
-    let affectRows: any;
-    if (req.body.id) {
-        // update
-        const result = await m_updateCompany(req.body);
-        affectRows = result.affectedRows;
-    } else {
-        const result = await m_insertCompany(req.body);
-        affectRows = result.affectedRows;
-    }
-    if (affectRows) {
-        return res.status(200).json({
-            status: RES_STATUS.SUC_UPDATE_COMPANY,
-            msg: "successed updated company info",
+    try {
+        let affectRows: any;
+        if (req.body.id) {
+            // update
+            const result = await m_updateCompany(req.body);
+            affectRows = result.affectedRows;
+        } else {
+            const result = await m_insertCompany(req.body);
+            affectRows = result.affectedRows;
+        }
+        if (affectRows) {
+            return res.status(200).json({
+                status: RES_STATUS.SUC_UPDATE_COMPANY,
+                msg: "successed updated company info",
+                data: "",
+            });
+        } else {
+            throw new Error("update company info failed");
+        }
+    } catch (error) {
+        return res.status(403).json({
+            status: RES_STATUS.FAILED,
+            msg: "Faile: update company info",
             data: "",
         });
     }
-    return res.status(403).json({
-        status: RES_STATUS.FAILED,
-        msg: "Faile: update company info",
-        data: "",
-    });
 };
 
 export const updateLogo = async (req: Request, res: Response) => {

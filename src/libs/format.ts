@@ -343,3 +343,17 @@ export const formatOrderArrangement = (
     const result = Array.from(arrangementMap.values());
     return result;
 };
+
+export const convertToFloat = (x: number): number => {
+    // Convert the integer to a string to determine the number of digits
+    const xStr = x.toString();
+    const numberOfDigits = xStr.length;
+
+    // Calculate the divisor as 10 raised to the power of the number of digits
+    const divisor = Math.pow(10, numberOfDigits);
+
+    // Divide the integer by the divisor to get the float
+    const result = x / divisor;
+
+    return result;
+};

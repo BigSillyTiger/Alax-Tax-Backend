@@ -69,6 +69,7 @@ export enum RES_STATUS {
     FAILED_DEL_PAYSLIP = 410,
     FAILED_UPDATE_PAYSLIP = 411,
     FAILED_TOO_LARGE = 413,
+    FAILED_UPDATE_COMPANY = 414,
 }
 
 export const sleep = (ms: number) =>

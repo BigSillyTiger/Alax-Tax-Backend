@@ -46,6 +46,7 @@ export type Tcompany = {
     bsb: string;
     acc: string;
     logoName: string;
+    deposit_rate: number;
 };
 
 export type Torder = {
