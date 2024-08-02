@@ -8,12 +8,12 @@ import {
 
 export const SERVER_NAME: string = "AlaxTax";
 
-export const ALAX_DB_CONFIG = {
+export const DB_CONFIG = {
     //connectionLimit: 5,
     host: "localhost",
     user: "root",
     password: "",
-    database: "alax_tax_db",
+    database: "cp_software",
 };
 
 export const URL_LIST = {

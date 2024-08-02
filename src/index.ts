@@ -59,17 +59,3 @@ app.use(express.static("./public"));
 app.listen(process.env.PORT || 5005, () => {
     logger.infoLog(`server runs on ${process.env.PORT || 5005}`);
 });
-/* 
-createConnection()
-    .then(() => {
-        
-        app.listen(PORT, () => {
-            logger.infoLog(`server runs on ${PORT}`);
-        });
-    })
-    .catch((err) => {
-        logger.errLog(err);
-    });
- */
-
-//mysql://efylnj961wm0fk7k:t8j4ewa2wboyh2od@z3iruaadbwo0iyfp.cbetxkdyhwsb.us-east-1.rds.amazonaws.com:3306/p5b9wocijt2qpli4
