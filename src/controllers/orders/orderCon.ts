@@ -1,10 +1,10 @@
 import type { Request, Response } from "express";
 import { RES_STATUS, uidPrefix } from "../../utils/config";
 import {
-    m_orderDescInsert,
+    m_orderServiceInsert,
     m_orderInsert,
     m_clientOrders,
-    m_clientOrderWichId,
+    m_clientOrderWithId,
     m_orderArchive,
     m_orderStatusUpdate,
     m_orderUpdatePayments,
@@ -12,7 +12,7 @@ import {
     m_findClientID,
     m_findOrder,
     m_orderGetAllWithDetails,
-    m_orderUpdateWithDesc,
+    m_orderUpdateWithService,
     m_orderGetAllAbstract,
 } from "../../models/ordersModel";
 import {
@@ -23,12 +23,10 @@ import {
 import { genOID, genPID } from "../../libs/id";
 import { genOrderWithWorkLogs } from "../../libs/format";
 import { m_clientGetSingle } from "../../models/clientsModel";
-import {
-    m_wlGetAllAbstract,
-    m_wlGetALLWithLogStructure,
-} from "../../models/workLogModel";
+
 import {
     Tarrangement,
+    TclientorderWithId,
     Torder,
     TorderAbstract,
     TorderArrangement,
@@ -48,17 +46,11 @@ export const orderAll = async (req: Request, res: Response) => {
     try {
         const ordersResult = await m_orderGetAllWithDetails();
         //const ordersResult = await m_wlGetAllOrdersWithWL();
-        const workLogsResult = await m_wlGetALLWithLogStructure();
-
-        const result = genOrderWithWorkLogs(
-            ordersResult as Torder[],
-            workLogsResult
-        );
 
         return res.status(200).json({
             status: RES_STATUS.SUCCESS,
             msg: "successed retrieve all orders",
-            data: result,
+            data: ordersResult,
         });
     } catch (error) {
         console.log("ERROR: server - orderAll: get all orders");
@@ -70,10 +62,12 @@ export const orderAll = async (req: Request, res: Response) => {
     }
 };
 
-export const orderWcid = async (req: Request, res: Response) => {
+export const orderWithCid = async (req: Request, res: Response) => {
     console.log("server - order: get order with client id: ", req.body.cid);
     try {
-        const result = await m_clientOrderWichId(req.body.cid);
+        const result = (await m_clientOrderWithId(
+            req.body.cid
+        )) as TclientorderWithId[];
         if (result) {
             return res.status(200).json({
                 status: RES_STATUS.SUCCESS,
@@ -82,7 +76,7 @@ export const orderWcid = async (req: Request, res: Response) => {
             });
         } else {
             console.log(
-                "ERROR: server - orderWcid: get order with client id: ",
+                "ERROR: server - orderWithCid: get order with client id: ",
                 req.body
             );
             return res.status(400).json({
@@ -93,7 +87,7 @@ export const orderWcid = async (req: Request, res: Response) => {
         }
     } catch (error) {
         console.log(
-            "ERROR: server - orderWcid: get order with client id: ",
+            "ERROR: server - orderWithCid: get order with client id: ",
             req.body
         );
         return res.status(400).json({
@@ -114,7 +108,7 @@ export const orderAdd = async (req: Request, res: Response) => {
 
     const orResult = await m_orderInsert(order);
     if (orResult.affectedRows) {
-        const odResult = await m_orderDescInsert(
+        const odResult = await m_orderServiceInsert(
             formatOrderDesc(req.body.order.oid, order_services)
         );
         if (odResult?.affectedRows) {
@@ -162,7 +156,7 @@ export const orderUpdate = async (req: Request, res: Response) => {
     const order = req.body.order;
     const order_services = req.body.order_services;
     try {
-        const result = await m_orderUpdateWithDesc(
+        const result = await m_orderUpdateWithService(
             order,
             order.oid,
             formatOrderDesc(req.body.order.oid, order_services)
@@ -331,43 +325,4 @@ export const updateInvoiceIssue = async (req: Request, res: Response) => {
         msg: `Failed: update invoice issue date[${req.body.oid}]`,
         data: null,
     });
-};
-
-export const orderAllArrangement = async (
-    req: TRequestWithUser,
-    res: Response
-) => {
-    console.log("-> server - order: get all orders arrangement");
-    const uid = req.user?.userId as string;
-    const admin = req.user?.userId.charAt(0); // M - manager, E - employee
-    try {
-        const [orderAbstract, wlAbstract] = await Promise.all([
-            m_orderGetAllAbstract().then((res) => res),
-            m_wlGetAllAbstract().then((res) => res),
-        ]);
-        const newOrderArrangement = formatOrderArrangement(
-            orderAbstract as TorderAbstract[],
-            wlAbstract as TwlAbstract[]
-        ).filter((oa: TorderArrangement) => {
-            if (admin === uidPrefix.manager) return true;
-            return oa.arrangement.some((a: Tarrangement) =>
-                a.wl.some((w) => w.fk_uid === uid)
-            );
-        });
-
-        return res.status(200).json({
-            status: RES_STATUS.SUCCESS,
-            msg: "successed retrieve all orders arrangement",
-            data: newOrderArrangement,
-        });
-    } catch (error) {
-        console.log(
-            "ERROR: server - orderAllArrangement: get all orders arrangement"
-        );
-        return res.status(400).json({
-            status: RES_STATUS.FAILED,
-            msg: "Failed: retrieve all orders arrangement",
-            data: [],
-        });
-    }
 };

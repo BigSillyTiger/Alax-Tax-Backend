@@ -4,7 +4,7 @@ import adminPool from "../config/adminPool";
 import type { TclientData } from "../utils/global";
 import { RowDataPacket } from "mysql2";
 
-export const m_clientInsert = async (client: TclientData) => {
+export const m_clientInsert = async (client: TclientData[]) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(

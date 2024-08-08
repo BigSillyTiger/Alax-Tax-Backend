@@ -1,19 +1,19 @@
 import { DB_TABLE_LIST } from "../utils/config";
 import logger from "../libs/logger";
 import adminPool from "../config/adminPool";
-import type { Tpayment, Torder, TorderDesc } from "../utils/global";
+import type { Tpayment, Torder, Tservice } from "../utils/global";
 import { ResultSetHeader, RowDataPacket } from "mysql2";
 
 /**
  *
- * @returns
+ * @returns TorderAbstract
  */
 export const m_orderGetAllAbstract = async () => {
     try {
         const connection = await adminPool.getConnection();
         const [result] = await connection.query(
             `SELECT
-                o.oid, o.fk_cid, o.address, o.suburb, o.city, o.state, o.country, o.postcode, o.status,
+                o.oid, o.fk_cid, o.status, o.status, o.archive, o.q_deposit, o.q_valid, o.q_date, o.total, o.gst, o.net, o.paid, o.created_date, o.estimate_finish_date, o.i_date, o.note,
                 c.first_name, c.last_name, c.phone, c.email
             FROM ${DB_TABLE_LIST.ORDER_LIST} o
             JOIN ${DB_TABLE_LIST.CLIENT} c ON o.fk_cid = c.cid
@@ -28,6 +28,11 @@ export const m_orderGetAllAbstract = async () => {
     }
 };
 
+/**
+ * @description get all orders with details
+ *              deatils: order_services, payments, client_info
+ * @returns
+ */
 export const m_orderGetAllWithDetails = async () => {
     try {
         const connection = await adminPool.getConnection();
@@ -35,36 +40,43 @@ export const m_orderGetAllWithDetails = async () => {
             `SELECT 
                 A.oid, 
                 A.fk_cid,
-                A.address,
-                A.suburb,
-                A.city,
-                A.state,
-                A.country,
-                A.postcode,
                 A.status,
-                A.deposit,
+                A.q_deposit,
+                A.q_valid,
+                A.q_date,
                 A.gst,
+                A.net,
                 A.total,
                 A.paid,
                 A.created_date,
+                A.estimate_finish_date,
                 A.invoice_date,
+                A.i_date, 
                 (SELECT 
                     JSON_ARRAYAGG(
                         JSON_OBJECT(
-                            'ranking', B.ranking,
+                            'osid', B.osid,
                             'fk_oid', B.fk_oid,
+                            'ranking', B.ranking,
                             'title', B.title,
-                            'description', B.description,
+                            'note', B.note,
+                            'taxable', B.taxable,
                             'qty', B.qty,
                             'unit', B.unit,
-                            'taxable', B.taxable,
                             'unit_price', B.unit_price,
                             'gst', B.gst,
-                            'netto', B.netto
+                            'net', B.net,
+                            'status', B.status,
+                            'expiry_date', B.expiry_date,
+                            'created_date', B.created_date,
+                            'archive', B.archive,
+                            'service_type', B.service_type,
+                            'product_name', B.product_name                            
                         )
                     ) 
-                FROM ${DB_TABLE_LIST.ORDER_SERVICE} B 
-                WHERE B.fk_oid = A.oid) AS order_services,
+                    FROM ${DB_TABLE_LIST.ORDER_SERVICE} B 
+                    WHERE B.fk_oid = A.oid
+                ) AS order_services,
                 (SELECT 
                     JSON_ARRAYAGG(
                         JSON_OBJECT(
@@ -74,8 +86,9 @@ export const m_orderGetAllWithDetails = async () => {
                             'paid_date', P.paid_date
                         )
                     ) 
-                FROM ${DB_TABLE_LIST.PAYMENT} P 
-                WHERE P.fk_oid = A.oid) AS payments,
+                    FROM ${DB_TABLE_LIST.PAYMENT} P 
+                    WHERE P.fk_oid = A.oid
+                ) AS payments,
                 (SELECT 
                     JSON_OBJECT(
                         'cid', C.cid,
@@ -90,11 +103,11 @@ export const m_orderGetAllWithDetails = async () => {
                         'country', C.country,
                         'postcode', C.postcode
                     )
-                FROM ${DB_TABLE_LIST.CLIENT} C 
-                WHERE C.cid = A.fk_cid) AS client_info
+                    FROM ${DB_TABLE_LIST.CLIENT} C 
+                    WHERE C.cid = A.fk_cid
+                ) AS client_info
             FROM ${DB_TABLE_LIST.ORDER_LIST} A
-            WHERE A.archive = 0;
-            `
+            WHERE A.archive = 0;`
         );
         connection.release();
         return result[0];
@@ -109,22 +122,24 @@ export const m_orderInsert = async (order: Torder) => {
         console.log("-> inser order: ", order);
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `INSERT INTO ${DB_TABLE_LIST.ORDER_LIST} (oid, fk_cid, address, suburb, city, state, country, postcode, status, deposit, gst, total ) VALUES ?`,
+            `INSERT INTO ${DB_TABLE_LIST.ORDER_LIST} (oid, fk_cid, status, gst, net, total, paid, created_date, q_deposit, q_valid, q_date, estimate_finish_date, i_date, note ) VALUES ?`,
             [
                 [
                     [
                         order.oid,
                         order.fk_cid,
-                        order.address,
-                        order.suburb,
-                        order.city,
-                        order.state,
-                        order.country,
-                        order.postcode,
                         order.status,
-                        order.deposit,
                         order.gst,
+                        order.net,
                         order.total,
+                        order.paid,
+                        order.created_date,
+                        order.q_deposit,
+                        order.q_valid,
+                        order.q_date,
+                        order.estimate_finish_date,
+                        order.i_date,
+                        order.note,
                     ],
                 ],
             ]
@@ -138,17 +153,17 @@ export const m_orderInsert = async (order: Torder) => {
     }
 };
 
-export const m_orderDescInsert = async (order_services: TorderDesc) => {
+export const m_orderServiceInsert = async (services: Tservice[]) => {
     try {
         const connection = await adminPool.getConnection();
         const [result] = await connection.query(
-            `INSERT INTO ${DB_TABLE_LIST.ORDER_SERVICE} (fk_oid, ranking, title, description, qty, taxable, unit, unit_price, gst, netto) VALUES ?`,
-            [order_services]
+            `INSERT INTO ${DB_TABLE_LIST.ORDER_SERVICE} (osid, fk_oid, title, taxtable, qty, unit, unit_price, gst, net, ranking, status, expiry_date, created_date, service_type, product_name, note) VALUES ?`,
+            [services]
         );
         connection.release();
         return result as ResultSetHeader;
     } catch (err) {
-        console.log("err: insert order_services: ", err);
+        console.log("err: insert services: ", err);
         return null;
     }
 };
@@ -169,27 +184,31 @@ export const m_clientOrders = async (cid: string) => {
     }
 };
 
-export const m_clientOrderWichId = async (cid: string) => {
+/**
+ * @description
+ * @param cid
+ * @returns
+ */
+export const m_clientOrderWithId = async (cid: string) => {
     try {
         const connection = await adminPool.getConnection();
         const [rows] = await connection.query(
             `
             SELECT 
                 A.oid, 
-                A.fk_cid,  
-                A.address,
-                A.suburb,
-                A.city,
-                A.state,
-                A.country,
-                A.postcode,
+                A.fk_cid,
                 A.status,
-                A.deposit,
+                A.q_deposit,
+                A.q_valid,
+                A.q_date,
                 A.gst,
+                A.net,
                 A.total,
                 A.paid,
                 A.created_date,
-                A.invoice_date,
+                A.estimate_finish_date,
+                A.i_date,
+                A.note,
                 order_services,
                 payments,
                 client_info
@@ -199,16 +218,23 @@ export const m_clientOrderWichId = async (cid: string) => {
                     fk_oid,
                     JSON_ARRAYAGG(
                         JSON_OBJECT(
-                            'ranking', ranking,
+                            'osid', osid,
                             'fk_oid', fk_oid,
+                            'ranking', ranking,
                             'title', title,
-                            'description', description,
+                            'note', note,
+                            'taxable', taxable,
                             'qty', qty,
                             'unit', unit,
-                            'taxable', taxable,
                             'unit_price', unit_price,
                             'gst', gst,
-                            'netto', netto
+                            'net', net,
+                            'status', status,
+                            'expiry_date', expiry_date,
+                            'created_date', created_date,
+                            'archive', archive,
+                            'service_type', service_type,
+                            'product_name', product_name
                         )
                     ) AS order_services
                 FROM ${DB_TABLE_LIST.ORDER_SERVICE}
@@ -341,12 +367,12 @@ export const m_orderArchive = async (oid: string) => {
     }
 };
 
-export const m_orderDescDel = async (oid: string) => {
+export const m_orderServiceDelete = async (oid: string) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `DELETE FROM ${DB_TABLE_LIST.ORDER_SERVICE} WHERE fk_oid = ?`,
-            [oid]
+            `UPDATE ${DB_TABLE_LIST.ORDER_SERVICE} SET deleted = ? WHERE fk_oid = ?`,
+            [1, oid]
         );
         connection.release();
         //console.log("-> delete order_services result: ", result);
@@ -393,39 +419,41 @@ export const m_orderUpdateProperty = async (
     }
 };
 
-export const m_orderUpdateWithDesc = async (
+export const m_orderUpdateWithService = async (
     order: Torder,
     oid: string,
-    order_services: TorderDesc
+    order_services: Tservice[]
 ) => {
     try {
         const connection = await adminPool.getConnection();
         await connection.query("START TRANSACTION;");
         await connection.query(
             `UPDATE ${DB_TABLE_LIST.ORDER_LIST} SET 
-                address = ?, 
-                suburb = ?, 
-                city = ?, 
-                state = ?, 
-                country = ?, 
-                postcode = ?, 
                 status = ?, 
-                deposit = ?, 
                 gst = ?, 
-                total = ? 
+                net = ?,
+                total = ?,
+                paid = ?,
+                q_deposit = ?,
+                q_valid = ?,
+                q_date = ?,
+                estimate_finish_date = ?,
+                i_date = ?,
+                note = ?
             WHERE oid = ?`,
             [
-                order.address,
-                order.suburb,
-                order.city,
-                order.state,
-                order.country,
-                order.postcode,
                 order.status,
-                order.deposit,
                 order.gst,
+                order.net,
                 order.total,
-                order.oid,
+                order.paid,
+                order.q_deposit,
+                order.q_valid,
+                order.q_date,
+                order.estimate_finish_date,
+                order.i_date,
+                order.note,
+                oid,
             ]
         );
         await connection.query(
@@ -433,7 +461,7 @@ export const m_orderUpdateWithDesc = async (
             [oid]
         );
         await connection.query(
-            `INSERT INTO ${DB_TABLE_LIST.ORDER_SERVICE} (fk_oid, ranking, title, description, qty, taxable, unit, unit_price, gst, netto) VALUES ?`,
+            `INSERT INTO ${DB_TABLE_LIST.ORDER_SERVICE} (osid, fk_oid, title, taxtable, qty, unit, unit_price, gst, net, ranking, status, expiry_date, created_date, service_type, product_name, note) VALUES ?`,
             [order_services]
         );
         await connection.query("COMMIT;");
@@ -451,28 +479,29 @@ export const m_orderUpdate = async (order: Torder) => {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
             `UPDATE ${DB_TABLE_LIST.ORDER_LIST} SET 
-                address = ?, 
-                suburb = ?, 
-                city = ?, 
-                state = ?, 
-                country = ?, 
-                postcode = ?, 
                 status = ?, 
-                deposit = ?, 
                 gst = ?, 
-                total = ? 
+                net = ?, 
+                total = ?,
+                paid = ?,
+                q_deposit = ?,
+                q_valid = ?,
+                q_date = ?,
+                estimate_finish_date = ?,
+                i_date = ?,
+                note = ?
             WHERE oid = ?`,
             [
-                order.address,
-                order.suburb,
-                order.city,
-                order.state,
-                order.country,
-                order.postcode,
                 order.status,
-                order.deposit,
                 order.gst,
                 order.total,
+                order.paid,
+                order.q_deposit,
+                order.q_valid,
+                order.q_date,
+                order.estimate_finish_date,
+                order.i_date,
+                order.note,
                 order.oid,
             ]
         );
@@ -574,20 +603,21 @@ export const m_findOrder = async (oid: string) => {
             `SELECT
                 JSON_OBJECT(
                     'oid', A.oid, 
-                    'fk_cid', A.fk_cid,  
-                    'address', A.address,
-                    'suburb', A.suburb,
-                    'city', A.city,
-                    'state', A.state,
-                    'country', A.country,
-                    'postcode', A.postcode,
+                    'fk_cid', A.fk_cid,
                     'status', A.status,
-                    'deposit', A.deposit,
                     'gst', A.gst,
+                    'net', A.net,
                     'total', A.total,
                     'paid', A.paid,
+                    'q_deposit', A.q_deposit,
+                    'q_valid', A.q_valid,
+                    'q_date', A.q_date,
                     'created_date', A.created_date,
-                    'order_services', descriptions,
+                    'estimate_finish_date', A.estimate_finish_date,
+                    'invoice_date', A.invoice_date,
+                    'i_date', A.i_date,
+                    'note', A.note,
+                    'order_services', order_services,
                     'payments', paymentData
                 )
                 FROM orders A
@@ -596,18 +626,25 @@ export const m_findOrder = async (oid: string) => {
                         fk_oid,
                         JSON_ARRAYAGG(
                             JSON_OBJECT(
-                                'ranking', ranking,
-                                'fk_oid', fk_oid,
-                                'title', title,
-                                'description', description,
-                                'qty', qty,
-                                'unit', unit,
-                                'taxable', taxable,
-                                'unit_price', unit_price,
-                                'gst', gst,
-                                'netto', netto
+                                'osid', B.osid,
+                                'fk_oid', B.fk_oid,
+                                'ranking', B.ranking,
+                                'title', B.title,
+                                'note', B.note,
+                                'qty', B.qty,
+                                'unit', B.unit,
+                                'taxable', B.taxable,
+                                'unit_price', B.unit_price,
+                                'gst', B.gst,
+                                'net', B.net,
+                                'status', B.status,
+                                'expiry_date', B.expiry_date,
+                                'created_date', B.created_date,
+                                'archive', B.archive,
+                                'service_type', B.service_type,
+                                'product_name', B.product_name
                             )
-                        ) AS descriptions
+                        ) AS order_services
                     FROM order_services
                     GROUP BY fk_oid
                 ) B ON A.oid = B.fk_oid
@@ -629,10 +666,7 @@ export const m_findOrder = async (oid: string) => {
             [oid]
         );
         connection.release();
-        /* console.log(
-        `-> id[${cid}] orders: `,
-        Object.values(result[0][0])[0]
-    ); */
+
         return Object.values(result[0][0])[0];
     } catch (err) {
         console.log("err: get order with id: ", err);

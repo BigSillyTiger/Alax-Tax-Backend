@@ -17,7 +17,7 @@ import { accessCheckM } from "../../middleware/accessCheckM";
 const router = express.Router();
 
 router.get(ORDER_ALL, orderCtl.orderAll);
-router.post(ORDER_W_CLIENT, [accessCheckM], orderCtl.orderWcid);
+router.post(ORDER_W_CLIENT, [accessCheckM], orderCtl.orderWithCid);
 router.post("/order/findClient", orderCtl.findClient);
 router.post("/order/findOrder", orderCtl.findOrder);
 router.post(ORDER_ADD, [accessCheckM], orderCtl.orderAdd);
@@ -27,6 +27,5 @@ router.put(ORDER_STATUS, [accessCheckM], orderCtl.orderChangeStatus);
 //router.post("/order/clientOrders", orderCtl.clientOrders);
 router.put(PAYMENT_UPDATE, [accessCheckM], orderCtl.orderUpdatePayments);
 router.put(INVOICE_ISSUE_UPDATE, [accessCheckM], orderCtl.updateInvoiceIssue);
-router.get(ORDER_ALL_ARRANGEMENT, [authMW], orderCtl.orderAllArrangement);
 
 export default router;

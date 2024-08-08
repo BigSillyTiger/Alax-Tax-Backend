@@ -9,7 +9,6 @@ import type {
     Tpayslip,
     TwlAbstract,
 } from "../utils/global";
-import { m_wlGetAllWLID } from "../models/workLogModel";
 import { genDate, genYYYYHHMM } from "./time";
 import { MONTHS, uidPrefix } from "../utils/config";
 import { plusAB } from "./calculate";
@@ -25,7 +24,7 @@ export const formatOrderDesc = (id: number, items: any) => {
             unit,
             unit_price,
             gst,
-            netto,
+            net,
         } = item;
         return [
             id,
@@ -37,7 +36,7 @@ export const formatOrderDesc = (id: number, items: any) => {
             unit,
             unit_price,
             gst,
-            netto,
+            net,
         ];
     });
 };
@@ -91,46 +90,6 @@ export const genOrderWithWorkLogs = (
             : [];
         return { ...order, wlUnion: workLogsOfOrder };
     });
-};
-
-/**
- * @description generate new work log id based on the last work log id
- *  and the current date
- * @param oriWorkLogs
- * @returns
- */
-export const genWorkLogsWithNewWLID = async (oriWorkLogs: ToriWorkLog[]) => {
-    const ddmmyy = genDate();
-    // Filter out items with non-empty wlid
-    const itemsWithEmptyWlid = oriWorkLogs.filter((item) => !item.wlid);
-    // Generate unique wlid values
-    let counter = 1;
-    // Record used wlid values
-    /* const usedWlids = new Set(
-        oriWorkLogs.map((item) => item.wlid).filter((wlid) => wlid)
-    ); */
-
-    const existingWLIDs = await m_wlGetAllWLID().then((value) => {
-        if (!value || !value.length) return new Set();
-        return new Set(value.map((item) => item.wlid));
-    });
-
-    const updatedArray = [...oriWorkLogs];
-    for (const item of itemsWithEmptyWlid) {
-        let wlid;
-        do {
-            wlid = `${uidPrefix.workLog}${ddmmyy}${String(counter).padStart(
-                3,
-                "0"
-            )}`;
-            counter++;
-        } while (existingWLIDs.has(wlid));
-        existingWLIDs.add(wlid);
-
-        const index = updatedArray.indexOf(item);
-        updatedArray[index] = { ...item, wlid };
-    }
-    return updatedArray;
 };
 
 /**
@@ -322,12 +281,6 @@ export const formatOrderArrangement = (
                     first_name: order.first_name,
                     last_name: order.last_name,
                     phone: order.phone,
-                    address: order.address,
-                    suburb: order.suburb,
-                    city: order.city,
-                    state: order.state,
-                    country: order.country,
-                    postcode: order.postcode,
                     status: order.status,
                 },
                 wl: [],

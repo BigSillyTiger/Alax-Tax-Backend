@@ -5,7 +5,6 @@ import { uidPrefix } from "../utils/config";
 import { m_uidGetLastStaff } from "../models/staffModel";
 import { m_clientsLastCID } from "../models/clientsModel";
 import { m_ordersLastOID, m_paymentLastPID } from "../models/ordersModel";
-import { m_deductLastDID } from "../models/workLogModel";
 
 export const genPSID = async () => {
     try {
@@ -73,40 +72,6 @@ export const genBID = async () => {
         return `${uidPrefix.bonus}${date}${newId}`;
     } catch (error) {
         return null;
-    }
-};
-
-/**
- * @description generate multiple beduction id
- * @returns
- */
-export const genDID = async (count: number) => {
-    try {
-        let ids = [];
-        let currentNumber = 1;
-        const currentDate = genDate();
-        const lastId = await m_deductLastDID();
-
-        if (lastId?.length) {
-            const lastIdDate = lastId[0].did.substring(1, 7);
-            currentNumber = parseInt(lastId[0].did.substring(7), 10);
-
-            if (lastIdDate === currentDate) {
-                currentNumber++;
-            } else {
-                currentNumber = 1;
-            }
-        }
-
-        for (let i = 0; i < count; i++) {
-            let number = (currentNumber + i).toString().padStart(3, "0");
-            ids.push(`${uidPrefix.deduction}${currentDate}${number}`);
-        }
-
-        return ids;
-    } catch (error) {
-        console.log("-> error - genDID: ", error);
-        throw new Error("Error generating deduction id");
     }
 };
 
