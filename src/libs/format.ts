@@ -9,15 +9,19 @@ import type {
     Tpayslip,
     TwlAbstract,
 } from "../utils/global";
-import { genDate, genYYYYHHMM } from "./time";
-import { MONTHS, uidPrefix } from "../utils/config";
+import { genYYYYHHMM } from "./time";
+import { MONTHS } from "../utils/config";
 import { plusAB } from "./calculate";
 
-export const formatOrderDesc = (oid: string, items: any) => {
-    return items.map((item: any, index: number) => {
+export const formatOrderService = (
+    oid: string,
+    items: any,
+    osidArray: string[] = []
+) => {
+    let i = 0;
+    return items.map((item: any) => {
         const {
             osid,
-            status,
             title,
             ranking,
             qty,
@@ -25,50 +29,22 @@ export const formatOrderDesc = (oid: string, items: any) => {
             unit,
             unit_price,
             gst,
+            status,
             net,
             created_date,
             service_type,
             product_name,
             note,
         } = item;
-        return [
-            osid,
-            oid, // fk_oid
-            title,
-            taxable,
-            qty,
-            unit,
-            unit_price,
-            gst,
-            net,
-            ranking,
-            status,
-            created_date,
-            service_type,
-            product_name,
-            note,
-        ];
-    });
-};
 
-export const formatOrderService = (osid: string, oid: string, items: any) => {
-    return items.map((item: any, index: number) => {
-        const {
-            title,
-            ranking,
-            qty,
-            taxable,
-            unit,
-            unit_price,
-            gst,
-            status,
-            net,
-            service_type,
-            product_name,
-            note,
-        } = item;
+        // Use the provided osid if it exists, otherwise use the generated osid from validOsidArray
+        const newOsid = osid && osid.length > 0 ? osid : osidArray[i++] ?? null;
+
+        // Use the provided created_date if it exists, otherwise use the current date
+        const createdDate = created_date?.length ? created_date : new Date();
+
         return [
-            osid,
+            newOsid,
             oid,
             title,
             taxable,
@@ -79,6 +55,7 @@ export const formatOrderService = (osid: string, oid: string, items: any) => {
             net,
             ranking,
             status,
+            createdDate,
             service_type,
             product_name,
             note,

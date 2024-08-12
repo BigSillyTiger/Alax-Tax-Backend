@@ -102,22 +102,28 @@ export const genOID = async () => {
 };
 /**
  * @description generate order id
+ * @param num number of order service id to generate
  */
-export const genOSID = async () => {
+export const genOSID = async (num: number) => {
     try {
         const result = await m_ordersLastOSID();
         const date = genDate();
-        let newId = "001";
+        let newIds: string[] = [];
+        let newIdNum = 1;
+
         if (result && result.length) {
-            // notice this slice(2, 8) because the osid's prefix is 'OS', 2 digits
             const dateCmp = date === result[0].osid.slice(2, 8);
-            result.length && dateCmp
-                ? (newId = String(
-                      parseInt(result[0].osid.slice(-3), 10) + 1
-                  ).padStart(3, "0"))
-                : (newId = "001");
+            if (dateCmp) {
+                newIdNum = parseInt(result[0].osid.slice(-3), 10) + 1;
+            }
         }
-        return `${uidPrefix.orderService}${date}${newId}`;
+
+        for (let i = 0; i < num; i++) {
+            const newId = String(newIdNum + i).padStart(3, "0");
+            newIds.push(`${uidPrefix.orderService}${date}${newId}`);
+        }
+
+        return newIds;
     } catch (error) {
         return null;
     }

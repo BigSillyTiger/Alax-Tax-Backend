@@ -17,7 +17,6 @@ import {
 } from "../../models/ordersModel";
 import {
     formatOrderArrangement,
-    formatOrderDesc,
     formatOrderService,
     formatPayment,
 } from "../../libs/format";
@@ -35,6 +34,7 @@ import {
     TwlAbstract,
 } from "../../utils/global";
 import { promise } from "zod";
+import { findEmptyOsid } from "../../libs/utils";
 
 /**
  * @description return all orders from orders table with client first name and last name from clients table
@@ -100,22 +100,31 @@ export const orderWithCid = async (req: Request, res: Response) => {
     }
 };
 
+/**
+ * @description add new order to order_list table
+ * @param req
+ * @param res
+ * @returns
+ */
 export const orderAdd = async (req: Request, res: Response) => {
     console.log("server - order: add order: ", req.body);
     try {
         const order = req.body.order;
         const order_services = req.body.order_services;
+        const newOsidNum = findEmptyOsid(order_services).length;
         const newOid = await genOID();
         order.oid = newOid;
-        console.log("==> new order: ", order);
 
         const orResult = await m_orderInsert(order);
         if (orResult.affectedRows) {
-            const newOSid = await genOSID();
-            console.log("--> new newosid: ", newOSid);
-            if (!newOSid) throw new Error("error - genOSID");
+            const osidArray = await genOSID(newOsidNum);
+            if (osidArray === null) throw new Error("error - genOSID");
             const odResult = await m_orderServiceInsert(
-                formatOrderService(newOSid, req.body.order.oid, order_services)
+                formatOrderService(
+                    req.body.order.oid,
+                    order_services,
+                    osidArray as string[]
+                )
             );
             if (odResult?.affectedRows) {
                 return res.status(200).json({
@@ -164,10 +173,19 @@ export const orderUpdate = async (req: Request, res: Response) => {
     const order = req.body.order;
     const order_services = req.body.order_services;
     try {
+        const newOsidNum = findEmptyOsid(order_services).length;
+        const osidArray = await genOSID(newOsidNum);
+        if (osidArray === null) throw new Error("error - genOSID");
+        const newFormateServices = await formatOrderService(
+            req.body.order.oid,
+            order_services,
+            osidArray
+        );
+
         const result = await m_orderUpdateWithService(
             order,
             order.oid,
-            formatOrderDesc(req.body.order.oid, order_services)
+            newFormateServices
         );
         if (result) {
             return res.status(200).json({

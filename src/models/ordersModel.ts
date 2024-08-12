@@ -429,6 +429,7 @@ export const m_orderUpdateWithService = async (
     order_services: Tservice[]
 ) => {
     try {
+        //console.log("--> order modal order_services: ", order_services);
         const connection = await adminPool.getConnection();
         await connection.query("START TRANSACTION;");
         await connection.query(
