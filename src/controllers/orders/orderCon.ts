@@ -18,9 +18,10 @@ import {
 import {
     formatOrderArrangement,
     formatOrderDesc,
+    formatOrderService,
     formatPayment,
 } from "../../libs/format";
-import { genOID, genPID } from "../../libs/id";
+import { genOID, genOSID, genPID } from "../../libs/id";
 import { genOrderWithWorkLogs } from "../../libs/format";
 import { m_clientGetSingle } from "../../models/clientsModel";
 
@@ -68,6 +69,7 @@ export const orderWithCid = async (req: Request, res: Response) => {
         const result = (await m_clientOrderWithId(
             req.body.cid
         )) as TclientorderWithId[];
+        console.log("--> client order with id - result: ", result);
         if (result) {
             return res.status(200).json({
                 status: RES_STATUS.SUCCESS,
@@ -100,32 +102,38 @@ export const orderWithCid = async (req: Request, res: Response) => {
 
 export const orderAdd = async (req: Request, res: Response) => {
     console.log("server - order: add order: ", req.body);
-    const order = req.body.order;
-    const order_services = req.body.order_services;
-    const newOid = await genOID();
-    console.log("==> new oid: ", newOid);
-    order.oid = newOid;
+    try {
+        const order = req.body.order;
+        const order_services = req.body.order_services;
+        const newOid = await genOID();
+        order.oid = newOid;
+        console.log("==> new order: ", order);
 
-    const orResult = await m_orderInsert(order);
-    if (orResult.affectedRows) {
-        const odResult = await m_orderServiceInsert(
-            formatOrderDesc(req.body.order.oid, order_services)
-        );
-        if (odResult?.affectedRows) {
-            return res.status(200).json({
-                status: RES_STATUS.SUCCESS,
-                msg: "successed insert order",
-                data: { order: orResult, order_services: odResult },
-            });
-        } else {
-            throw new Error();
+        const orResult = await m_orderInsert(order);
+        if (orResult.affectedRows) {
+            const newOSid = await genOSID();
+            console.log("--> new newosid: ", newOSid);
+            if (!newOSid) throw new Error("error - genOSID");
+            const odResult = await m_orderServiceInsert(
+                formatOrderService(newOSid, req.body.order.oid, order_services)
+            );
+            if (odResult?.affectedRows) {
+                return res.status(200).json({
+                    status: RES_STATUS.SUCCESS,
+                    msg: "successed insert order",
+                    data: { order: orResult, order_services: odResult },
+                });
+            } else {
+                throw new Error();
+            }
         }
+    } catch (error) {
+        return res.status(400).json({
+            status: RES_STATUS.FAILED,
+            msg: "Failed: insert order",
+            data: null,
+        });
     }
-    return res.status(400).json({
-        status: RES_STATUS.FAILED,
-        msg: "Failed: insert order",
-        data: null,
-    });
 };
 
 export const orderDel = async (req: Request, res: Response) => {

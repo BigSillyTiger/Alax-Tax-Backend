@@ -102,7 +102,6 @@ export const createTables = async () => {
             net DECIMAL(10,2) UNSIGNED NOT NULL,
             ranking TINYINT UNSIGNED DEFAULT 0,
             status VARCHAR(10) DEFAULT 'Pending',
-            expiry_date TIMESTAMP DEFAULT NULL,
             created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             archive BOOLEAN DEFAULT FALSE NOT NULL,
             deleted BOOLEAN DEFAULT FALSE NOT NULL,

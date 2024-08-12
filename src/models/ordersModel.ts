@@ -67,7 +67,6 @@ export const m_orderGetAllWithDetails = async () => {
                             'gst', B.gst,
                             'net', B.net,
                             'status', B.status,
-                            'expiry_date', B.expiry_date,
                             'created_date', B.created_date,
                             'archive', B.archive,
                             'service_type', B.service_type,
@@ -117,12 +116,18 @@ export const m_orderGetAllWithDetails = async () => {
     }
 };
 
+/**
+ * @description get all orders with details
+ *              omit created_date, archive by using default
+ * @param order
+ * @returns
+ */
 export const m_orderInsert = async (order: Torder) => {
     try {
         console.log("-> inser order: ", order);
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `INSERT INTO ${DB_TABLE_LIST.ORDER_LIST} (oid, fk_cid, status, gst, net, total, paid, created_date, q_deposit, q_valid, q_date, estimate_finish_date, i_date, note ) VALUES ?`,
+            `INSERT INTO ${DB_TABLE_LIST.ORDER_LIST} (oid, fk_cid, status, gst, net, total, paid, q_deposit, q_valid, q_date, estimate_finish_date, i_date, note ) VALUES ?`,
             [
                 [
                     [
@@ -133,7 +138,6 @@ export const m_orderInsert = async (order: Torder) => {
                         order.net,
                         order.total,
                         order.paid,
-                        order.created_date,
                         order.q_deposit,
                         order.q_valid,
                         order.q_date,
@@ -155,9 +159,10 @@ export const m_orderInsert = async (order: Torder) => {
 
 export const m_orderServiceInsert = async (services: Tservice[]) => {
     try {
+        console.log("-> insert service: ", services);
         const connection = await adminPool.getConnection();
         const [result] = await connection.query(
-            `INSERT INTO ${DB_TABLE_LIST.ORDER_SERVICE} (osid, fk_oid, title, taxtable, qty, unit, unit_price, gst, net, ranking, status, expiry_date, created_date, service_type, product_name, note) VALUES ?`,
+            `INSERT INTO ${DB_TABLE_LIST.ORDER_SERVICE} (osid, fk_oid, title, taxable, qty, unit, unit_price, gst, net, ranking, status, service_type, product_name, note) VALUES ?`,
             [services]
         );
         connection.release();
@@ -230,7 +235,6 @@ export const m_clientOrderWithId = async (cid: string) => {
                             'gst', gst,
                             'net', net,
                             'status', status,
-                            'expiry_date', expiry_date,
                             'created_date', created_date,
                             'archive', archive,
                             'service_type', service_type,
@@ -461,7 +465,7 @@ export const m_orderUpdateWithService = async (
             [oid]
         );
         await connection.query(
-            `INSERT INTO ${DB_TABLE_LIST.ORDER_SERVICE} (osid, fk_oid, title, taxtable, qty, unit, unit_price, gst, net, ranking, status, expiry_date, created_date, service_type, product_name, note) VALUES ?`,
+            `INSERT INTO ${DB_TABLE_LIST.ORDER_SERVICE} (osid, fk_oid, title, taxable, qty, unit, unit_price, gst, net, ranking, status, created_date, service_type, product_name, note) VALUES ?`,
             [order_services]
         );
         await connection.query("COMMIT;");
@@ -638,7 +642,6 @@ export const m_findOrder = async (oid: string) => {
                                 'gst', B.gst,
                                 'net', B.net,
                                 'status', B.status,
-                                'expiry_date', B.expiry_date,
                                 'created_date', B.created_date,
                                 'archive', B.archive,
                                 'service_type', B.service_type,
@@ -679,6 +682,20 @@ export const m_ordersLastOID = async () => {
         const connection = await adminPool.getConnection();
         const [result] = await connection.query(
             `SELECT oid FROM ${DB_TABLE_LIST.ORDER_LIST} ORDER BY created_date DESC LIMIT 1`
+        );
+        connection.release();
+        return result as RowDataPacket[];
+    } catch (error) {
+        console.log("err: get last uid: ", error);
+        return null;
+    }
+};
+
+export const m_ordersLastOSID = async () => {
+    try {
+        const connection = await adminPool.getConnection();
+        const [result] = await connection.query(
+            `SELECT osid FROM ${DB_TABLE_LIST.ORDER_SERVICE} ORDER BY created_date DESC LIMIT 1`
         );
         connection.release();
         return result as RowDataPacket[];

@@ -13,30 +13,75 @@ import { genDate, genYYYYHHMM } from "./time";
 import { MONTHS, uidPrefix } from "../utils/config";
 import { plusAB } from "./calculate";
 
-export const formatOrderDesc = (id: number, items: any) => {
+export const formatOrderDesc = (oid: string, items: any) => {
+    return items.map((item: any, index: number) => {
+        const {
+            osid,
+            status,
+            title,
+            ranking,
+            qty,
+            taxable,
+            unit,
+            unit_price,
+            gst,
+            net,
+            created_date,
+            service_type,
+            product_name,
+            note,
+        } = item;
+        return [
+            osid,
+            oid, // fk_oid
+            title,
+            taxable,
+            qty,
+            unit,
+            unit_price,
+            gst,
+            net,
+            ranking,
+            status,
+            created_date,
+            service_type,
+            product_name,
+            note,
+        ];
+    });
+};
+
+export const formatOrderService = (osid: string, oid: string, items: any) => {
     return items.map((item: any, index: number) => {
         const {
             title,
             ranking,
-            description,
             qty,
             taxable,
             unit,
             unit_price,
             gst,
+            status,
             net,
+            service_type,
+            product_name,
+            note,
         } = item;
         return [
-            id,
-            ranking,
+            osid,
+            oid,
             title,
-            description,
-            qty,
             taxable,
+            qty,
             unit,
             unit_price,
             gst,
             net,
+            ranking,
+            status,
+            service_type,
+            product_name,
+            note,
         ];
     });
 };

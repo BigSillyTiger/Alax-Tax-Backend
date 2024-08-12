@@ -183,7 +183,6 @@ export type Tservice = {
     unit_price: number;
     gst: number;
     net: number;
-    expiry_date: string;
     created_date: string;
     service_type: string;
     product_name: string;

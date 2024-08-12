@@ -19,6 +19,7 @@ const adminPool: Pool = mysql.createPool({
     database: DB,
     connectionLimit: 15,
     port: Number(PORT),
+    decimalNumbers: true,
 });
 
 //const adminPool = mysql.createPool(process.env.JAWSDB_URL as string);

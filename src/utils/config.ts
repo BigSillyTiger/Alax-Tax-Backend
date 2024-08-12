@@ -83,6 +83,7 @@ export const uidPrefix = {
     labor: "L",
     manager: "M",
     order: "J",
+    orderService: "OS",
     payment: "P",
     payslip: "PS",
     workLog: "WL",

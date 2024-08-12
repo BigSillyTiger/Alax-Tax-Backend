@@ -4,7 +4,11 @@ import { uidPrefix } from "../utils/config";
 
 import { m_uidGetLastStaff } from "../models/staffModel";
 import { m_clientsLastCID } from "../models/clientsModel";
-import { m_ordersLastOID, m_paymentLastPID } from "../models/ordersModel";
+import {
+    m_ordersLastOID,
+    m_ordersLastOSID,
+    m_paymentLastPID,
+} from "../models/ordersModel";
 
 export const genPSID = async () => {
     try {
@@ -92,6 +96,28 @@ export const genOID = async () => {
                 : (newId = "001");
         }
         return `${uidPrefix.order}${date}${newId}`;
+    } catch (error) {
+        return null;
+    }
+};
+/**
+ * @description generate order id
+ */
+export const genOSID = async () => {
+    try {
+        const result = await m_ordersLastOSID();
+        const date = genDate();
+        let newId = "001";
+        if (result && result.length) {
+            // notice this slice(2, 8) because the osid's prefix is 'OS', 2 digits
+            const dateCmp = date === result[0].osid.slice(2, 8);
+            result.length && dateCmp
+                ? (newId = String(
+                      parseInt(result[0].osid.slice(-3), 10) + 1
+                  ).padStart(3, "0"))
+                : (newId = "001");
+        }
+        return `${uidPrefix.orderService}${date}${newId}`;
     } catch (error) {
         return null;
     }
