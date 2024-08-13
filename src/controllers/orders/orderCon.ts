@@ -14,6 +14,7 @@ import {
     m_orderGetAllWithDetails,
     m_orderUpdateWithService,
     m_orderGetAllAbstract,
+    m_orderDelete,
 } from "../../models/ordersModel";
 import {
     formatOrderArrangement,
@@ -148,7 +149,7 @@ export const orderAdd = async (req: Request, res: Response) => {
 export const orderDel = async (req: Request, res: Response) => {
     console.log("server - order: delete order: ", req.body);
     try {
-        const result = await m_orderArchive(req.body.oid);
+        const result = await m_orderDelete(req.body.oid);
         if (result) {
             return res.status(200).json({
                 status: RES_STATUS.SUC_DEL,

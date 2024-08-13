@@ -17,7 +17,7 @@ export const m_orderGetAllAbstract = async () => {
                 c.first_name, c.last_name, c.phone, c.email
             FROM ${DB_TABLE_LIST.ORDER_LIST} o
             JOIN ${DB_TABLE_LIST.CLIENT} c ON o.fk_cid = c.cid
-            WHERE o.archive = 0;
+            WHERE o.deleted = 0;
             `
         );
         connection.release();
@@ -106,7 +106,7 @@ export const m_orderGetAllWithDetails = async () => {
                     WHERE C.cid = A.fk_cid
                 ) AS client_info
             FROM ${DB_TABLE_LIST.ORDER_LIST} A
-            WHERE A.archive = 0;`
+            WHERE A.deleted = 0;`
         );
         connection.release();
         return result[0];
@@ -276,7 +276,7 @@ export const m_clientOrderWithId = async (cid: string) => {
                     ) AS client_info
                 FROM ${DB_TABLE_LIST.CLIENT} 
             ) C ON A.fk_cid = C.cid
-            WHERE A.fk_cid = ? AND A.archive = 0;
+            WHERE A.fk_cid = ? AND A.deleted = 0;
             `,
             [cid]
         );
@@ -367,6 +367,62 @@ export const m_orderArchive = async (oid: string) => {
         return true;
     } catch (err) {
         console.log("err: archive order: ", err);
+        return false;
+    }
+};
+
+/**
+ * @description delete order
+ *              - fail: if current order has payment record
+ *              - fail: if current order status is not pending nor cancelled
+ * @param oid
+ * @returns
+ */
+export const m_orderDelete = async (oid: string) => {
+    try {
+        const connection = await adminPool.getConnection();
+        await connection.query("START TRANSACTION;");
+
+        // check if the order has payment record
+        const [resultP] = await connection.query(
+            `
+            SELECT COUNT(pid) count FROM ${DB_TABLE_LIST.PAYMENT} WHERE fk_oid = ?`,
+            [oid]
+        );
+        if ((resultP as RowDataPacket)[0].count > 0) {
+            throw new Error("The order has payments, fail to delete");
+        }
+
+        // check if the order status is pending or cancelled
+        const [resultS] = await connection.query(
+            `SELECT status FROM ${DB_TABLE_LIST.ORDER_LIST} WHERE oid = ? AND deleted = 0`,
+            [oid]
+        );
+
+        if (
+            (resultS as RowDataPacket)[0].status !== "pending" &&
+            (resultS as RowDataPacket)[0].status !== "cancelled"
+        ) {
+            throw new Error(
+                "The order status is not pending nor cancelled, fail to delete"
+            );
+        }
+
+        await connection.query(
+            `UPDATE ${DB_TABLE_LIST.ORDER_LIST} SET deleted = ? WHERE oid = ?`,
+            [1, oid]
+        );
+        await connection.query(
+            `UPDATE ${DB_TABLE_LIST.ORDER_SERVICE} SET deleted = ? WHERE fk_oid = ?`,
+            [1, oid]
+        );
+        await connection.query("COMMIT;");
+        connection.release();
+
+        //console.log("-> delete order result: ", result);
+        return true;
+    } catch (err) {
+        console.log("err: delete order: ", err);
         return false;
     }
 };
@@ -665,7 +721,7 @@ export const m_findOrder = async (oid: string) => {
                     FROM payments
                     GROUP BY fk_oid 
                 ) P ON A.oid = P.fk_oid
-                WHERE A.oid = ? AND A.archive = 0;
+                WHERE A.oid = ? AND A.deleted = 0;
                 `,
             [oid]
         );
@@ -724,7 +780,7 @@ export const m_paymentALL = async () => {
     try {
         const connection = await adminPool.getConnection();
         const [result] = await connection.query(
-            `SELECT p.paid, p.paid_date FROM ${DB_TABLE_LIST.PAYMENT} p JOIN ${DB_TABLE_LIST.ORDER_LIST} o ON p.fk_oid = o.oid WHERE o.archive = 0`
+            `SELECT p.paid, p.paid_date FROM ${DB_TABLE_LIST.PAYMENT} p JOIN ${DB_TABLE_LIST.ORDER_LIST} o ON p.fk_oid = o.oid WHERE o.deleted = 0`
         );
         connection.release();
         return result as RowDataPacket[];
@@ -738,7 +794,7 @@ export const m_orderAllCount = async () => {
     try {
         const connection = await adminPool.getConnection();
         const [result] = await connection.query(
-            `SELECT created_date FROM ${DB_TABLE_LIST.ORDER_LIST} WHERE archive = 0`
+            `SELECT created_date FROM ${DB_TABLE_LIST.ORDER_LIST} WHERE deleted = 0`
         );
         connection.release();
         return result as RowDataPacket[];
@@ -752,7 +808,7 @@ export const m_orderAllUnpaid = async () => {
     try {
         const connection = await adminPool.getConnection();
         const [result] = await connection.query(
-            `SELECT (total - paid) * -1 as unpaid, created_date FROM ${DB_TABLE_LIST.ORDER_LIST} WHERE archive = 0`
+            `SELECT (total - paid) * -1 as unpaid, created_date FROM ${DB_TABLE_LIST.ORDER_LIST} WHERE deleted = 0`
         );
         connection.release();
         return result as RowDataPacket[];
