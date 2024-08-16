@@ -102,18 +102,6 @@ export const formatPayment = (pids: string[], fk_oid: string, items: any) => {
     });
 };
 
-export const genOrderWithWorkLogs = (
-    orders: Torder[],
-    workLogs: ToriWorkLog[]
-) => {
-    return orders.map((order: any) => {
-        const workLogsOfOrder = workLogs?.length
-            ? workLogs.filter((log: any) => log.fk_oid === order.oid)
-            : [];
-        return { ...order, wlUnion: workLogsOfOrder };
-    });
-};
-
 /**
  *
  * @param psid newly created payslip id

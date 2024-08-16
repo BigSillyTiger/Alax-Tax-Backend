@@ -162,7 +162,7 @@ export const m_orderServiceInsert = async (services: Tservice[]) => {
         console.log("-> insert service: ", services);
         const connection = await adminPool.getConnection();
         const [result] = await connection.query(
-            `INSERT INTO ${DB_TABLE_LIST.ORDER_SERVICE} (osid, fk_oid, title, taxable, qty, unit, unit_price, gst, net, ranking, status, service_type, product_name, note) VALUES ?`,
+            `INSERT INTO ${DB_TABLE_LIST.ORDER_SERVICE} (osid, fk_oid, title, taxable, qty, unit, unit_price, gst, net, ranking, status, created_date, service_type, product_name, note) VALUES ?`,
             [services]
         );
         connection.release();

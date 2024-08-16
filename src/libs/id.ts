@@ -160,3 +160,5 @@ export const genCID = async () => {
         : (newId = "0001");
     return `${uidPrefix.client}${newId}`;
 };
+
+export const genCSID = async (num: number) => { }

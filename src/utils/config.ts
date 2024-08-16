@@ -31,6 +31,7 @@ export const DB_TABLE_LIST = {
     QUOTATION: "quotation",
     INVOICE: "invoice",
     PAYMENT: "payment",
+    CLIENT_SERVICE: "client_service",
     // Assiste
     SERVICE: "service",
     UNIT: "unit",

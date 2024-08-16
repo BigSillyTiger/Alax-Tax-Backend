@@ -9,9 +9,7 @@ import {
     ORDER_UPDATE,
     ORDER_W_CLIENT,
     PAYMENT_UPDATE,
-    ORDER_ALL_ARRANGEMENT,
 } from "../../utils/reqList";
-import { authMW } from "../../middleware/authMW";
 import { accessCheckM } from "../../middleware/accessCheckM";
 
 const router = express.Router();
@@ -24,7 +22,6 @@ router.post(ORDER_ADD, [accessCheckM], orderCtl.orderAdd);
 router.delete(ORDER_DEL, [accessCheckM], orderCtl.orderDel);
 router.put(ORDER_UPDATE, [accessCheckM], orderCtl.orderUpdate);
 router.put(ORDER_STATUS, [accessCheckM], orderCtl.orderChangeStatus);
-//router.post("/order/clientOrders", orderCtl.clientOrders);
 router.put(PAYMENT_UPDATE, [accessCheckM], orderCtl.orderUpdatePayments);
 router.put(INVOICE_ISSUE_UPDATE, [accessCheckM], orderCtl.updateInvoiceIssue);
 

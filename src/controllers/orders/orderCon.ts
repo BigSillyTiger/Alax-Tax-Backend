@@ -16,13 +16,8 @@ import {
     m_orderGetAllAbstract,
     m_orderDelete,
 } from "../../models/ordersModel";
-import {
-    formatOrderArrangement,
-    formatOrderService,
-    formatPayment,
-} from "../../libs/format";
+import { formatOrderService, formatPayment } from "../../libs/format";
 import { genOID, genOSID, genPID } from "../../libs/id";
-import { genOrderWithWorkLogs } from "../../libs/format";
 import { m_clientGetSingle } from "../../models/clientsModel";
 
 import {
