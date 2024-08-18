@@ -2,13 +2,13 @@ import type { Request, Response } from "express";
 import { RES_STATUS, uidPrefix } from "../../utils/config";
 import { genPSID } from "../../libs/id";
 import {
-    m_psAll,
-    m_psAllWUID,
-    m_psBonusAll,
-    m_psBonusAllWUID,
-    m_psSingleDel,
-    m_psSingleInsert,
-    m_psStatusUpdate,
+    payslip_all,
+    payslip_allwithUid,
+    payslip_allBonus,
+    payslip_allBonusWithUid,
+    payslip_deleteSingle,
+    payslip_singleInsert,
+    payslip_updateStatus,
 } from "../../models/payslipsModel";
 import { formatBonus, formatPayslip } from "../../libs/format";
 import { TRequestWithUser } from "@/utils/global";
@@ -20,9 +20,9 @@ export const psAll = async (req: TRequestWithUser, res: Response) => {
     try {
         let result;
         if (admin === uidPrefix.manager) {
-            result = await m_psAll();
+            result = await payslip_all();
         } else {
-            result = await m_psAllWUID(uid);
+            result = await payslip_allwithUid(uid);
         }
 
         if (!result) throw new Error("Failed to get payslip data");
@@ -60,7 +60,7 @@ export const psSingleInsert = async (req: Request, res: Response) => {
             req.body.bonus
         );
 
-        const result = await m_psSingleInsert(
+        const result = await payslip_singleInsert(
             [psData],
             bonusData,
             psid,
@@ -100,7 +100,7 @@ export const psSingleDel = async (req: Request, res: Response) => {
         3. update work_logs table: wl_status = "confirmed", fk_psid = null
          */
         const psid = req.body.psid;
-        const result = await m_psSingleDel(psid);
+        const result = await payslip_deleteSingle(psid);
         if (!result) throw new Error("Failed to delete payslip");
         return res.status(200).json({
             status: RES_STATUS.SUC_DEL_PAYSLIP,
@@ -130,7 +130,7 @@ export const psStatusUpdate = async (req: Request, res: Response) => {
         const psid = req.body.psid;
         const ps_status = req.body.status; // payslip status
         const wl_status = ps_status === "pending" ? "unpaid" : "completed";
-        const result = await m_psStatusUpdate(psid, ps_status, wl_status);
+        const result = await payslip_updateStatus(psid, ps_status, wl_status);
         if (!result) throw new Error("Failed to update payslip status");
         return res.status(200).json({
             status: RES_STATUS.SUC_UPDATE_PAYSLIP,
@@ -154,9 +154,9 @@ export const psBonusAll = async (req: TRequestWithUser, res: Response) => {
     try {
         let result;
         if (admin === uidPrefix.manager) {
-            result = await m_psBonusAll();
+            result = await payslip_allBonus();
         } else {
-            result = await m_psBonusAllWUID(uid);
+            result = await payslip_allBonusWithUid(uid);
         }
         if (!result) throw new Error("Failed to get bonus data");
         return res.status(200).json({

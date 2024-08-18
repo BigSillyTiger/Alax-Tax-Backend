@@ -3,9 +3,9 @@ import type { Request, Response } from "express";
 import mysql from "mysql2/promise";
 import { DB_TABLE_LIST, RES_STATUS } from "../../utils/config";
 import {
-    m_getCompany,
-    m_updateCompany,
-    m_insertCompany,
+    setting_getCompanyInfo,
+    setting_updateCompanyInfo,
+    setting_insertCompanyInfo,
 } from "../../models/settingModel";
 import dotenv from "dotenv";
 import { convertToFloat } from "../../libs/format";
@@ -151,7 +151,7 @@ export const uniEdit = async (req: Request, res: Response) => {
 
 export const getCompany = async (req: Request, res: Response) => {
     console.log("-> server - company: get company info");
-    const result = await m_getCompany();
+    const result = await setting_getCompanyInfo();
 
     return res.status(200).json({
         status: RES_STATUS.SUCCESS,
@@ -167,10 +167,10 @@ export const updateCompany = async (req: Request, res: Response) => {
         let affectRows: any;
         if (req.body.id) {
             // update
-            const result = await m_updateCompany(req.body);
+            const result = await setting_updateCompanyInfo(req.body);
             affectRows = result.affectedRows;
         } else {
-            const result = await m_insertCompany(req.body);
+            const result = await setting_insertCompanyInfo(req.body);
             affectRows = result.affectedRows;
         }
         if (affectRows) {

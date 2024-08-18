@@ -4,7 +4,7 @@ import adminPool from "../config/adminPool";
 import type { TclientData } from "../utils/global";
 import { RowDataPacket } from "mysql2";
 
-export const m_clientInsert = async (client: TclientData[]) => {
+export const client_insert = async (client: TclientData[]) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
@@ -19,7 +19,7 @@ export const m_clientInsert = async (client: TclientData[]) => {
     }
 };
 
-export const m_clientGetAll = async () => {
+export const client_getAll = async () => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
@@ -33,7 +33,7 @@ export const m_clientGetAll = async () => {
     }
 };
 
-export const m_clientGetSingle = async (cid: string) => {
+export const client_getSingle = async (cid: string) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
@@ -48,7 +48,7 @@ export const m_clientGetSingle = async (cid: string) => {
     }
 };
 
-export const m_clientIsPropertyExist = async (
+export const client_isPropertyExist = async (
     cid: string,
     property: string,
     data: string | number
@@ -67,7 +67,7 @@ export const m_clientIsPropertyExist = async (
     }
 };
 
-export const m_clientDelSingle = async (cid: string) => {
+export const client_deleteSingle = async (cid: string) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
@@ -89,7 +89,7 @@ export const m_clientDelSingle = async (cid: string) => {
  * @param cid
  * @returns
  */
-export const m_clientArchiveSingle = async (cid: string) => {
+export const client_archiveSingle = async (cid: string) => {
     try {
         const connection = await adminPool.getConnection();
         await connection.query("START TRANSACTION;");
@@ -120,7 +120,7 @@ export const m_clientArchiveSingle = async (cid: string) => {
     }
 };
 
-export const m_clientUpdateProperty = async (
+export const client_updateProperty = async (
     cid: string,
     property: string,
     data: string | number
@@ -139,7 +139,7 @@ export const m_clientUpdateProperty = async (
     }
 };
 
-export const m_clientUpdate = async (
+export const client_update = async (
     first_name: string,
     last_name: string,
     phone: string,
@@ -178,7 +178,7 @@ export const m_clientUpdate = async (
     }
 };
 
-export const m_clientsLastCID = async () => {
+export const client_lastCid = async () => {
     try {
         const connection = await adminPool.getConnection();
         const [result] = await connection.query(

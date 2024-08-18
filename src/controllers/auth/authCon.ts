@@ -4,10 +4,10 @@ import logger from "../../libs/logger";
 import { RES_STATUS, uidPrefix } from "../../utils/config";
 import { Request, Response } from "express";
 import {
-    m_addStaff,
-    m_levelCheck,
-    m_searchMPhoneEmail,
-    m_searchMbyEmail,
+    setting_addStaff,
+    setting_levelCheck,
+    setting_searchStaffByPE,
+    setting_searchStaffByEmail,
 } from "../../models/settingModel";
 import dotenv from "dotenv";
 import { encodePW } from "../../libs/utils";
@@ -29,10 +29,13 @@ export const test = async (req: Request, res: Response) => {
 export const registerNewUser = async (req: Request, res: Response) => {
     logger.infoLog("server - register new staff");
     console.log("-> backend receive new staff: ", req.body);
-    const peResult = await m_searchMPhoneEmail(req.body.phone, req.body.email);
+    const peResult = await setting_searchStaffByPE(
+        req.body.phone,
+        req.body.email
+    );
     if (!peResult) {
         const newPW = await encodePW(req.body.password);
-        const insertMRes = await m_addStaff(
+        const insertMRes = await setting_addStaff(
             req.body.first_name,
             req.body.last_name,
             req.body.email,
@@ -74,7 +77,7 @@ export const registerNewUser = async (req: Request, res: Response) => {
 export const adminLogin = async (req: Request, res: Response) => {
     console.log("server - login");
     try {
-        const staff = await m_searchMbyEmail(req.body.email);
+        const staff = await setting_searchStaffByEmail(req.body.email);
 
         if (staff?.uid) {
             if (staff.uid.charAt(0) === uidPrefix.labor) {
@@ -98,7 +101,7 @@ export const adminLogin = async (req: Request, res: Response) => {
             }
             const token = generateToken(staff.uid as string);
             logger.infoLog(`-> new login token: ${token}`);
-            const level = await m_levelCheck(staff.uid as string);
+            const level = await setting_levelCheck(staff.uid as string);
 
             if (level) {
                 return res
@@ -146,7 +149,7 @@ export const adminCheck = async (req: TRequestWithUser, res: Response) => {
     const uid = req.user!.userId;
     logger.infoLog(`Server - authCheck, userID = ${uid}`);
     try {
-        const level = (await m_levelCheck(uid)) as Tlevel | null;
+        const level = (await setting_levelCheck(uid)) as Tlevel | null;
         if (level && level.access) {
             return res.status(200).json({
                 status: RES_STATUS.SUCCESS,
@@ -175,7 +178,7 @@ export const accessCheckM = async (req: TRequestWithUser, res: Response) => {
     console.log("-> server - access check: ", req.body);
     const uid = req.user!.userId;
     try {
-        const access = (await m_levelCheck(uid)) as {
+        const access = (await setting_levelCheck(uid)) as {
             [key: string]: number;
         } | null;
         if (access && access[req.body.page] !== 0) {

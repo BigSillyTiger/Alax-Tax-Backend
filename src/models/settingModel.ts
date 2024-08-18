@@ -13,7 +13,7 @@ import { th } from "date-fns/locale";
  * @param password
  * @returns number: uid always > 0, false if error
  */
-export const m_addStaff = async (
+export const setting_addStaff = async (
     first_name: string,
     last_name: string,
     email: string,
@@ -74,12 +74,12 @@ export const m_addStaff = async (
 };
 
 /**
- *
+ * @description search staff by phone or email
  * @param phone
  * @param email
  * @returns boolean: true if no duplicate, false if duplicate or error
  */
-export const m_searchMPhoneEmail = async (phone: string, email: string) => {
+export const setting_searchStaffByPE = async (phone: string, email: string) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
@@ -99,7 +99,7 @@ export const m_searchMPhoneEmail = async (phone: string, email: string) => {
  * @param email
  * @returns {uid: number, password: string} | null
  */
-export const m_searchMbyEmail = async (email: string) => {
+export const setting_searchStaffByEmail = async (email: string) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
@@ -120,7 +120,7 @@ export const m_searchMbyEmail = async (email: string) => {
  * @param uid staff's uid
  * @returns {dashboard: number, clients: number, orders: number, calendar: number, staff: number, setting: number} | null
  */
-export const m_levelCheck = async (uid: string) => {
+export const setting_levelCheck = async (uid: string) => {
     try {
         const connection = await adminPool.getConnection();
         const [result] = await connection.query(
@@ -144,7 +144,7 @@ export const m_levelCheck = async (uid: string) => {
  * @returns {uid: number, first_name: string, last_name: string, email: string, phone: string, address: string, created_date: string} | null
  */
 
-export const m_checkEmail = async (email: string) => {
+export const setting_emailCheck = async (email: string) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
@@ -159,7 +159,7 @@ export const m_checkEmail = async (email: string) => {
     }
 };
 
-export const m_getCompany = async () => {
+export const setting_getCompanyInfo = async () => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(`
@@ -174,7 +174,7 @@ export const m_getCompany = async () => {
     }
 };
 
-export const m_updateCompany = async (company: Tcompany) => {
+export const setting_updateCompanyInfo = async (company: Tcompany) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
@@ -201,7 +201,7 @@ export const m_updateCompany = async (company: Tcompany) => {
     }
 };
 
-export const m_insertCompany = async (company: Tcompany) => {
+export const setting_insertCompanyInfo = async (company: Tcompany) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(

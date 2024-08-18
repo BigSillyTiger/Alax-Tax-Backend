@@ -2,7 +2,7 @@ import type { ResultSetHeader, RowDataPacket } from "mysql2";
 import { DB_TABLE_LIST } from "../utils/config";
 import adminPool from "../config/adminPool";
 
-export const m_psAll = async () => {
+export const payslip_all = async () => {
     try {
         const connection = await adminPool.getConnection();
         const [result] = await connection.query(
@@ -16,7 +16,7 @@ export const m_psAll = async () => {
     }
 };
 
-export const m_psAllWUID = async (uid: string) => {
+export const payslip_allwithUid = async (uid: string) => {
     try {
         const connection = await adminPool.getConnection();
         const [result] = await connection.query(
@@ -31,7 +31,7 @@ export const m_psAllWUID = async (uid: string) => {
     }
 };
 
-export const m_psSingleInsert = async (
+export const payslip_singleInsert = async (
     payslip: any,
     bonus: any,
     psid: string,
@@ -73,7 +73,7 @@ export const m_psSingleInsert = async (
     }
 };
 
-export const m_psLastPSID = async () => {
+export const payslip_lastPsid = async () => {
     try {
         const connection = await adminPool.getConnection();
         const [result] = await connection.query<RowDataPacket[]>(
@@ -87,7 +87,11 @@ export const m_psLastPSID = async () => {
     }
 };
 
-export const m_psLastBID = async () => {
+/**
+ * @description retrieve last bid from bonus table
+ * @returns
+ */
+export const payslip_lastBid = async () => {
     try {
         const connection = await adminPool.getConnection();
         const [result] = await connection.query<RowDataPacket[]>(
@@ -101,7 +105,7 @@ export const m_psLastBID = async () => {
     }
 };
 
-export const m_psSingleDel = async (psid: string) => {
+export const payslip_deleteSingle = async (psid: string) => {
     try {
         console.log("-> delete psid: ", psid);
         const connection = await adminPool.getConnection();
@@ -128,7 +132,7 @@ export const m_psSingleDel = async (psid: string) => {
     }
 };
 
-export const m_psStatusUpdate = async (
+export const payslip_updateStatus = async (
     psid: string,
     ps_status: string,
     wl_status: string
@@ -152,7 +156,7 @@ export const m_psStatusUpdate = async (
     }
 };
 
-export const m_psBonusAll = async () => {
+export const payslip_allBonus = async () => {
     try {
         const connection = await adminPool.getConnection();
         const [result] = await connection.query(
@@ -166,7 +170,7 @@ export const m_psBonusAll = async () => {
     }
 };
 
-export const m_psBonusAllWUID = async (uid: string) => {
+export const payslip_allBonusWithUid = async (uid: string) => {
     try {
         const connection = await adminPool.getConnection();
         const [result] = await connection.query(

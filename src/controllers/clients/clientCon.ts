@@ -3,14 +3,14 @@ import { RES_STATUS } from "../../utils/config";
 import logger from "../../libs/logger";
 
 import {
-    m_clientGetAll,
-    m_clientGetSingle,
-    m_clientIsPropertyExist,
-    m_clientInsert,
-    m_clientDelSingle,
-    m_clientUpdateProperty,
-    m_clientUpdate,
-    m_clientArchiveSingle,
+    client_getAll,
+    client_getSingle,
+    client_isPropertyExist,
+    client_insert,
+    client_deleteSingle,
+    client_updateProperty,
+    client_update,
+    client_archiveSingle,
 } from "../../models/clientsModel";
 import { genCID } from "../../libs/id";
 
@@ -54,7 +54,7 @@ const phaseClientsData = async (items: any /* placeholder */) => {
 export const clientMulInstert = async (req: Request, res: Response) => {
     console.log("server - client: insert clients ");
     const insertData = await phaseClientsData(req.body);
-    const insertResult = await m_clientInsert(insertData);
+    const insertResult = await client_insert(insertData);
     if (insertResult.affectedRows) {
         return res.status(200).json({
             status: RES_STATUS.SUCCESS,
@@ -78,7 +78,7 @@ export const clientMulInstert = async (req: Request, res: Response) => {
  */
 export const clientGetAll = async (req: Request, res: Response) => {
     console.log("-> server - client: all");
-    const clients = await m_clientGetAll();
+    const clients = await client_getAll();
     return res.status(200).json({
         status: RES_STATUS.SUCCESS,
         msg: clients?.length
@@ -96,7 +96,7 @@ export const clientGetAll = async (req: Request, res: Response) => {
  */
 export const clientInfo = async (req: Request, res: Response) => {
     console.log("-> server - client: info - ", req.body.cid);
-    const client = await m_clientGetSingle(req.body.cid);
+    const client = await client_getSingle(req.body.cid);
     if (client) {
         return res.status(200).json({
             status: RES_STATUS.SUCCESS,
@@ -115,12 +115,12 @@ export const clientInfo = async (req: Request, res: Response) => {
 export const clientSingleInstert = async (req: Request, res: Response) => {
     console.log("-> server - client: single insert: ", req.body[0]);
 
-    const phoneDup = await m_clientIsPropertyExist(
+    const phoneDup = await client_isPropertyExist(
         "0", // new client does not nedd to check cid
         "phone",
         req.body[0].phone
     );
-    const emailDup = await m_clientIsPropertyExist(
+    const emailDup = await client_isPropertyExist(
         "0", // new client does not nedd to check cid
         "email",
         req.body[0].email
@@ -129,7 +129,7 @@ export const clientSingleInstert = async (req: Request, res: Response) => {
 
     if (!emailDup && !phoneDup) {
         const newClient = await phaseClientsData(req.body);
-        const result = await m_clientInsert(newClient);
+        const result = await client_insert(newClient);
 
         if (result.affectedRows > 0) {
             logger.infoLog("client: successed in register a new client");
@@ -160,8 +160,8 @@ export const clientSingleDel = async (req: Request, res: Response) => {
     // Delete client
     console.log("-> server - client: delete clientID: ", req.body);
     try {
-        //const result = await m_clientDelSingle(req.body.cid);
-        const result = await m_clientArchiveSingle(req.body.cid);
+        //const result = await client_deleteSingle(req.body.cid);
+        const result = await client_archiveSingle(req.body.cid);
         // Return success
         if (result) {
             return res.status(200).json({
@@ -184,7 +184,7 @@ export const clientSingleDel = async (req: Request, res: Response) => {
 
 export const clientSingleArchive = async (req: Request, res: Response) => {
     console.log("-> server - client: archive");
-    const result = await m_clientUpdateProperty(
+    const result = await client_updateProperty(
         req.body.cid,
         "archive",
         req.body.archive
@@ -220,12 +220,12 @@ export const clientSingleUpdate = async (req: Request, res: Response) => {
         postcode,
         cid,
     } = req.body[0];
-    const phoneDup = await m_clientIsPropertyExist(cid, "phone", phone);
-    const emailDup = await m_clientIsPropertyExist(cid, "email", email);
+    const phoneDup = await client_isPropertyExist(cid, "phone", phone);
+    const emailDup = await client_isPropertyExist(cid, "email", email);
 
     if (!phoneDup && !emailDup) {
         console.log("-> update not duplicated");
-        const result = await m_clientUpdate(
+        const result = await client_update(
             first_name,
             last_name,
             phone,

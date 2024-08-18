@@ -8,7 +8,7 @@ import { RowDataPacket } from "mysql2";
  * @description retrieve all staff info which is not archived
  * @returns
  */
-export const m_staffGetAll = async () => {
+export const staff_all = async () => {
     try {
         const connection = await adminPool.getConnection();
         const [rows] = await connection.query(
@@ -57,7 +57,7 @@ export const m_staffGetAll = async () => {
  * @description retrieve staff info which is not archived with uid
  * @returns
  */
-export const m_staffGetWUID = async (uid: string) => {
+export const staff_getWithUid = async (uid: string) => {
     try {
         const connection = await adminPool.getConnection();
         const [rows] = await connection.query(
@@ -108,7 +108,7 @@ export const m_staffGetWUID = async (uid: string) => {
  * @param uid
  * @returns
  */
-export const m_staffGetSingle = async (uid: number) => {
+export const staff_getSingle = async (uid: number) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
@@ -123,7 +123,7 @@ export const m_staffGetSingle = async (uid: number) => {
     }
 };
 
-export const m_staffInsert = async (staff: TnewStaff[]) => {
+export const staff_insert = async (staff: TnewStaff[]) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
@@ -145,7 +145,7 @@ export const m_staffInsert = async (staff: TnewStaff[]) => {
  * @param uid
  * @returns
  */
-export const m_staffArchiveSingle = async (uid: number) => {
+export const staff_archiveSingle = async (uid: number) => {
     try {
         console.log("-> archieve uid: ", uid);
         const connection = await adminPool.getConnection();
@@ -181,7 +181,7 @@ export const m_staffArchiveSingle = async (uid: number) => {
  * @param uid
  * @returns
  */
-export const m_staffDelSingle = async (uid: number) => {
+export const staff_deleteSingle = async (uid: number) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
@@ -203,7 +203,7 @@ export const m_staffDelSingle = async (uid: number) => {
  * @param data - the new value of the property
  * @returns
  */
-export const m_staffUpdateProperty = async (
+export const staff_updateProperty = async (
     uid: number,
     property: string,
     data: string | number
@@ -227,7 +227,7 @@ export const m_staffUpdateProperty = async (
  * @param staff
  * @returns
  */
-export const m_staffUpdate = async (staff: any, newUID?: string) => {
+export const staff_update = async (staff: any, newUID?: string) => {
     try {
         const connection = await adminPool.getConnection();
         await connection.query("START TRANSACTION;");
@@ -293,7 +293,7 @@ export const m_staffUpdate = async (staff: any, newUID?: string) => {
  * @param data
  * @returns
  */
-export const m_staffIsPropertyExist = async (
+export const staff_isPropertyExist = async (
     uid: string,
     property: string,
     data: string | number
@@ -312,7 +312,7 @@ export const m_staffIsPropertyExist = async (
     }
 };
 
-export const m_uidGetLastStaff = async (
+export const staff_lastUid = async (
     prefix: (typeof uidPrefix)[keyof typeof uidPrefix]
 ) => {
     try {

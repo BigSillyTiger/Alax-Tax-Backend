@@ -2,15 +2,15 @@ import type { Request, Response } from "express";
 import { RES_STATUS, uidPrefix } from "../../utils/config";
 import logger from "../../libs/logger";
 import {
-    m_staffGetAll,
-    m_staffGetSingle,
-    m_staffInsert,
-    m_staffArchiveSingle,
-    m_staffDelSingle,
-    m_staffUpdateProperty,
-    m_staffUpdate,
-    m_staffIsPropertyExist,
-    m_staffGetWUID,
+    staff_all,
+    staff_getSingle,
+    staff_insert,
+    staff_archiveSingle,
+    staff_deleteSingle,
+    staff_updateProperty,
+    staff_update,
+    staff_isPropertyExist,
+    staff_getWithUid,
 } from "../../models/staffModel";
 import { encodePW, replaceStaffPW } from "../../libs/utils";
 import { genUID } from "../../libs/id";
@@ -30,9 +30,9 @@ export const staffAllInfo = async (req: TRequestWithUser, res: Response) => {
         const admin = req.user?.userId.charAt(0); // M - manager, E - employee
         let result;
         if (admin === uidPrefix.manager) {
-            result = (await m_staffGetAll()) as TstaffWPayslip[];
+            result = (await staff_all()) as TstaffWPayslip[];
         } else {
-            result = (await m_staffGetWUID(uid)) as TstaffWPayslip[];
+            result = (await staff_getWithUid(uid)) as TstaffWPayslip[];
         }
 
         if (result?.length) {
@@ -62,7 +62,7 @@ export const staffAllInfo = async (req: TRequestWithUser, res: Response) => {
 export const staffSingleInfo = async (req: Request, res: Response) => {
     logger.infoLog("server - staff: get single staff info");
     try {
-        const result = await m_staffGetSingle(req.body.uid);
+        const result = await staff_getSingle(req.body.uid);
         if (result) {
             return res.status(200).json({
                 status: RES_STATUS.SUCCESS,
@@ -90,12 +90,12 @@ export const staffSingleInfo = async (req: Request, res: Response) => {
 export const staffSingleInstert = async (req: Request, res: Response) => {
     console.log("-> server - staff: single insert: ", req.body);
 
-    const phoneDup = await m_staffIsPropertyExist(
+    const phoneDup = await staff_isPropertyExist(
         "0", // new client does not nedd to check cid
         "phone",
         req.body.staff[0].phone
     );
-    const emailDup = await m_staffIsPropertyExist(
+    const emailDup = await staff_isPropertyExist(
         "0", // new client does not nedd to check cid
         "email",
         req.body.staff[0].email
@@ -110,7 +110,7 @@ export const staffSingleInstert = async (req: Request, res: Response) => {
             ]
         );
         req.body.staff[0].access = req.body.staff[0].role === "labor" ? 0 : 1;
-        const result = await m_staffInsert(
+        const result = await staff_insert(
             formatStaff(newUid, newPW, req.body.staff[0])
         );
 
@@ -161,7 +161,7 @@ export const staffSingleDel = async (req: Request, res: Response) => {
                 data: null,
             });
         }
-        const result = await m_staffArchiveSingle(req.body.uid);
+        const result = await staff_archiveSingle(req.body.uid);
 
         if (result) {
             return res.status(200).json({
@@ -190,7 +190,7 @@ export const staffSingleDel = async (req: Request, res: Response) => {
  */
 export const staffSingleDel_back = async (req: Request, res: Response) => {
     logger.infoLog("server - staff: delete single staff");
-    const result = await m_staffDelSingle(req.body.uid);
+    const result = await staff_deleteSingle(req.body.uid);
     if (result) {
         return res.status(200).json({
             status: RES_STATUS.SUC_DEL,
@@ -215,12 +215,12 @@ export const staffSingleUpdate = async (req: Request, res: Response) => {
     console.log("server - staff: update single staff ");
     try {
         // check if phone or email is duplicated
-        const phoneDup = await m_staffIsPropertyExist(
+        const phoneDup = await staff_isPropertyExist(
             req.body.staff.uid,
             "phone",
             req.body.staff.phone
         );
-        const emailDup = await m_staffIsPropertyExist(
+        const emailDup = await staff_isPropertyExist(
             req.body.staff.uid,
             "email",
             req.body.staff.email
@@ -260,10 +260,10 @@ export const staffSingleUpdate = async (req: Request, res: Response) => {
                     req.body.staff.role as "employee" | "manager" | "labor"
                 ]
             );
-            result = await m_staffUpdate(req.body.staff, newUid);
+            result = await staff_update(req.body.staff, newUid);
         } else {
             // no need to change uid
-            result = await m_staffUpdate(req.body.staff);
+            result = await staff_update(req.body.staff);
         }
 
         if (result) {
@@ -293,7 +293,7 @@ export const staffSingleUpdate = async (req: Request, res: Response) => {
 export const staffUpdateAccess = async (req: Request, res: Response) => {
     console.log("-> server - staff: update access: ", req.body.accessody);
     try {
-        const result = await m_staffUpdateProperty(
+        const result = await staff_updateProperty(
             req.body.uid,
             "access",
             req.body.access
@@ -326,7 +326,7 @@ export const staffUpdateAccess = async (req: Request, res: Response) => {
 export const staffUpdatePW = async (req: Request, res: Response) => {
     logger.infoLog("server - staff: update password");
     const newPW = await encodePW(req.body.pw);
-    const result = await m_staffUpdateProperty(req.body.uid, "password", newPW);
+    const result = await staff_updateProperty(req.body.uid, "password", newPW);
     if (result) {
         return res.status(200).json({
             status: RES_STATUS.SUCCESS,

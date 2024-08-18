@@ -1,19 +1,19 @@
-import { m_psLastBID, m_psLastPSID } from "../models/payslipsModel";
+import { payslip_lastBid, payslip_lastPsid } from "../models/payslipsModel";
 import { genDate } from "../libs/time";
 import { uidPrefix } from "../utils/config";
 
-import { m_uidGetLastStaff } from "../models/staffModel";
-import { m_clientsLastCID } from "../models/clientsModel";
+import { staff_lastUid } from "../models/staffModel";
+import { client_lastCid } from "../models/clientsModel";
 import {
-    m_ordersLastOID,
-    m_ordersLastOSID,
-    m_paymentLastPID,
+    order_lastOid,
+    order_lastOsid,
+    order_lastPid,
 } from "../models/ordersModel";
 
 export const genPSID = async () => {
     try {
         const date = genDate();
-        const lastPsid = await m_psLastPSID();
+        const lastPsid = await payslip_lastPsid();
         let newId = "001";
         if (lastPsid?.length) {
             const dateCmp = date === lastPsid[0].psid.slice(2, 8);
@@ -35,7 +35,7 @@ export const genPID = async (count: number) => {
         let ids = [];
         let currentNumber = 1;
         const currentDate = genDate();
-        const lastId = await m_paymentLastPID();
+        const lastId = await order_lastPid();
 
         if (lastId?.length) {
             const lastIdDate = lastId[0].pid.substring(1, 7);
@@ -62,7 +62,7 @@ export const genPID = async (count: number) => {
 
 export const genBID = async () => {
     try {
-        const result = await m_psLastBID();
+        const result = await payslip_lastBid();
         let newId = "001";
         const date = genDate();
         if (result) {
@@ -84,7 +84,7 @@ export const genBID = async () => {
  */
 export const genOID = async () => {
     try {
-        const result = await m_ordersLastOID();
+        const result = await order_lastOid();
         const date = genDate();
         let newId = "001";
         if (result && result.length) {
@@ -106,7 +106,7 @@ export const genOID = async () => {
  */
 export const genOSID = async (num: number) => {
     try {
-        const result = await m_ordersLastOSID();
+        const result = await order_lastOsid();
         const date = genDate();
         let newIds: string[] = [];
         let newIdNum = 1;
@@ -135,7 +135,7 @@ export const genOSID = async (num: number) => {
 export const genUID = async (
     prefix: (typeof uidPrefix)[keyof typeof uidPrefix]
 ) => {
-    const result = await m_uidGetLastStaff(prefix);
+    const result = await staff_lastUid(prefix);
     let newId = "";
     result?.length
         ? (newId = String(parseInt(result[0].uid.slice(1), 10) + 1).padStart(
@@ -150,7 +150,7 @@ export const genUID = async (
  * @description generate client uid
  */
 export const genCID = async () => {
-    const result = await m_clientsLastCID();
+    const result = await client_lastCid();
     let newId = "";
     result && result.length
         ? (newId = String(parseInt(result[0].cid.slice(1), 10) + 1).padStart(
@@ -161,4 +161,4 @@ export const genCID = async () => {
     return `${uidPrefix.client}${newId}`;
 };
 
-export const genCSID = async (num: number) => { }
+export const genCSID = async (num: number) => {};

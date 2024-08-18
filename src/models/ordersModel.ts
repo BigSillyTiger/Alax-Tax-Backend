@@ -8,7 +8,7 @@ import { ResultSetHeader, RowDataPacket } from "mysql2";
  *
  * @returns TorderAbstract
  */
-export const m_orderGetAllAbstract = async () => {
+export const order_getAllAbstract = async () => {
     try {
         const connection = await adminPool.getConnection();
         const [result] = await connection.query(
@@ -33,7 +33,7 @@ export const m_orderGetAllAbstract = async () => {
  *              deatils: order_services, payments, client_info
  * @returns
  */
-export const m_orderGetAllWithDetails = async () => {
+export const order_getAllWithDetails = async () => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
@@ -122,7 +122,7 @@ export const m_orderGetAllWithDetails = async () => {
  * @param order
  * @returns
  */
-export const m_orderInsert = async (order: Torder) => {
+export const order_insert = async (order: Torder) => {
     try {
         console.log("-> inser order: ", order);
         const connection = await adminPool.getConnection();
@@ -153,11 +153,11 @@ export const m_orderInsert = async (order: Torder) => {
         return result[0];
     } catch (err) {
         console.log("err: insert order: ", err);
-        return null;
+        return new Error("Error order_insert");
     }
 };
 
-export const m_orderServiceInsert = async (services: Tservice[]) => {
+export const order_serviceInsert = async (services: Tservice[]) => {
     try {
         console.log("-> insert service: ", services);
         const connection = await adminPool.getConnection();
@@ -173,7 +173,12 @@ export const m_orderServiceInsert = async (services: Tservice[]) => {
     }
 };
 
-export const m_clientOrders = async (cid: string) => {
+/**
+ * @description just orders from order_list table
+ * @param cid
+ * @returns
+ */
+export const order_clientOrders = async (cid: string) => {
     try {
         const connection = await adminPool.getConnection();
         const [result] = await connection.query(
@@ -190,11 +195,11 @@ export const m_clientOrders = async (cid: string) => {
 };
 
 /**
- * @description
+ * @description get client order with data from order_list, order_service, payment, client tables
  * @param cid
  * @returns
  */
-export const m_clientOrderWithId = async (cid: string) => {
+export const order_clientDetailedOrders = async (cid: string) => {
     try {
         const connection = await adminPool.getConnection();
         const [rows] = await connection.query(
@@ -288,7 +293,12 @@ export const m_clientOrderWithId = async (cid: string) => {
     }
 };
 
-export const m_orderDel = async (oid: string) => {
+/**
+ * @description not used
+ * @param oid
+ * @returns
+ */
+/* export const order_delete = async (oid: string) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
@@ -301,7 +311,7 @@ export const m_orderDel = async (oid: string) => {
         console.log("err: delete order: ", err);
         return null;
     }
-};
+}; */
 
 /**
  * @description archive order
@@ -311,7 +321,7 @@ export const m_orderDel = async (oid: string) => {
  * @param oid
  * @returns
  */
-export const m_orderArchive = async (oid: string) => {
+export const order_archive = async (oid: string) => {
     try {
         const connection = await adminPool.getConnection();
         await connection.query("START TRANSACTION;");
@@ -378,7 +388,7 @@ export const m_orderArchive = async (oid: string) => {
  * @param oid
  * @returns
  */
-export const m_orderDelete = async (oid: string) => {
+export const order_delete = async (oid: string) => {
     try {
         const connection = await adminPool.getConnection();
         await connection.query("START TRANSACTION;");
@@ -427,7 +437,7 @@ export const m_orderDelete = async (oid: string) => {
     }
 };
 
-export const m_orderServiceDelete = async (oid: string) => {
+export const order_deleteService = async (oid: string) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
@@ -443,7 +453,7 @@ export const m_orderServiceDelete = async (oid: string) => {
     }
 };
 
-export const m_orderStatusUpdate = async (oid: string, status: string) => {
+export const order_updateStatus = async (oid: string, status: string) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
@@ -459,7 +469,7 @@ export const m_orderStatusUpdate = async (oid: string, status: string) => {
     }
 };
 
-export const m_orderUpdateProperty = async (
+export const order_updateProperty = async (
     property: string,
     value: any,
     oid: string
@@ -479,7 +489,7 @@ export const m_orderUpdateProperty = async (
     }
 };
 
-export const m_orderUpdateWithService = async (
+export const order_updateWithService = async (
     order: Torder,
     oid: string,
     order_services: Tservice[]
@@ -535,7 +545,12 @@ export const m_orderUpdateWithService = async (
     }
 };
 
-export const m_orderUpdate = async (order: Torder) => {
+/**
+ * @description not used
+ * @param order
+ * @returns
+ */
+export const order_update = async (order: Torder) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
@@ -575,7 +590,12 @@ export const m_orderUpdate = async (order: Torder) => {
     }
 };
 
-export const m_deletePayment = async (fk_oid: string) => {
+/**
+ * @description not used
+ * @param fk_oid
+ * @returns
+ */
+/* export const order_deletePayment = async (fk_oid: string) => {
     try {
         //console.log("-> delete payment: ", fk_oid);
         const connection = await adminPool.getConnection();
@@ -590,9 +610,14 @@ export const m_deletePayment = async (fk_oid: string) => {
         console.log("err: delete payment: ", error);
         return null;
     }
-};
+}; */
 
-export const m_updatePayments = async (payments: Tpayment) => {
+/**
+ * @description not used
+ * @param payments
+ * @returns
+ */
+/* export const order_updatePayment = async (payments: Tpayment) => {
     try {
         //console.log("-> before insert payments: ", payments);
         const connection = await adminPool.getConnection();
@@ -607,9 +632,9 @@ export const m_updatePayments = async (payments: Tpayment) => {
         console.log("err: update payment: ", error);
         return null;
     }
-};
+}; */
 
-export const m_orderUpdatePayments = async (
+export const order_updatePayment = async (
     fk_oid: string,
     payments: Tpayment[],
     totalPaid: number
@@ -642,7 +667,7 @@ export const m_orderUpdatePayments = async (
     }
 };
 
-export const m_findClientID = async (oid: string) => {
+export const order_findCid = async (oid: string) => {
     try {
         const connection = await adminPool.getConnection();
         const [result] = await connection.query(
@@ -657,7 +682,7 @@ export const m_findClientID = async (oid: string) => {
     }
 };
 
-export const m_findOrder = async (oid: string) => {
+export const order_findOrder = async (oid: string) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
@@ -734,7 +759,7 @@ export const m_findOrder = async (oid: string) => {
     }
 };
 
-export const m_ordersLastOID = async () => {
+export const order_lastOid = async () => {
     try {
         const connection = await adminPool.getConnection();
         const [result] = await connection.query(
@@ -748,7 +773,7 @@ export const m_ordersLastOID = async () => {
     }
 };
 
-export const m_ordersLastOSID = async () => {
+export const order_lastOsid = async () => {
     try {
         const connection = await adminPool.getConnection();
         const [result] = await connection.query(
@@ -762,7 +787,7 @@ export const m_ordersLastOSID = async () => {
     }
 };
 
-export const m_paymentLastPID = async () => {
+export const order_lastPid = async () => {
     try {
         const connection = await adminPool.getConnection();
         const [result] = await connection.query<RowDataPacket[]>(
@@ -776,7 +801,7 @@ export const m_paymentLastPID = async () => {
     }
 };
 
-export const m_paymentALL = async () => {
+export const order_allPayment = async () => {
     try {
         const connection = await adminPool.getConnection();
         const [result] = await connection.query(
@@ -790,7 +815,7 @@ export const m_paymentALL = async () => {
     }
 };
 
-export const m_orderAllCount = async () => {
+export const order_allCreatedDate = async () => {
     try {
         const connection = await adminPool.getConnection();
         const [result] = await connection.query(
@@ -804,7 +829,7 @@ export const m_orderAllCount = async () => {
     }
 };
 
-export const m_orderAllUnpaid = async () => {
+export const order_allUnpaid = async () => {
     try {
         const connection = await adminPool.getConnection();
         const [result] = await connection.query(

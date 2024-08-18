@@ -17,7 +17,7 @@ const adminPool: Pool = mysql.createPool({
     user: USER,
     password: PW,
     database: DB,
-    connectionLimit: 15,
+    connectionLimit: 200,
     port: Number(PORT),
     decimalNumbers: true,
 });

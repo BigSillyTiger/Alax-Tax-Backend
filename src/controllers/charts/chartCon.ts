@@ -1,9 +1,9 @@
 import type { Request, Response } from "express";
 import { RES_STATUS } from "../../utils/config";
 import {
-    m_orderAllCount,
-    m_orderAllUnpaid,
-    m_paymentALL,
+    order_allCreatedDate,
+    order_allUnpaid,
+    order_allPayment,
 } from "../../models/ordersModel";
 import { accumulateByMonth } from "../../libs/format";
 import { TaccumulatedItem, TaccumulatedResult } from "../../utils/global";
@@ -14,7 +14,7 @@ export const ctAllPayments = async (req: Request, res: Response) => {
     try {
         const [paymentAll, orderAll, unpaidAll] = await Promise.all([
             /* all paid  */
-            m_paymentALL().then((res) => {
+            order_allPayment().then((res) => {
                 if (!res) {
                     return {};
                 }
@@ -28,7 +28,7 @@ export const ctAllPayments = async (req: Request, res: Response) => {
                 ) as TaccumulatedResult;
             }),
             /* all order */
-            m_orderAllCount().then((res) => {
+            order_allCreatedDate().then((res) => {
                 if (!res) {
                     return [];
                 }
@@ -41,7 +41,7 @@ export const ctAllPayments = async (req: Request, res: Response) => {
                 ) as TaccumulatedResult;
             }),
             /* all unpaid */
-            m_orderAllUnpaid().then((res) => {
+            order_allUnpaid().then((res) => {
                 if (!res) {
                     return [];
                 }
