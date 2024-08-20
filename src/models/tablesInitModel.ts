@@ -108,7 +108,7 @@ export const createTables = async () => {
             archive BOOLEAN DEFAULT FALSE NOT NULL,
             deleted BOOLEAN DEFAULT FALSE NOT NULL,
             service_type VARCHAR(5) DEFAULT 'OOP',
-            product_name VARCHAR(20) DEFAULT 'product'
+            product_name VARCHAR(30) DEFAULT 'product'
         )`);
         await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.PAYMENT} (
             pid VARCHAR(11) NOT NULL PRIMARY KEY,

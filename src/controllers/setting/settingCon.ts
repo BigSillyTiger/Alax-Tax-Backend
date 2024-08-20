@@ -63,8 +63,14 @@ export const uniAdd = async (req: Request, res: Response) => {
         const connection = await pool.getConnection();
         if (req.body.service) {
             const result: any = await connection.query(
-                `INSERT INTO ${DB_TABLE_LIST.SERVICE} (service, unit, unit_price) VALUES (?,?,?)`,
-                [req.body.service, req.body.unit, req.body.unit_price]
+                `INSERT INTO ${DB_TABLE_LIST.SERVICE} (service, unit, unit_price, service_type, product_name) VALUES (?,?,?)`,
+                [
+                    req.body.service,
+                    req.body.unit,
+                    req.body.unit_price,
+                    req.body.service_type,
+                    req.body.product_name,
+                ]
             );
         } else {
             const result = await connection.query(
@@ -120,11 +126,13 @@ export const uniEdit = async (req: Request, res: Response) => {
         const connection = await pool.getConnection();
         if (req.body.service) {
             const result: any = await connection.query(
-                `UPDATE ${DB_TABLE_LIST.SERVICE} SET service = ?, unit = ?, unit_price = ? WHERE id = ?`,
+                `UPDATE ${DB_TABLE_LIST.SERVICE} SET service = ?, unit = ?, unit_price = ?, service_type = ?, product_name = ? WHERE id = ?`,
                 [
                     req.body.service,
                     req.body.unit,
                     req.body.unit_price,
+                    req.body.service_type,
+                    req.body.product_name,
                     req.body.id,
                 ]
             );
