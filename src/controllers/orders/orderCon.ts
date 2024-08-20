@@ -209,8 +209,8 @@ export const orderUpdate = async (req: Request, res: Response) => {
         const newOsidNum = findEmptyOsid(order_services).length;
         const osidArray = await genOSID(newOsidNum);
         if (osidArray === null) throw new Error("error - genOSID");
-        const newFormateServices = await formatOrderService(
-            req.body.order.oid,
+        const newFormateServices = formatOrderService(
+            req.body.order.fk_cid,
             order_services,
             osidArray
         );

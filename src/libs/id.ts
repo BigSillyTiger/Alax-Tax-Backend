@@ -107,7 +107,6 @@ export const genOID = async () => {
 export const genOSID = async (num: number) => {
     try {
         const result = await order_lastOsid();
-        console.log("-------> last osid: ", result);
         const date = genDate();
         let newIds: string[] = [];
         let newIdNum = 1;

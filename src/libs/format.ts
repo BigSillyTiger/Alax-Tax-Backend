@@ -15,7 +15,7 @@ import { MONTHS } from "../utils/config";
 import { plusAB } from "./calculate";
 
 export const formatOrderService = (
-    oid: string,
+    cid: string,
     items: any,
     osidArray: string[] = []
 ) => {
@@ -23,7 +23,7 @@ export const formatOrderService = (
     return items.map((item: any) => {
         const {
             osid,
-            fk_cid,
+            fk_oid,
             title,
             ranking,
             qty,
@@ -47,8 +47,8 @@ export const formatOrderService = (
 
         return [
             newOsid,
-            fk_cid,
-            oid,
+            cid,
+            fk_oid,
             title,
             taxable,
             qty,
