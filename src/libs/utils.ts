@@ -20,3 +20,23 @@ export const replaceStaffPW = (data: TstaffWPayslip[], pw: string) => {
 export const findEmptyOsid = (data: Tservice[]) => {
     return data.filter((item) => item.osid === null || item.osid === "");
 };
+
+/**
+ * @description status map: order status to service status
+ */
+export const osStatusMap = new Map([
+    ["processing", "processing"],
+    ["completed", "completed"],
+    ["cancelled", "cancelled"],
+    ["refunded", "cancelled"],
+]);
+
+/**
+ * @description status map: service status to order status
+ */
+export const soStatusMap = new Map([
+    ["processing", "processing"],
+    ["completed", "completed"],
+    ["cancelled", "cancelled"],
+    ["cancelled", "refunded"],
+]);

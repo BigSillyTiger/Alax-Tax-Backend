@@ -162,7 +162,7 @@ export const order_serviceInsert = async (services: Tservice[]) => {
         console.log("-> insert service: ", services);
         const connection = await adminPool.getConnection();
         const [result] = await connection.query(
-            `INSERT INTO ${DB_TABLE_LIST.ORDER_SERVICE} (osid, fk_oid, title, taxable, qty, unit, unit_price, gst, net, ranking, status, created_date, service_type, product_name, note) VALUES ?`,
+            `INSERT INTO ${DB_TABLE_LIST.ORDER_SERVICE} (osid, fk_cid, fk_oid, title, taxable, qty, unit, unit_price, gst, net, ranking, status, created_date, service_type, product_name, note) VALUES ?`,
             [services]
         );
         connection.release();
@@ -191,6 +191,25 @@ export const order_clientOrders = async (cid: string) => {
     } catch (err) {
         console.log("err: get client orders: ", err);
         return null;
+    }
+};
+
+/**
+ * @description get client order service with cid
+ * @param cid
+ */
+export const order_clientOrderService = async (cid: string) => {
+    try {
+        const connection = await adminPool.getConnection();
+        const [result] = await connection.query(
+            `SELECT osid, fk_oid, qty, unit, unit_price, taxable, gst, net, title, ranking, status, created_date, archive, expiry_date, service_type, product_name, note FROM ${DB_TABLE_LIST.ORDER_SERVICE} WHERE fk_cid = ? AND deleted = ?`,
+            [cid, 0]
+        );
+        connection.release();
+        return result as RowDataPacket[];
+    } catch (err) {
+        console.log("err: get client order services: ", err);
+        return new Error("Error order_clientOrderService");
     }
 };
 
@@ -811,7 +830,7 @@ export const order_lastOsid = async () => {
     try {
         const connection = await adminPool.getConnection();
         const [result] = await connection.query(
-            `SELECT osid FROM ${DB_TABLE_LIST.ORDER_SERVICE} ORDER BY created_date DESC LIMIT 1`
+            `SELECT osid FROM ${DB_TABLE_LIST.ORDER_SERVICE} ORDER BY osid DESC LIMIT 1`
         );
         connection.release();
         return result as RowDataPacket[];

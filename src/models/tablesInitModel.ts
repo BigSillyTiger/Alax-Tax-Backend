@@ -92,6 +92,7 @@ export const createTables = async () => {
         await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.ORDER_SERVICE} (
             osid VARCHAR(11) NOT NULL PRIMARY KEY,
             fk_oid VARCHAR(11) NOT NULL,
+            fk_cid VARCHAR(11) NOT NULL,
             title VARCHAR(255) NOT NULL,
             note VARCHAR(512),
             taxable BOOLEAN DEFAULT TRUE,
@@ -103,6 +104,7 @@ export const createTables = async () => {
             ranking TINYINT UNSIGNED DEFAULT 0,
             status VARCHAR(10) DEFAULT 'Pending',
             created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            expiry_date VARCHAR(10) DEFAULT 'none',
             archive BOOLEAN DEFAULT FALSE NOT NULL,
             deleted BOOLEAN DEFAULT FALSE NOT NULL,
             service_type VARCHAR(5) DEFAULT 'OOP',
@@ -161,22 +163,6 @@ export const createTables = async () => {
             note VARCHAR(500),
             amount DECIMAL(10,2) UNSIGNED DEFAULT 0
         )`);
-
-        await connection.query(
-            `CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.CLIENT_SERVICE} (
-                csid VARCHAR(11) NOT NULL PRIMARY KEY,
-                fk_cid VARCHAR(11) NOT NULL,
-                title VARCHAR(255) NOT NULL,
-                service_type VARCHAR(5) NOT NULL DEFAULT 'OOP',
-                product_name VARCHAR(20) NOT NULL DEFAULT 'product',
-                status VARCHAR(10) NOT NULL DEFAULT 'pending',
-                created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                expiry_date VARCHAR(10) DEFAULT 'none',
-                archive BOOLEAN DEFAULT FALSE NOT NULL,
-                deleted BOOLEAN DEFAULT FALSE NOT NULL,
-                note VARCHAR(512)
-            )`
-        );
         connection.release();
         return true;
     } catch (err) {

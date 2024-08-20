@@ -23,6 +23,7 @@ export const formatOrderService = (
     return items.map((item: any) => {
         const {
             osid,
+            fk_cid,
             title,
             ranking,
             qty,
@@ -46,6 +47,7 @@ export const formatOrderService = (
 
         return [
             newOsid,
+            fk_cid,
             oid,
             title,
             taxable,

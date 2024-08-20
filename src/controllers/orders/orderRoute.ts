@@ -8,6 +8,7 @@ import {
     ORDER_STATUS,
     ORDER_UPDATE,
     ORDER_W_CLIENT,
+    ORDER_SERVICE_W_CLIENT,
     PAYMENT_UPDATE,
 } from "../../utils/reqList";
 import { accessCheckM } from "../../middleware/accessCheckM";
@@ -16,6 +17,11 @@ const router = express.Router();
 
 router.get(ORDER_ALL, orderCtl.orderAll);
 router.post(ORDER_W_CLIENT, [accessCheckM], orderCtl.orderWithCid);
+router.post(
+    ORDER_SERVICE_W_CLIENT,
+    [accessCheckM],
+    orderCtl.orderServiceWithCid
+);
 router.post("/order/findClient", orderCtl.findClient);
 router.post("/order/findOrder", orderCtl.findOrder);
 router.post(ORDER_ADD, [accessCheckM], orderCtl.orderAdd);

@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import { RES_STATUS, SERVICE_TYPE, uidPrefix } from "../../utils/config";
+import { RES_STATUS, SERVICE_TYPE } from "../../utils/config";
 import {
     order_serviceInsert,
     order_insert,
@@ -17,33 +17,17 @@ import {
     order_delete,
     order_updateServiceStatus,
     order_findService,
+    order_clientOrderService,
 } from "../../models/ordersModel";
 import {
     formatClientService,
     formatOrderService,
     formatPayment,
 } from "../../libs/format";
-import { genCSID, genOID, genOSID, genPID } from "../../libs/id";
+import { genOID, genOSID, genPID } from "../../libs/id";
 import { client_getSingle } from "../../models/clientsModel";
-
-import {
-    Tarrangement,
-    TclientorderWithId,
-    TclientService,
-    Torder,
-    TorderAbstract,
-    TorderArrangement,
-    TRequestWithUser,
-    Tservice,
-    TwlAbstract,
-} from "../../utils/global";
-import { promise } from "zod";
-import { findEmptyOsid } from "../../libs/utils";
-import {
-    service_append,
-    service_clear,
-    service_updateStatus,
-} from "../../models/servicesModel";
+import { TclientorderWithId, Tservice } from "../../utils/global";
+import { findEmptyOsid, osStatusMap } from "../../libs/utils";
 
 /**
  * @description return all orders from orders table with client first name and last name from clients table
@@ -78,7 +62,7 @@ export const orderWithCid = async (req: Request, res: Response) => {
         const result = (await order_clientDetailedOrders(
             req.body.cid
         )) as TclientorderWithId[];
-        console.log("--> client order with id - result: ", result);
+        //console.log("--> client order with id - result: ", result);
         if (result) {
             return res.status(200).json({
                 status: RES_STATUS.SUCCESS,
@@ -104,6 +88,46 @@ export const orderWithCid = async (req: Request, res: Response) => {
         return res.status(400).json({
             status: RES_STATUS.FAILED,
             msg: `Failed: retrieve client[${req.body.cid}] orders`,
+            data: null,
+        });
+    }
+};
+
+/**
+ * @description return order service of client with client id
+ * @param req
+ * @param res
+ */
+export const orderServiceWithCid = async (req: Request, res: Response) => {
+    console.log(
+        "server - order: get order service with client id: ",
+        req.body.cid
+    );
+    try {
+        const result = (await order_clientOrderService(
+            req.body.cid
+        )) as Tservice[];
+        if (result) {
+            console.log(
+                "---> client[" + req.body.cid + "] order services: ",
+                result
+            );
+            return res.status(200).json({
+                status: RES_STATUS.SUCCESS,
+                msg: `successed retrieve client[${req.body.cid}] order services`,
+                data: result,
+            });
+        } else {
+            throw new Error("error - orderServiceWithCid");
+        }
+    } catch (error) {
+        console.log(
+            "ERROR: server - orderServiceWithCid: get order service with client id: ",
+            req.body.cid
+        );
+        return res.status(400).json({
+            status: RES_STATUS.FAILED,
+            msg: `Failed: retrieve client[${req.body.cid}] order services`,
             data: null,
         });
     }
@@ -260,42 +284,7 @@ export const orderChangeStatus = async (req: Request, res: Response) => {
             req.body.oid,
             req.body.status
         );
-        // append order services to client service table
-        const services = await order_findService(req.body.oid);
-        services?.forEach(async (item) => {
-            // oop & ctm
-            if (
-                item.service_type === SERVICE_TYPE[0] ||
-                item.service_type === SERVICE_TYPE[1]
-            ) {
-                const csid = genCSID(item.osid);
-                if (req.body.status !== "pending") {
-                    const newService = formatClientService(
-                        req.body.cid,
-                        csid,
-                        item as Tservice
-                    );
-                    // append new
-                    const result = await service_append(newService);
-                    let regex = /duplicate/i;
-                    // update status if duplicate
-                    regex.test(result as string)
-                        ? await service_updateStatus(csid, req.body.status)
-                        : null;
-                } else if (req.body.status === "pending") {
-                    // placeholder
-                    await service_clear(csid);
-                }
-            }
-            // sub
-            else {
-                await order_updateProperty(
-                    "status",
-                    req.body.status,
-                    item.osid
-                );
-            }
-        });
+
         if (result1.affectedRows && result2.affectedRows) {
             return res.status(200).json({
                 status: RES_STATUS.SUC_UPDATE_STATUS,

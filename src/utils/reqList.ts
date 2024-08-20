@@ -53,14 +53,11 @@ export const ORDER_ADD = "/api/order/add";
 export const ORDER_UPDATE = "/api/order/update";
 export const ORDER_DEL = "/api/order/del";
 export const ORDER_W_CLIENT = "/api/order/withClientID";
+export const ORDER_SERVICE_W_CLIENT = "/api/order/serviceWithCid";
 export const ORDER_STATUS = "/api/order/status";
 export const PAYMENT_UPDATE = "/api/order/updatePayments";
 export const INVOICE_ISSUE_UPDATE = "/api/order/updateInvoiceIssue";
 export const ORDER_ALL_ARRANGEMENT = "/api/order/all_arrangement";
-
-// Service
-export const SERVICE_ALL = "/api/service/all";
-export const SERVICE_W_CLIENT = "/api/service/withClientID";
 
 // Assist
 export const SETTING_UNI_ALL = "/api/setting/uni_all";

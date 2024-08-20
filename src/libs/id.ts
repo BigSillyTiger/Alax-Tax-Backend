@@ -107,6 +107,7 @@ export const genOID = async () => {
 export const genOSID = async (num: number) => {
     try {
         const result = await order_lastOsid();
+        console.log("-------> last osid: ", result);
         const date = genDate();
         let newIds: string[] = [];
         let newIdNum = 1;
@@ -159,14 +160,4 @@ export const genCID = async () => {
           ))
         : (newId = "0001");
     return `${uidPrefix.client}${newId}`;
-};
-
-export const genCSID = (id: string) => {
-    if (id.startsWith("os") && /^\d+$/.test(id.slice(2))) {
-        // Replace 'os' with the newPrefix
-        return uidPrefix.clientService + id.slice(2);
-    } else {
-        // Return the original string if it doesn't match the expected format
-        return id;
-    }
 };

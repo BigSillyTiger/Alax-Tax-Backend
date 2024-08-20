@@ -1,6 +1,5 @@
 import express from "express";
 import * as payslipsCtl from "./payslipsCon";
-import checkWLStatusMW from "../../middleware/checkWLStatus";
 import {
     PAYSLIP_ALL,
     PAYSLIP_SINGLE_ARCHIVE,

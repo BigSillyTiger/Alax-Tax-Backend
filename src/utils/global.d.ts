@@ -171,20 +171,6 @@ export type Torder = {
     total: number;
 };
 
-// client service
-export type TclientService = {
-    csid: string;
-    fk_cid: string;
-    title: string;
-    service_type: string;
-    product_name: string;
-    status: string;
-    created_date: string;
-    expiry_date: string;
-    archive: boolean;
-    note: string;
-};
-
 // order service
 export type Tservice = {
     osid: string;
@@ -199,6 +185,7 @@ export type Tservice = {
     gst: number;
     net: number;
     created_date: string;
+    expiry_date: string;
     service_type: string;
     product_name: string;
     archive: boolean;
