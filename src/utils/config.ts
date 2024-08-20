@@ -85,6 +85,7 @@ export const uidPrefix = {
     manager: "M",
     order: "J",
     orderService: "OS",
+    clientService: "CS",
     payment: "P",
     payslip: "PS",
     workLog: "WL",
@@ -113,3 +114,5 @@ export const MONTHS = [
     "November",
     "December",
 ];
+
+export const SERVICE_TYPE = ["OOP", "CTM", "SUB"];

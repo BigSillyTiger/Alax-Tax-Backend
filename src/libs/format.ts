@@ -7,6 +7,7 @@ import type {
     TorderAbstract,
     ToriWorkLog,
     Tpayslip,
+    Tservice,
     TwlAbstract,
 } from "../utils/global";
 import { genYYYYHHMM } from "./time";
@@ -305,6 +306,35 @@ export const formatOrderArrangement = (
     // Convert map values to array
     const result = Array.from(arrangementMap.values());
     return result;
+};
+
+export const formatClientService = (
+    cid: string,
+    csid: string,
+    service: Tservice
+) => {
+    const {
+        title,
+        service_type,
+        product_name,
+        status,
+        created_date,
+        archive,
+        note,
+    } = service;
+
+    return [
+        csid,
+        cid,
+        title,
+        service_type,
+        product_name,
+        status,
+        created_date,
+        "none", // expiry_date,
+        archive,
+        note,
+    ];
 };
 
 export const convertToFloat = (x: number): number => {

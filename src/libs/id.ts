@@ -161,4 +161,12 @@ export const genCID = async () => {
     return `${uidPrefix.client}${newId}`;
 };
 
-export const genCSID = async (num: number) => {};
+export const genCSID = (id: string) => {
+    if (id.startsWith("os") && /^\d+$/.test(id.slice(2))) {
+        // Replace 'os' with the newPrefix
+        return uidPrefix.clientService + id.slice(2);
+    } else {
+        // Return the original string if it doesn't match the expected format
+        return id;
+    }
+};

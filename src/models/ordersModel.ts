@@ -465,6 +465,40 @@ export const order_updateStatus = async (oid: string, status: string) => {
         return result[0];
     } catch (err) {
         console.log("err: update order status: ", err);
+        return new Error("Error order_updateStatus");
+    }
+};
+
+export const order_updateServiceStatus = async (
+    oid: string,
+    status: string
+) => {
+    try {
+        const connection = await adminPool.getConnection();
+        const result: any = await connection.query(
+            `UPDATE ${DB_TABLE_LIST.ORDER_SERVICE} SET status = ? WHERE fk_oid = ?`,
+            [status, oid]
+        );
+        connection.release();
+        //console.log("-> update order service status result: ", result[0]);
+        return result[0];
+    } catch (error) {
+        console.log("err: update order service status: ", error);
+        return new Error("Error order_updateServiceStatus");
+    }
+};
+
+export const order_findService = async (oid: string) => {
+    try {
+        const connection = await adminPool.getConnection();
+        const [result] = await connection.query(
+            `SELECT * FROM ${DB_TABLE_LIST.ORDER_SERVICE} WHERE fk_oid = ?`,
+            [oid]
+        );
+        connection.release();
+        return result as RowDataPacket[];
+    } catch (error) {
+        console.log("err: find order service: ", error);
         return null;
     }
 };

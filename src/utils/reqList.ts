@@ -58,6 +58,10 @@ export const PAYMENT_UPDATE = "/api/order/updatePayments";
 export const INVOICE_ISSUE_UPDATE = "/api/order/updateInvoiceIssue";
 export const ORDER_ALL_ARRANGEMENT = "/api/order/all_arrangement";
 
+// Service
+export const SERVICE_ALL = "/api/service/all";
+export const SERVICE_W_CLIENT = "/api/service/withClientID";
+
 // Assist
 export const SETTING_UNI_ALL = "/api/setting/uni_all";
 export const SETTING_UNI_ADD = "/api/setting/uni_add";

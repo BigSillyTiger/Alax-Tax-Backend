@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import { RES_STATUS, uidPrefix } from "../../utils/config";
+import { RES_STATUS, SERVICE_TYPE, uidPrefix } from "../../utils/config";
 import {
     order_serviceInsert,
     order_insert,
@@ -15,22 +15,35 @@ import {
     order_updateWithService,
     order_getAllAbstract,
     order_delete,
+    order_updateServiceStatus,
+    order_findService,
 } from "../../models/ordersModel";
-import { formatOrderService, formatPayment } from "../../libs/format";
-import { genOID, genOSID, genPID } from "../../libs/id";
+import {
+    formatClientService,
+    formatOrderService,
+    formatPayment,
+} from "../../libs/format";
+import { genCSID, genOID, genOSID, genPID } from "../../libs/id";
 import { client_getSingle } from "../../models/clientsModel";
 
 import {
     Tarrangement,
     TclientorderWithId,
+    TclientService,
     Torder,
     TorderAbstract,
     TorderArrangement,
     TRequestWithUser,
+    Tservice,
     TwlAbstract,
 } from "../../utils/global";
 import { promise } from "zod";
 import { findEmptyOsid } from "../../libs/utils";
+import {
+    service_append,
+    service_clear,
+    service_updateStatus,
+} from "../../models/servicesModel";
 
 /**
  * @description return all orders from orders table with client first name and last name from clients table
@@ -86,7 +99,7 @@ export const orderWithCid = async (req: Request, res: Response) => {
     } catch (error) {
         console.log(
             "ERROR: server - orderWithCid: get order with client id: ",
-            req.body
+            req.body.cid
         );
         return res.status(400).json({
             status: RES_STATUS.FAILED,
@@ -229,15 +242,65 @@ export const clientOrders = async (req: Request, res: Response) => {
     }
 };
 
+/**
+ * @description change order status and change order_service status
+ *              and update client service table
+ *              not used
+ * @param req
+ * @param res
+ * @returns
+ */
 export const orderChangeStatus = async (req: Request, res: Response) => {
     console.log("server - order: change order status: ", req.body);
     try {
-        const result = await order_updateStatus(req.body.oid, req.body.status);
-        if (result.affectedRows) {
+        // update order status
+        const result1 = await order_updateStatus(req.body.oid, req.body.status);
+        // update order service status
+        const result2 = await order_updateServiceStatus(
+            req.body.oid,
+            req.body.status
+        );
+        // append order services to client service table
+        const services = await order_findService(req.body.oid);
+        services?.forEach(async (item) => {
+            // oop & ctm
+            if (
+                item.service_type === SERVICE_TYPE[0] ||
+                item.service_type === SERVICE_TYPE[1]
+            ) {
+                const csid = genCSID(item.osid);
+                if (req.body.status !== "pending") {
+                    const newService = formatClientService(
+                        req.body.cid,
+                        csid,
+                        item as Tservice
+                    );
+                    // append new
+                    const result = await service_append(newService);
+                    let regex = /duplicate/i;
+                    // update status if duplicate
+                    regex.test(result as string)
+                        ? await service_updateStatus(csid, req.body.status)
+                        : null;
+                } else if (req.body.status === "pending") {
+                    // placeholder
+                    await service_clear(csid);
+                }
+            }
+            // sub
+            else {
+                await order_updateProperty(
+                    "status",
+                    req.body.status,
+                    item.osid
+                );
+            }
+        });
+        if (result1.affectedRows && result2.affectedRows) {
             return res.status(200).json({
                 status: RES_STATUS.SUC_UPDATE_STATUS,
                 msg: `successed change order[${req.body.oid}] status`,
-                data: result,
+                data: result1,
             });
         } else {
             throw new Error("error - update order status");

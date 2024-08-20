@@ -19,6 +19,7 @@ import orderRouter from "./controllers/orders/orderRoute";
 import staffRouter from "./controllers/staff/staffRoute";
 import payslipRouter from "./controllers/payslips/payslipsRoute";
 import chartRouter from "./controllers/charts/chartRoute";
+import serviceRouter from "./controllers/services/servicesRoute";
 import dotenv from "dotenv";
 import corsOptions from "./config/corsOptions";
 //const bodyParser = require("body-parser");
@@ -52,6 +53,8 @@ app.use(settingRouter);
 app.use(staffRouter);
 app.use(payslipRouter);
 app.use(chartRouter);
+app.use(serviceRouter);
+
 app.use(express.static("./public"));
 
 app.listen(process.env.PORT || 5005, () => {
