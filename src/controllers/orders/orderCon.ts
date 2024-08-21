@@ -11,13 +11,14 @@ import {
     order_updateProperty,
     order_findCid,
     order_findOrder,
-    order_getAllWithDetails,
+    order_allWithDetails,
     order_updateWithService,
-    order_getAllAbstract,
+    order_allAbstract,
     order_delete,
     order_updateServiceStatus,
     order_findService,
     order_clientOrderService,
+    order_allServicesWithClient,
 } from "../../models/ordersModel";
 import {
     formatClientService,
@@ -38,8 +39,9 @@ import { findEmptyOsid, osStatusMap } from "../../libs/utils";
 export const orderAll = async (req: Request, res: Response) => {
     console.log("server - order: get all orders");
     try {
-        const ordersResult = await order_getAllWithDetails();
+        const ordersResult = await order_allWithDetails();
         //const ordersResult = await m_wlGetAllOrdersWithWL();
+        console.log("---> all orders Result: ", ordersResult);
 
         return res.status(200).json({
             status: RES_STATUS.SUCCESS,
@@ -51,6 +53,27 @@ export const orderAll = async (req: Request, res: Response) => {
         return res.status(400).json({
             status: RES_STATUS.FAILED,
             msg: "Failed: retrieve all orders",
+            data: [],
+        });
+    }
+};
+
+export const orderAllService = async (req: Request, res: Response) => {
+    console.log("server - order: get all orders service");
+    try {
+        const ordersResult = await order_allServicesWithClient();
+        return res.status(200).json({
+            status: RES_STATUS.SUCCESS,
+            msg: "successed retrieve all orders service",
+            data: ordersResult,
+        });
+    } catch (error) {
+        console.log(
+            "ERROR: server - orderAllService: get all orders service with client info"
+        );
+        return res.status(400).json({
+            status: RES_STATUS.FAILED,
+            msg: "Failed: retrieve all orders service with client info",
             data: [],
         });
     }
@@ -148,26 +171,24 @@ export const orderAdd = async (req: Request, res: Response) => {
         const newOid = await genOID();
         order.oid = newOid;
 
-        const orResult = await order_insert(order);
-        if (orResult.affectedRows) {
-            const osidArray = await genOSID(newOsidNum);
-            if (osidArray === null) throw new Error("error - genOSID");
-            const odResult = await order_serviceInsert(
-                formatOrderService(
-                    req.body.order.oid,
-                    order_services,
-                    osidArray as string[]
-                )
-            );
-            if (odResult?.affectedRows) {
-                return res.status(200).json({
-                    status: RES_STATUS.SUCCESS,
-                    msg: "successed insert order",
-                    data: { order: orResult, order_services: odResult },
-                });
-            } else {
-                throw new Error();
-            }
+        const osidArray = await genOSID(newOsidNum);
+        const orResult = await order_insert(
+            order,
+            formatOrderService(
+                req.body.order.oid,
+                req.body.order.fk_cid,
+                order_services,
+                osidArray as string[]
+            )
+        );
+        if (orResult) {
+            return res.status(200).json({
+                status: RES_STATUS.SUCCESS,
+                msg: "successed insert order",
+                data: {},
+            });
+        } else {
+            throw new Error();
         }
     } catch (error) {
         return res.status(400).json({
@@ -383,7 +404,7 @@ export const findOrder = async (req: Request, res: Response) => {
 export const updateInvoiceIssue = async (req: Request, res: Response) => {
     console.log("-> server - order: update invoice issue: ", req.body);
     const order = await order_updateProperty(
-        "invoice_date",
+        "i_date",
         req.body.date,
         req.body.oid
     );

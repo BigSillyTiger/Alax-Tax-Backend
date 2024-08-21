@@ -10,12 +10,14 @@ import {
     ORDER_W_CLIENT,
     ORDER_SERVICE_W_CLIENT,
     PAYMENT_UPDATE,
+    ORDER_SERVICE_ALL,
 } from "../../utils/reqList";
 import { accessCheckM } from "../../middleware/accessCheckM";
 
 const router = express.Router();
 
 router.get(ORDER_ALL, orderCtl.orderAll);
+router.get(ORDER_SERVICE_ALL, orderCtl.orderAllService);
 router.post(ORDER_W_CLIENT, [accessCheckM], orderCtl.orderWithCid);
 router.post(
     ORDER_SERVICE_W_CLIENT,

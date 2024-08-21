@@ -8,7 +8,7 @@ import { ResultSetHeader, RowDataPacket } from "mysql2";
  *
  * @returns TorderAbstract
  */
-export const order_getAllAbstract = async () => {
+export const order_allAbstract = async () => {
     try {
         const connection = await adminPool.getConnection();
         const [result] = await connection.query(
@@ -33,7 +33,7 @@ export const order_getAllAbstract = async () => {
  *              deatils: order_services, payments, client_info
  * @returns
  */
-export const order_getAllWithDetails = async () => {
+export const order_allWithDetails = async () => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
@@ -50,7 +50,7 @@ export const order_getAllWithDetails = async () => {
                 A.paid,
                 A.created_date,
                 A.estimate_finish_date,
-                A.invoice_date,
+                A.i_date,
                 A.i_date, 
                 (SELECT 
                     JSON_ARRAYAGG(
@@ -117,16 +117,73 @@ export const order_getAllWithDetails = async () => {
 };
 
 /**
+ * @description get all order services with client info
+ * @returns
+ */
+export const order_allServicesWithClient = async () => {
+    try {
+        const connection = await adminPool.getConnection();
+        const result: any = await connection.query(
+            `SELECT 
+                A.osid,
+                A.fk_oid, 
+                A.fk_cid,
+                A.title,
+                A.status,
+                A.qty,
+                A.unit,
+                A.unit_price,
+                A.gst,
+                A.taxable,
+                A.net,
+                A.created_date,
+                A.expiry_date,
+                A.archive,
+                A.service_type,
+                A.product_name,
+                A.note,                
+                (SELECT 
+                    JSON_OBJECT(
+                        'cid', C.cid,
+                        'first_name', C.first_name,
+                        'last_name', C.last_name,
+                        'phone', C.phone,
+                        'email', C.email,
+                        'address', C.address,
+                        'suburb', C.suburb,
+                        'city', C.city,
+                        'state', C.state,
+                        'country', C.country,
+                        'postcode', C.postcode
+                    )
+                    FROM ${DB_TABLE_LIST.CLIENT} C 
+                    WHERE C.cid = A.fk_cid
+                ) AS client_info
+            FROM ${DB_TABLE_LIST.ORDER_SERVICE} A
+            WHERE A.deleted = 0;`
+        );
+        connection.release();
+        return result[0];
+    } catch (err) {
+        console.log("err: get all order services with details: ", err);
+        return null;
+    }
+};
+
+/**
  * @description get all orders with details
  *              omit created_date, archive by using default
  * @param order
  * @returns
  */
-export const order_insert = async (order: Torder) => {
+export const order_insert = async (order: Torder, services: Tservice[]) => {
     try {
-        console.log("-> inser order: ", order);
+        // console.log("-> order_insert order: ", order);
+        // console.log("-> order_insert services: ", services);
         const connection = await adminPool.getConnection();
-        const result: any = await connection.query(
+        await connection.query("START TRANSACTION;");
+
+        await connection.query(
             `INSERT INTO ${DB_TABLE_LIST.ORDER_LIST} (oid, fk_cid, status, gst, net, total, paid, q_deposit, q_valid, q_date, estimate_finish_date, i_date, note ) VALUES ?`,
             [
                 [
@@ -148,9 +205,14 @@ export const order_insert = async (order: Torder) => {
                 ],
             ]
         );
+        await connection.query(
+            `INSERT INTO ${DB_TABLE_LIST.ORDER_SERVICE} (osid, fk_cid, fk_oid, title, taxable, qty, unit, unit_price, gst, net, ranking, status, created_date, service_type, product_name, note) VALUES ?`,
+            [services]
+        );
+        await connection.query("COMMIT;");
         connection.release();
         //console.log("-> insert order result: ", result[0]);
-        return result[0];
+        return true;
     } catch (err) {
         console.log("err: insert order: ", err);
         return new Error("Error order_insert");
@@ -584,7 +646,7 @@ export const order_updateWithService = async (
             `DELETE FROM ${DB_TABLE_LIST.ORDER_SERVICE} WHERE fk_oid = ?`,
             [oid]
         );
-        console.log("---> order_services: ", order_services);
+        //console.log("---> order_services: ", order_services);
         await connection.query(
             `INSERT INTO ${DB_TABLE_LIST.ORDER_SERVICE} (osid, fk_cid, fk_oid, title, taxable, qty, unit, unit_price, gst, net, ranking, status, created_date, service_type, product_name, note) VALUES ?`,
             [order_services]
@@ -754,7 +816,6 @@ export const order_findOrder = async (oid: string) => {
                     'q_date', A.q_date,
                     'created_date', A.created_date,
                     'estimate_finish_date', A.estimate_finish_date,
-                    'invoice_date', A.invoice_date,
                     'i_date', A.i_date,
                     'note', A.note,
                     'order_services', order_services,

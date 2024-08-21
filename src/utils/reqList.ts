@@ -54,6 +54,7 @@ export const ORDER_UPDATE = "/api/order/update";
 export const ORDER_DEL = "/api/order/del";
 export const ORDER_W_CLIENT = "/api/order/withClientID";
 export const ORDER_SERVICE_W_CLIENT = "/api/order/serviceWithCid";
+export const ORDER_SERVICE_ALL = "/api/order/serviceAll";
 export const ORDER_STATUS = "/api/order/status";
 export const PAYMENT_UPDATE = "/api/order/updatePayments";
 export const INVOICE_ISSUE_UPDATE = "/api/order/updateInvoiceIssue";
