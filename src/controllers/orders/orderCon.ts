@@ -131,10 +131,6 @@ export const orderServiceWithCid = async (req: Request, res: Response) => {
             req.body.cid
         )) as Tservice[];
         if (result) {
-            console.log(
-                "---> client[" + req.body.cid + "] order services: ",
-                result
-            );
             return res.status(200).json({
                 status: RES_STATUS.SUCCESS,
                 msg: `successed retrieve client[${req.body.cid}] order services`,

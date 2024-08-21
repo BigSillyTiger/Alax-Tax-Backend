@@ -178,13 +178,13 @@ export const order_allServicesWithClient = async () => {
  */
 export const order_insert = async (order: Torder, services: Tservice[]) => {
     try {
-        // console.log("-> order_insert order: ", order);
+        console.log("-> order_insert order: ", order);
         // console.log("-> order_insert services: ", services);
         const connection = await adminPool.getConnection();
         await connection.query("START TRANSACTION;");
 
         await connection.query(
-            `INSERT INTO ${DB_TABLE_LIST.ORDER_LIST} (oid, fk_cid, status, gst, net, total, paid, q_deposit, q_valid, q_date, estimate_finish_date, i_date, note ) VALUES ?`,
+            `INSERT INTO ${DB_TABLE_LIST.ORDER_LIST} (oid, fk_cid, status, gst, net, total, q_deposit, q_valid, q_date, estimate_finish_date, i_date, note ) VALUES ?`,
             [
                 [
                     [
@@ -194,7 +194,6 @@ export const order_insert = async (order: Torder, services: Tservice[]) => {
                         order.gst,
                         order.net,
                         order.total,
-                        order.paid,
                         order.q_deposit,
                         order.q_valid,
                         order.q_date,
