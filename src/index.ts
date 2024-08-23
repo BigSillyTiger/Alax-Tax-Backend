@@ -17,7 +17,6 @@ import clientRouter from "./controllers/clients/clientRoute";
 import settingRouter from "./controllers/setting/settingRoute";
 import orderRouter from "./controllers/orders/orderRoute";
 import staffRouter from "./controllers/staff/staffRoute";
-import payslipRouter from "./controllers/payslips/payslipsRoute";
 import chartRouter from "./controllers/charts/chartRoute";
 import dotenv from "dotenv";
 import corsOptions from "./config/corsOptions";
@@ -50,7 +49,6 @@ app.use(clientRouter);
 app.use(orderRouter);
 app.use(settingRouter);
 app.use(staffRouter);
-app.use(payslipRouter);
 app.use(chartRouter);
 app.use(express.static("./public"));
 

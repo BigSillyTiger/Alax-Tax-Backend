@@ -1,11 +1,8 @@
 import type {
     TaccumulatedItem,
-    TnewBonus,
-    TnewDeduction,
     TnewStaff,
     Torder,
     TorderAbstract,
-    ToriWorkLog,
     Tpayslip,
     Tservice,
     TwlAbstract,
@@ -66,106 +63,9 @@ export const formatOrderService = (
     });
 };
 
-export const formatWorkLog = (items: ToriWorkLog[]) => {
-    return items.map((item) => {
-        const {
-            wlid,
-            fk_oid,
-            fk_uid,
-            wl_date,
-            s_time,
-            e_time,
-            b_time,
-            b_hour,
-            wl_status,
-            wl_note,
-            confirm_status,
-            archive,
-        } = item;
-        return [
-            wlid,
-            fk_oid,
-            fk_uid,
-            wl_date,
-            s_time,
-            e_time,
-            b_time,
-            b_hour,
-            wl_status,
-            wl_note,
-            confirm_status,
-            archive,
-        ];
-    });
-};
-
 export const formatPayment = (pids: string[], fk_oid: string, items: any) => {
     return items.map((item: any, index: number) => {
         return [pids[index], fk_oid, item.paid, item.paid_date];
-    });
-};
-
-/**
- *
- * @param psid newly created payslip id
- * @param items contains data for payslip, bonus, deduction
- * @returns data for payslip table
- *          data for bonus table
- *          data for deduction table
- */
-export const formatPayslip = (psid: string, data: Partial<Tpayslip>) => {
-    const {
-        fk_uid,
-        status,
-        hr,
-        s_date,
-        e_date,
-        paid,
-        company_name,
-        company_addr,
-        company_phone,
-        staff_name,
-        staff_phone,
-        staff_email,
-        staff_addr,
-        staff_bsb,
-        staff_acc,
-    } = data;
-    return [
-        psid,
-        fk_uid,
-        status,
-        hr,
-        s_date,
-        e_date,
-        paid,
-        company_name,
-        company_addr,
-        company_phone,
-        staff_name,
-        staff_phone,
-        staff_email,
-        staff_addr,
-        staff_bsb,
-        staff_acc,
-    ];
-};
-
-export const formatBonus = (psid: string, uid: string, data: TnewBonus[]) => {
-    return data.map((item: TnewBonus) => {
-        const { note, amount } = item;
-        return [psid, uid, note, amount];
-    });
-};
-
-export const formatDeduction = (
-    did: string[],
-    wlid: string,
-    items: TnewDeduction[]
-) => {
-    return items.map((item: TnewDeduction, index) => {
-        const { amount, note } = item;
-        return [did[index], wlid, amount, note];
     });
 };
 
@@ -188,7 +88,7 @@ export const formatStaff = (uid: string, pw: string, staff: TnewStaff) => {
         staff.dashboard,
         staff.clients,
         staff.orders,
-        staff.worklogs,
+        staff.services,
         staff.calendar,
         staff.staff,
         staff.setting,
@@ -242,72 +142,6 @@ export const accumulateByMonth = (items: TaccumulatedItem[]) => {
     }
 
     return monthlyItems;
-};
-
-export const formatOrderArrangement = (
-    orders: TorderAbstract[],
-    worklogs: TwlAbstract[]
-) => {
-    if (orders.length === 0 || worklogs.length === 0) {
-        return [];
-    }
-
-    // Create a map to store arrangement objects
-    const arrangementMap = new Map();
-
-    // Iterate over worklogs to populate arrangementMap
-    worklogs.forEach((worklog) => {
-        const key = `${worklog.wl_date}`;
-        if (!arrangementMap.has(key)) {
-            arrangementMap.set(key, {
-                date: genYYYYHHMM(worklog.wl_date),
-                arrangement: [],
-            });
-        }
-        const arrangement = arrangementMap.get(key);
-
-        // Find the corresponding order for the worklog
-        const order = orders.find((order) => order.oid === worklog.fk_oid);
-        if (!order) {
-            return;
-        }
-
-        // Create a new wl object
-        const wlItem = {
-            first_name: worklog.first_name,
-            last_name: worklog.last_name,
-            fk_uid: worklog.fk_uid,
-            role: worklog.role,
-            wl_note: worklog.wl_note,
-        };
-
-        // Check if an arrangement item for this order already exists
-        let arrangementItem = arrangement.arrangement.find(
-            (item: any) => item.order.oid === order.oid
-        );
-        if (!arrangementItem) {
-            // If not, create a new arrangement item
-            arrangementItem = {
-                order: {
-                    oid: order.oid,
-                    fk_cid: order.fk_cid,
-                    first_name: order.first_name,
-                    last_name: order.last_name,
-                    phone: order.phone,
-                    status: order.status,
-                },
-                wl: [],
-            };
-            arrangement.arrangement.push(arrangementItem);
-        }
-
-        // Push the wl object to the corresponding arrangement item
-        arrangementItem.wl.push(wlItem);
-    });
-
-    // Convert map values to array
-    const result = Array.from(arrangementMap.values());
-    return result;
 };
 
 export const formatClientService = (

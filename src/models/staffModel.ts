@@ -12,37 +12,7 @@ export const staff_all = async () => {
     try {
         const connection = await adminPool.getConnection();
         const [rows] = await connection.query(
-            `SELECT 
-                A.*,
-                payslips
-            FROM ${DB_TABLE_LIST.STAFF} A
-            LEFT JOIN (
-                SELECT 
-                    fk_uid,
-                    JSON_ARRAYAGG(
-                        JSON_OBJECT(
-                            'psid', psid,
-                            'fk_uid', fk_uid,
-                            'status', status,
-                            'hr', hr,
-                            's_date', s_date,
-                            'e_date', e_date,
-                            'paid', paid,
-                            'company_name', company_name,
-                            'company_addr', company_addr,
-                            'company_phone', company_phone,
-                            'staff_name', staff_name,
-                            'staff_phone', staff_phone,
-                            'staff_email', staff_email,
-                            'staff_addr', staff_addr,
-                            'staff_bsb', staff_bsb,
-                            'staff_acc', staff_acc
-                        )
-                    ) as payslips
-                FROM ${DB_TABLE_LIST.PAYSLIP}
-                GROUP BY fk_uid
-            ) P ON A.uid = P.fk_uid
-            WHERE archive = 0`
+            `SELECT * FROM ${DB_TABLE_LIST.STAFF} WHERE archive = 0`
         );
         connection.release();
         //console.log("-> all staff rows: ", rows);
@@ -61,37 +31,7 @@ export const staff_getWithUid = async (uid: string) => {
     try {
         const connection = await adminPool.getConnection();
         const [rows] = await connection.query(
-            `SELECT 
-                A.*,
-                payslips
-            FROM ${DB_TABLE_LIST.STAFF} A
-            LEFT JOIN (
-                SELECT 
-                    fk_uid,
-                    JSON_ARRAYAGG(
-                        JSON_OBJECT(
-                            'psid', psid,
-                            'fk_uid', fk_uid,
-                            'status', status,
-                            'hr', hr,
-                            's_date', s_date,
-                            'e_date', e_date,
-                            'paid', paid,
-                            'company_name', company_name,
-                            'company_addr', company_addr,
-                            'company_phone', company_phone,
-                            'staff_name', staff_name,
-                            'staff_phone', staff_phone,
-                            'staff_email', staff_email,
-                            'staff_addr', staff_addr,
-                            'staff_bsb', staff_bsb,
-                            'staff_acc', staff_acc
-                        )
-                    ) as payslips
-                FROM ${DB_TABLE_LIST.PAYSLIP}
-                GROUP BY fk_uid
-            ) P ON A.uid = P.fk_uid
-            WHERE archive = 0 AND A.uid = ?`,
+            `SELECT * FROM ${DB_TABLE_LIST.STAFF} WHERE archive = 0 AND A.uid = ?`,
             [uid]
         );
         connection.release();
@@ -127,7 +67,7 @@ export const staff_insert = async (staff: TnewStaff[]) => {
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `INSERT INTO ${DB_TABLE_LIST.STAFF} (uid, first_name, last_name, phone, email, password, address, role, access, suburb, city, state, country, postcode, dashboard, clients, orders, worklogs, calendar, staff, setting, hr, bsb, account) VALUES (?)`,
+            `INSERT INTO ${DB_TABLE_LIST.STAFF} (uid, first_name, last_name, phone, email, password, address, role, access, suburb, city, state, country, postcode, dashboard, clients, orders, services, calendar, staff, setting, hr, bsb, account) VALUES (?)`,
             [staff]
         );
         connection.release();
@@ -140,8 +80,6 @@ export const staff_insert = async (staff: TnewStaff[]) => {
 
 /**
  * @description archive single staff by uid
- *              - if the staff has worklogs, then fail to archive
- *              - check if the staff has worklogs through the work_log table by uid/fk_uid
  * @param uid
  * @returns
  */
@@ -149,25 +87,12 @@ export const staff_archiveSingle = async (uid: number) => {
     try {
         console.log("-> archieve uid: ", uid);
         const connection = await adminPool.getConnection();
-        await connection.query("START TRANSACTION;");
-
-        const [result] = await connection.query(
-            `SELECT COUNT(wlid) count FROM ${DB_TABLE_LIST.WORK_LOG} WHERE fk_uid = ? AND archive = 0`,
-            [uid]
-        );
-        if ((result as RowDataPacket)[0].count > 0) {
-            throw new Error("The staff has worklogs, fail to archive");
-        }
 
         await connection.query(
-            `UPDATE ${DB_TABLE_LIST.STAFF} SET archive = 1 WHERE uid = ?`,
+            `UPDATE ${DB_TABLE_LIST.STAFF} SET phone = CONCAT('A', phone), email = CONCAT('A', email), archive = 1 WHERE uid = ? AND archive = 0`,
             [uid]
         );
-        await connection.query(
-            `UPDATE ${DB_TABLE_LIST.STAFF} SET phone = CONCAT('A', phone), email = CONCAT('A', email) WHERE uid = ? AND archive = 1`,
-            [uid]
-        );
-        await connection.query("COMMIT;");
+
         connection.release();
         return true;
     } catch (err) {
@@ -232,7 +157,7 @@ export const staff_update = async (staff: any, newUID?: string) => {
         const connection = await adminPool.getConnection();
         await connection.query("START TRANSACTION;");
         await connection.query(
-            `UPDATE ${DB_TABLE_LIST.STAFF} SET uid = ?, first_name = ?, last_name = ?, phone = ?, email = ?, address = ?, role = ?, access = ?, suburb = ?, city = ?, state = ?, country = ?, postcode = ?, dashboard = ?, clients = ?, orders = ?, calendar = ?, staff = ?, setting = ?, hr = ?, bsb = ?, account = ? WHERE uid = ?`,
+            `UPDATE ${DB_TABLE_LIST.STAFF} SET uid = ?, first_name = ?, last_name = ?, phone = ?, email = ?, address = ?, role = ?, access = ?, suburb = ?, city = ?, state = ?, country = ?, postcode = ?, dashboard = ?, clients = ?, orders = ?, services = ?, calendar = ?, staff = ?, setting = ?, hr = ?, bsb = ?, account = ? WHERE uid = ?`,
             [
                 staff.uid,
                 staff.first_name,
@@ -250,6 +175,7 @@ export const staff_update = async (staff: any, newUID?: string) => {
                 staff.dashboard,
                 staff.clients,
                 staff.orders,
+                staff.services,
                 staff.calendar,
                 staff.staff,
                 staff.setting,
@@ -262,18 +188,6 @@ export const staff_update = async (staff: any, newUID?: string) => {
         if (newUID) {
             await connection.query(
                 `UPDATE ${DB_TABLE_LIST.STAFF} SET uid = ? WHERE uid = ?`,
-                [newUID, staff.uid]
-            );
-            await connection.query(
-                `UPDATE ${DB_TABLE_LIST.BONUS} SET fk_uid = ? WHERE fk_uid = ?`,
-                [newUID, staff.uid]
-            );
-            await connection.query(
-                `UPDATE ${DB_TABLE_LIST.PAYSLIP} SET fk_uid = ? WHERE fk_uid = ?`,
-                [newUID, staff.uid]
-            );
-            await connection.query(
-                `UPDATE ${DB_TABLE_LIST.WORK_LOG} SET fk_uid = ? WHERE fk_uid = ?`,
                 [newUID, staff.uid]
             );
         }

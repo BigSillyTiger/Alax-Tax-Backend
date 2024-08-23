@@ -27,8 +27,6 @@ export const JOB_ASSIGN = "/api/work/update";
 // Work log
 export const WL_ALL = "/api/work/all";
 export const WL_SIGNLE_UPDATE_H = "/api/work/single-update-hours";
-export const WL_SIGNLE_UPDATE_D = "/api/work/single-update-deduction";
-export const WL_SINGLE_UPDATE_HND = "/api/work/single-update-hnd"; // hours / note / deduction
 export const WL_STATUS = "/api/work/status";
 export const WL_SINGLE_DEL = "/api/work/single-del";
 export const WL_TODAY = "/api/work/today";
@@ -78,7 +76,6 @@ export const PAYSLIP_SINGLE_ARCHIVE = "/api/payslip/single-archive";
 export const PAYSLIP_STATUS_UPDATE = "/api/payslip/status-update";
 export const PAYSLIP_ALL = "/api/payslip/all";
 export const PAYSLIP_ALL_W_UID = "/api/payslip/all_w_uid";
-export const PAYSLIP_BONUS_ALL = "/api/payslip/bonus-all";
 
 // Charts - by month or by week
 export const CT_ORDER_PAYMENT = "/api/charts/order-payment";

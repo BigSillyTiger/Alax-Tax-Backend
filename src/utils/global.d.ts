@@ -15,7 +15,7 @@ export type Tlevel = {
     dashboard: number;
     clients: number;
     orders: number;
-    worklogs: number;
+    services: number;
     calendar: number;
     staff: number;
     setting: number;
@@ -94,27 +94,13 @@ export type TstaffData = {
     dashboard: TpageAccess;
     clients: TpageAccess;
     orders: TpageAccess;
+    services: TpageAccess;
     calendar: TpageAccess;
     staff: TpageAccess;
     setting: TpageAccess;
     hr: number;
     bsb: string;
     account: string;
-};
-
-export type ToriWorkLog = {
-    wlid: string;
-    fk_oid: string;
-    fk_uid: string;
-    wl_date: string;
-    s_time: string;
-    e_time: string;
-    b_time: string;
-    b_hour: string;
-    wl_status: string;
-    wl_note: string;
-    confirm_status: boolean;
-    archive: boolean;
 };
 
 export type TassignedWork = {
@@ -213,7 +199,7 @@ export type TstaffData = {
     dashboard: TpageAccess;
     clients: TpageAccess;
     orders: TpageAccess;
-    worklogs: TpageAccess;
+    services: TpageAccess;
     calendar: TpageAccess;
     staff: TpageAccess;
     setting: TpageAccess;
@@ -223,47 +209,10 @@ export type TnewStaff = Partical<TstaffData> & {
     pwConfirm: string;
 };
 
-export type ToriWorkLog = {
-    wlid: string;
-    fk_oid: string;
-    fk_uid: string;
-    wl_date: string;
-    s_time: string;
-    e_time: string;
-    b_time: string;
-    b_hour: string;
-    wl_status: string;
-    confirm_status: boolean;
-    archive: boolean;
-};
-
-export type TassignedWork = ToriWorkLog & {
-    // extra data from staff table
-    first_name: string;
-    last_name: string;
-    phone: string;
-    email: string;
-    role: string;
-};
-
 export type TwlUnion = {
     fk_oid: string;
     wl_date: string;
     assigned_work: TassignedWork[];
-};
-
-export type Tbonus = {
-    fk_psid: string;
-    fk_uid: string;
-    amount: number;
-    note: string;
-};
-
-export type Tdeduction = {
-    did: string;
-    fk_wlid: string;
-    amount: number;
-    note: string;
 };
 
 export type Tpayslip = {
@@ -336,5 +285,3 @@ export type TorderArrangement = {
 };
 
 export type TnewPayslip = Partical<Tpayslip>;
-export type TnewBonus = Partical<Tbonus>;
-export type TnewDeduction = Partical<Tdeduction>;

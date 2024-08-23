@@ -36,10 +36,6 @@ export const DB_TABLE_LIST = {
     SERVICE: "service",
     UNIT: "unit",
     WORK_LOG: "work_log",
-    // payslip
-    PAYSLIP: "payslip",
-    BONUS: "bonus",
-    DEDUCTION: "deduction",
 };
 
 export enum RES_STATUS {
@@ -77,9 +73,7 @@ export const sleep = (ms: number) =>
     new Promise((resolve) => setTimeout(resolve, ms));
 
 export const uidPrefix = {
-    bonus: "B",
     client: "C",
-    deduction: "D",
     employee: "E",
     labor: "L",
     manager: "M",
@@ -87,8 +81,6 @@ export const uidPrefix = {
     orderService: "OS",
     clientService: "CS",
     payment: "P",
-    payslip: "PS",
-    workLog: "WL",
 };
 
 export const MONTHS = [

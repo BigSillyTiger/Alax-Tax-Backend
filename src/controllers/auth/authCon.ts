@@ -51,6 +51,7 @@ export const registerNewUser = async (req: Request, res: Response) => {
             req.body.dashboard,
             req.body.clients,
             req.body.orders,
+            req.body.services,
             req.body.calendar,
             req.body.staff,
             req.body.setting,

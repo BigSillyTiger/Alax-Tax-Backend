@@ -1,4 +1,3 @@
-import { payslip_lastBid, payslip_lastPsid } from "../models/payslipsModel";
 import { genDate } from "../libs/time";
 import { uidPrefix } from "../utils/config";
 
@@ -9,26 +8,6 @@ import {
     order_lastOsid,
     order_lastPid,
 } from "../models/ordersModel";
-
-export const genPSID = async () => {
-    try {
-        const date = genDate();
-        const lastPsid = await payslip_lastPsid();
-        let newId = "001";
-        if (lastPsid?.length) {
-            const dateCmp = date === lastPsid[0].psid.slice(2, 8);
-            lastPsid.length && dateCmp
-                ? (newId = String(
-                      parseInt(lastPsid[0].psid.slice(-3), 10) + 1
-                  ).padStart(3, "0"))
-                : (newId = "001");
-        }
-        return `${uidPrefix.payslip}${date}${newId}`;
-    } catch (error) {
-        console.log("-> error - genPSID: ", error);
-        return null;
-    }
-};
 
 export const genPID = async (count: number) => {
     try {
@@ -57,25 +36,6 @@ export const genPID = async (count: number) => {
     } catch (error) {
         console.log("-> error - genPID: ", error);
         throw new Error("Error generating payment id");
-    }
-};
-
-export const genBID = async () => {
-    try {
-        const result = await payslip_lastBid();
-        let newId = "001";
-        const date = genDate();
-        if (result) {
-            const dateCmp = date === result[0].oid.slice(1, 7);
-            result.length && dateCmp
-                ? (newId = String(
-                      parseInt(result[0].oid.slice(-3), 10) + 1
-                  ).padStart(3, "0"))
-                : (newId = "001");
-        }
-        return `${uidPrefix.bonus}${date}${newId}`;
-    } catch (error) {
-        return null;
     }
 };
 

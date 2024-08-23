@@ -416,17 +416,6 @@ export const order_archive = async (oid: string) => {
             throw new Error("The order has payments, fail to archive");
         }
 
-        // check if the order has work log record
-        const [resultW] = await connection.query(
-            `
-            SELECT COUNT(wlid) count FROM ${DB_TABLE_LIST.WORK_LOG} WHERE fk_oid = ? AND archive = 0
-        `,
-            [oid]
-        );
-        if ((resultW as RowDataPacket)[0].count > 0) {
-            throw new Error("The order has work logs, fail to archive");
-        }
-
         // check if the order status is pending or cancelled
         const [resultS] = await connection.query(
             `SELECT status FROM ${DB_TABLE_LIST.ORDER_LIST} WHERE oid = ? AND archive = 0`,
@@ -444,10 +433,6 @@ export const order_archive = async (oid: string) => {
 
         await connection.query(
             `UPDATE ${DB_TABLE_LIST.ORDER_LIST} SET archive = ? WHERE oid = ?`,
-            [1, oid]
-        );
-        await connection.query(
-            `UPDATE ${DB_TABLE_LIST.WORK_LOG} SET archive = ? WHERE fk_oid = ?`,
             [1, oid]
         );
         await connection.query("COMMIT;");

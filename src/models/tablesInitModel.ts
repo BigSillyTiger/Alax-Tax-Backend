@@ -24,6 +24,7 @@ export const createTables = async () => {
         dashboard TINYINT NOT NULL DEFAULT 2,
         clients TINYINT NOT NULL DEFAULT 0,
         orders TINYINT NOT NULL DEFAULT 0,
+        servicess TINYINT NOT NULL DEFAULT 0,
         calendar TINYINT NOT NULL DEFAULT 1,
         staff TINYINT NOT NULL DEFAULT 0,		
         setting TINYINT NOT NULL DEFAULT 0,
@@ -116,53 +117,7 @@ export const createTables = async () => {
             paid DECIMAL(10,2) UNSIGNED DEFAULT 0,
             paid_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )`);
-        await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.WORK_LOG} (
-            wlid VARCHAR(11) NOT NULL PRIMARY KEY,
-            fk_oid VARCHAR(11) NOT NULL,
-            fk_uid VARCHAR(4) NOT NULL,
-            fk_psid VARCHAR(11),
-            wl_date DATE NOT NULL,
-            s_time TIME,
-            e_time TIME,
-            b_time TIME,
-            b_hour VARCHAR(8) default '00:00:00',
-            wl_status VARCHAR(20) NOT NULL DEFAULT 'pending',
-            confirm_status TINYINT(1) DEFAULT 0,
-            wl_note VARCHAR(500),
-            archive BOOLEAN DEFAULT FALSE NOT NULL
-        )`);
-        await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.PAYSLIP} (
-            psid VARCHAR(11) NOT NULL PRIMARY KEY,
-            fk_uid VARCHAR(4) NOT NULL,
-            status VARCHAR(20) NOT NULL DEFAULT 'pending',
-            paid DECIMAL(10,2) UNSIGNED DEFAULT 0,
-            hr DECIMAL(5,2) UNSIGNED DEFAULT 0,
-            archive BOOLEAN NOT NULL DEFAULT FALSE,
-            s_date DATE NOT NULL,
-            e_date DATE NOT NULL,
-            company_name VARCHAR(255) NOT NULL,
-            company_addr VARCHAR(255),
-            company_phone VARCHAR(25) NOT NULL,
-            staff_name VARCHAR(255) NOT NULL,
-            staff_phone VARCHAR(25) NOT NULL,
-            staff_email VARCHAR(50) NOT NULL,
-            staff_addr VARCHAR(255),
-            staff_bsb VARCHAR(10),
-            staff_acc VARCHAR(15),
-            created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )`);
-        await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.BONUS} (
-            bid VARCHAR(11) NOT NULL PRIMARY KEY,
-            fk_psid VARCHAR(11) NOT NULL,
-            fk_uid VARCHAR(4) NOT NULL,
-            note VARCHAR(500),
-            amount DECIMAL(10,2) UNSIGNED DEFAULT 0
-        )`);
-        await connection.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_LIST.DEDUCTION} (
-            fk_wlid VARCHAR(11) NOT NULL,
-            note VARCHAR(500),
-            amount DECIMAL(10,2) UNSIGNED DEFAULT 0
-        )`);
+
         connection.release();
         return true;
     } catch (err) {

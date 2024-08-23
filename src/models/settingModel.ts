@@ -29,6 +29,7 @@ export const setting_addStaff = async (
     dashboard: 0 | 1 | 2,
     clients: 0 | 1 | 2,
     orders: 0 | 1 | 2,
+    services: 0 | 1 | 2,
     calendar: 0 | 1 | 2,
     staff: 0 | 1 | 2,
     setting: 0 | 1 | 2,
@@ -39,7 +40,7 @@ export const setting_addStaff = async (
     try {
         const connection = await adminPool.getConnection();
         const result: any = await connection.query(
-            `INSERT INTO ${DB_TABLE_LIST.STAFF} (first_name, last_name, email, phone, password, role, address, suburb, city, state, country, postcode, dashboard, clients, orders, calendar, staff, setting, hr, bsb, account) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+            `INSERT INTO ${DB_TABLE_LIST.STAFF} (first_name, last_name, email, phone, password, role, address, suburb, city, state, country, postcode, dashboard, clients, orders, services, calendar, staff, setting, hr, bsb, account) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
             [
                 first_name,
                 last_name,
@@ -56,6 +57,7 @@ export const setting_addStaff = async (
                 dashboard,
                 clients,
                 orders,
+                services,
                 calendar,
                 staff,
                 setting,
@@ -118,13 +120,13 @@ export const setting_searchStaffByEmail = async (email: string) => {
 /**
  *
  * @param uid staff's uid
- * @returns {dashboard: number, clients: number, orders: number, calendar: number, staff: number, setting: number} | null
+ * @returns {dashboard: number, clients: number, orders: number, services: number, calendar: number, staff: number, setting: number} | null
  */
 export const setting_levelCheck = async (uid: string) => {
     try {
         const connection = await adminPool.getConnection();
         const [result] = await connection.query(
-            `SELECT uid, first_name, last_name, role, access, dashboard, clients, orders, worklogs, calendar, staff, setting FROM ${DB_TABLE_LIST.STAFF} WHERE uid = '${uid}'`
+            `SELECT uid, first_name, last_name, role, access, dashboard, clients, orders, services, calendar, staff, setting FROM ${DB_TABLE_LIST.STAFF} WHERE uid = '${uid}'`
         );
         connection.release();
         if (Array.isArray(result) && result.length) {
