@@ -348,7 +348,6 @@ export const m_wlGetAllWDeduct = async (
             WHERE wl.archive = ${archive};`
         );
         connection.release();
-        //console.log("-> test rows: ", rows);
         return rows as RowDataPacket[];
     } catch (error) {
         console.log("err: get all work logs w deduction: ", error);

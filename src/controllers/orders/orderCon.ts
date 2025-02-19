@@ -271,7 +271,6 @@ export const orderUpdatePayments = async (req: Request, res: Response) => {
 export const findClient = async (req: Request, res: Response) => {
     console.log("-> server - order: find client: ", req.body.oid);
     const clientID = await m_findClientID(req.body.oid);
-    console.log("---> test cid: ", clientID);
     if (clientID && clientID.length) {
         const client = await m_clientGetSingle(clientID[0].cid);
         if (client) {
