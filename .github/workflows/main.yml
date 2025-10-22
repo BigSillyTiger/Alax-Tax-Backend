@@ -22,7 +22,7 @@ jobs:
             - name: Push Backend Image
               uses: docker/build-push-action@v4
               with:
-                  context: ./b-admin # 确保此目录有 Dockerfile
+                  context: ./ # 确保此目录有 Dockerfile
                   push: true
                   tags: |
                       ${{ secrets.DOCKERHUB_USERNAME }}/alax_tax_backend:latest
