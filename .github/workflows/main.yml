@@ -1,0 +1,29 @@
+name: Build and Push Both Services
+
+on:
+    push:
+        branches: ["main"]
+        tags: ["v*"]
+
+jobs:
+    build-backend:
+        name: Build and Push Backend
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Login to Docker Hub
+              uses: docker/login-action@v2
+              with:
+                  username: ${{ secrets.DOCKERHUB_USERNAME }}
+                  password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+            - name: Push Backend Image
+              uses: docker/build-push-action@v4
+              with:
+                  context: ./b-admin # 确保此目录有 Dockerfile
+                  push: true
+                  tags: |
+                      ${{ secrets.DOCKERHUB_USERNAME }}/alax_tax_backend:latest
+                      ${{ secrets.DOCKERHUB_USERNAME }}/alax_tax_backend:${{ github.sha }}
